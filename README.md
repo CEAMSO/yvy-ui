@@ -12,3 +12,9 @@ Creado utilizando el Angular generator de Yeoman: https://github.com/yeoman/gene
   4. bower install
   5. grunt serve
   6. Profit!
+
+## Instalar nuevas dependencias
+
+```bash
+bower install --save [dependencia]
+```
