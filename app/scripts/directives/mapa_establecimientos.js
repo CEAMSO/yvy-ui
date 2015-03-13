@@ -83,60 +83,49 @@ angular.module('yvyUiApp')
 
           map.addLayer(gglRoadmap);
 
-          var geoJson = L.mapbox.featureLayer();
-          //var geoJson = L.mapbox.featureLayer(viviendas)
+          MECONF.geoJson = L.mapbox.featureLayer();
 
-          geoJson.on('layeradd', function (e) {
-              /*var marker = e.layer,
+          MECONF.geoJson.on('layeradd', function (e) {
+              var marker = e.layer,
                       feature = marker.feature;
 
-              var img = MECONF.ESTADO_TO_ICON[feature.properties['Estado de Obra']];
+              var img = MECONF.ESTADO_TO_ICON[feature.properties['periodo']];
               if (img) {
                   marker.setIcon(L.icon({
                       iconUrl: img,
                       iconSize: [32, 32]
                   }));
-              }*/
+              }else{
+                //nothing to do
+              }
           });
-
-          geoJson.setGeoJSON(establecimientos);
-
-          /*var markers = new L.MarkerClusterGroup({minZoom: 6});
-          markers.addLayer(geoJson);
-          markers.on('click', draw_popup);
-
-          map.addLayer(markers);
-          MECONF.markerLayer = markers;*/
-          MECONF.geoJsonLayer = geoJson;
 
           MECONF.infoBox = draw_info_box();
           MECONF.infoBox.addTo(map);
           L.control.layers(baseMaps).addTo(map);
-
-          map.on('popupclose', function (e) {
-              MECONF.infoBox.update();
-          });
-
-          /*markers.on('clustermouseover', function (e) {
-              var features = _.pluck(e.layer.getAllChildMarkers(), 'feature');
-              MECONF.infoBox.update(features);
-          });*/
-
-          /*markers.on('clustermouseout', function (e) {
-              MECONF.infoBox.update();
-          });*/
-
-          $('#opener').click();
 
           return map;
         };
 
         //Funcion que dibuja el mapa de acuerdo a los establecimientos filtrados
         var draw_map = function(establecimientos){
-
-          console.log(establecimientos);////////////////////////
-
+          MECONF.geoJson.setGeoJSON(establecimientos);
+          MECONF.geoJson.addTo(map);
+          MECONF.infoBox.update();
+          
+          return map;
         };
+        
+        //Funcion que calcula la distancia entre dos puntos
+        function two_points_distances() {
+          var info = L.control();
+          info.onAdd = function (map) {
+            this._div = L.DomUtil.create('div', 'distance-box'); // create a div with a class "info"
+            this.update();
+            return this._div;  
+          }
+          return info;
+        }
 
         //Funcion que dibuja el resumen de los establecimientos
         function draw_info_box() {
@@ -157,10 +146,11 @@ angular.module('yvyUiApp')
                   msg = sprintf('Mostrando un asentamiento del proyecto %s con %s viviendas',
                           f.properties['Proyecto'], f.properties['Cantidad de Viviendas']);
               } else {
-                  var features = _(MECONF.geoJsonLayer.getLayers()).map(function (l) {
+                  /*var features = _(MECONF.geoJsonLayer.getLayers()).map(function (l) {
                       return l.feature;
                   });
-                  msg = get_summary_message(features);
+                  msg = get_summary_message(features);*/
+                  msg = 'Esto es una prueba';
               }
 
               this._div.innerHTML = msg;
@@ -251,7 +241,13 @@ angular.module('yvyUiApp')
                 GOOGLE_HYBRID: gglHybrid,
                 GOOGLE_ROADMAP: gglRoadmap
             }
-        }
+        };
+
+        MECONF.ESTADO_TO_ICON = {
+          '2014': 'images/yeoman.png',
+          '2012': 'images/yeoman.png'
+        };
+
         var map = init_map(establecimientos);
 
       }//link: function postLink(scope, element, attrs) {
