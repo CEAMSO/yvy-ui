@@ -9,11 +9,15 @@
     <!-- build:css(.) styles/vendor.css -->
     <!-- bower:css -->
     <link rel="stylesheet" href="bower_components/leaflet/dist/leaflet.css" />
+    <link rel="stylesheet" href="bower_components/mapbox.js/mapbox.css" />
     <!-- endbower -->
     <!-- endbuild -->
     <!-- build:css(.tmp) styles/main.css -->
-    <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="styles/main.css" />
     <!-- endbuild -->
+    <link rel="stylesheet" href="bower_components/leaflet.markercluster/dist/MarkerCluster.css" />
+    <link rel="stylesheet" href="bower_components/leaflet.markercluster/dist/MarkerCluster.Default.css" />
+    <link rel="stylesheet" href="styles/style.css" />
   </head>
   <body ng-app="yvyUiApp">
     <!--[if lt IE 7]>
@@ -32,12 +36,13 @@
       </div>
 
       <div ng-view=""></div>
-      <mapa-leaflet lon="-25.308" lat="-57.6" zoom="13" height="500px"></mapa-leaflet>
+      
+      <!--<mapa-leaflet lon="-25.308" lat="-57.6" zoom="13" height="500px"></mapa-leaflet>-->
+
       <div class="footer">
         <p><span class="glyphicon glyphicon-heart"></span> from the Yeoman team</p>
       </div>
     </div>
-
 
     <!-- Google Analytics: change UA-XXXXX-X to be your site's ID -->
      <script>
@@ -73,15 +78,25 @@
     <script src="bower_components/lodash/lodash.js"></script>
     <script src="bower_components/leaflet/dist/leaflet.js"></script>
     <script src="bower_components/leaflet/dist/leaflet-src.js"></script>
+    <script src="bower_components/spin-js/spin.js"></script>
+    <script src="bower_components/sprintf/src/sprintf.js"></script>
+    <script src="bower_components/mapbox.js/mapbox.js"></script>
     <!-- endbower -->
     <!-- endbuild -->
 
-        <!-- build:js({.tmp,app}) scripts/scripts.js -->
-        <script src="scripts/app.js"></script>
-        <script src="scripts/controllers/main.js"></script>
-        <script src="scripts/controllers/about.js"></script>
-        <script src="scripts/directives/mapaleaflet.js"></script>
-        <script src="scripts/controllers/mapaleaflet.js"></script>
-        <!-- endbuild -->
-</body>
+    <script src="http://maps.google.com/maps/api/js?sensor=true"></script>
+    <script src="scripts/mapa/Google.js"></script>    
+
+    <!-- build:js({.tmp,app}) scripts/scripts.js -->
+    <script src="scripts/app.js"></script>
+    <script src="scripts/controllers/main.js"></script>
+    <script src="scripts/controllers/about.js"></script>
+    <script src="scripts/directives/mapaleaflet.js"></script>
+    <script src="scripts/controllers/mapaleaflet.js"></script>
+    <script src="scripts/factories/establecimientos.js"></script>
+    <script src="scripts/controllers/mapa_establecimientos.js"></script>
+    <script src="scripts/directives/mapa_establecimientos.js"></script>
+    <script src="scripts/directives/mapa_filtro.js"></script>
+    <!-- endbuild -->
+  </body>
 </html>

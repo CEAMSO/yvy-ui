@@ -29,7 +29,11 @@ angular
         templateUrl: 'views/about.html',
         controller: 'AboutCtrl'
       })
+      .when('/mapa', {
+        templateUrl: 'views/mapa_establecimientos.html',
+        controller: 'MapaEstablecimientosCtrl'
+      })
       .otherwise({
         redirectTo: '/'
       });
-  });
+  }) ;
