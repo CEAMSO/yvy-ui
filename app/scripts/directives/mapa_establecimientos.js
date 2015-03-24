@@ -14,10 +14,14 @@ angular.module('yvyUiApp')
         data:"=",
         filtro:"="
       },
-      template: '<div id="loader"></div>'+
-      '<div id="map"></div>'+
-      '<div id="mapa-establecimientos"></div>',
+      template:
+        '<a id="left-panel" href="#left-panel-link">LEFT PANEL</a>'+
+        '<div id="loader"></div>'+
+        '<div id="map"></div>'+
+        '<div id="mapa-establecimientos"></div>',
       link: function postLink(scope, element, attrs) {
+
+        $('#left-panel').panelslider({side: 'left', duration: 300, clickClose: true, onOpen: null });        
         
         /*
         El watch nos permitira filtrar los establecimientos (y por consiguiente, los respectivos Markers)
@@ -29,15 +33,6 @@ angular.module('yvyUiApp')
           });
 
           map = draw_map(establecimientos_visibles); //dibujamos el mapa con los establecimientos filtrados           
-
-          //Lista de establecimientos filtrados
-          var definicion = 
-          '<b>Directiva Mapa</b><br/>'+
-          '<b>Tamaño:</b><br/>'+establecimientos_visibles.features.length;
-          $.each(establecimientos_visibles.features, function(index,value){
-            definicion+= '<li>'+ value.properties.periodo + ' - ' + value.properties.departamento + ' - ' + value.properties.distrito+ ' - ' + value.properties.barrioLocalidad + ' - ' + value.properties.zona + ' - ' + value.properties.codigoEstablecimiento + ' - ' + value.properties.proyecto111 +'</li>';
-          });
-          angular.element("#mapa-establecimientos").html(definicion);
 
         }, true); //scope.$watch('filtro', function(filtro){
 
@@ -112,19 +107,37 @@ angular.module('yvyUiApp')
           MECONF.geoJson.setGeoJSON(establecimientos);
           MECONF.geoJson.addTo(map);
           MECONF.infoBox.update();
+
+          MECONF.geoJson.on('click', draw_popup);
           
           return map;
         };
         
         //Funcion que calcula la distancia entre dos puntos
         function two_points_distances() {
-          var info = L.control();
-          info.onAdd = function (map) {
-            this._div = L.DomUtil.create('div', 'distance-box'); // create a div with a class "info"
-            this.update();
-            return this._div;  
-          }
-          return info;
+          
+        }
+
+        function draw_popup(target){
+          //Contiene las coordenadas del punto que se clickeo
+          //console.log(target);
+
+          var definicion = 
+          '<a id="right-panel" href="#right-panel-link">RIGHT PANEL</a>'+
+          '<div id="right-panel-link" class="right-panel" role="navigation">'+
+            '<h2>Información</h2><br/>'+
+            '<label>Periodo</label><br/>'+
+            '<label>Departamento</label><br/>'+
+            '<label>Distrito</label><br/>'+
+            '<label>Barrio/Localidad</label><br/>'+
+            '<label>Zona</label><br/>'+
+            '<label>Proyecto 111</label><br/>'+
+            '<label>Proyecto 822</label>'+
+          '</div>';
+
+          angular.element("#mapa-establecimientos").html(definicion);
+          $('#right-panel').panelslider({side: 'right', duration: 300, clickClose: true, onOpen: null });
+
         }
 
         //Funcion que dibuja el resumen de los establecimientos

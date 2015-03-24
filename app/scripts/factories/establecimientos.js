@@ -26,8 +26,8 @@ angular.module('yvyUiApp')
 							"distrito":"Asunción",
 							"barrioLocalidad":"Luque",
 							"zona":"RURAL",
-							"codigoEstablecimiento":"120",
-							"proyecto111":"SI"
+							"proyecto111":"SI",
+							"proyecto822":"NO"
 		                }
 		        },
 		        {   
@@ -41,8 +41,8 @@ angular.module('yvyUiApp')
 							"distrito":"Asunción",
 							"barrioLocalidad":"Luque",
 							"zona":"RURAL",
-							"codigoEstablecimiento":"220",
-							"proyecto111":"NO"
+							"proyecto111":"NO",
+							"proyecto822":"SI"
 		                }
 		        },
 		        {   
@@ -56,8 +56,8 @@ angular.module('yvyUiApp')
 							"distrito":"Caacupe",
 							"barrioLocalidad":"Fernando Norte",
 							"zona":"RURAL",
-							"codigoEstablecimiento":"330",
-							"proyecto111":"SI"
+							"proyecto111":"SI",
+							"proyecto822":"NO"
 		                }
 		        },
 		        {   
@@ -71,8 +71,8 @@ angular.module('yvyUiApp')
 							"distrito":"Caacupe",
 							"barrioLocalidad":"Fernando Sur",
 							"zona":"RURAL",
-							"codigoEstablecimiento":"440",
-							"proyecto111":"NO"
+							"proyecto111":"NO",
+							"proyecto822":"SI"
 		                }
 		        },
 		        {   
@@ -86,8 +86,8 @@ angular.module('yvyUiApp')
 							"distrito":"Caacupe",
 							"barrioLocalidad":"Fernando Norte",
 							"zona":"URBANA",
-							"codigoEstablecimiento":"550",
-							"proyecto111":"NO"
+							"proyecto111":"NO",
+							"proyecto822":"NO"
 		                }
 		        },
 		        {   
@@ -101,8 +101,8 @@ angular.module('yvyUiApp')
 							"distrito":"Caacupe",
 							"barrioLocalidad":"Fernando Sur",
 							"zona":"URBANA",
-							"codigoEstablecimiento":"660",
-							"proyecto111":"NO"
+							"proyecto111":"NO",
+							"proyecto822":"SI"
 		                }
 		        },
 		        {   
@@ -116,8 +116,8 @@ angular.module('yvyUiApp')
 							"distrito":"Asunción",
 							"barrioLocalidad":"Luque",
 							"zona":"URBANA",
-							"codigoEstablecimiento":"770",
-							"proyecto111":"SI"
+							"proyecto111":"SI",
+							"proyecto822":"NO"
 		                }
 		        },
 		        {   
@@ -131,8 +131,8 @@ angular.module('yvyUiApp')
 							"distrito":"Asunción",
 							"barrioLocalidad":"Luque",
 							"zona":"RURAL",
-							"codigoEstablecimiento":"880",
-							"proyecto111":"SI"
+							"proyecto111":"SI",
+							"proyecto822":"SI"
 		                }
 		        },
 		        {   
@@ -146,8 +146,8 @@ angular.module('yvyUiApp')
 							"distrito":"Caacupe",
 							"barrioLocalidad":"Fernando Norte",
 							"zona":"URBANA",
-							"codigoEstablecimiento":"990",
-							"proyecto111":"NO"
+							"proyecto111":"NO",
+							"proyecto822":"NO"
 		                }
 		        },
 		        {   
@@ -161,8 +161,8 @@ angular.module('yvyUiApp')
 							"distrito":"Caacupe",
 							"barrioLocalidad":"Fernando Sur",
 							"zona":"URBANA",
-							"codigoEstablecimiento":"1100",
-							"proyecto111":"NO"
+							"proyecto111":"NO",
+							"proyecto822":"SI"
 		                }
 		        }
         	]
