@@ -15,10 +15,12 @@ angular.module('yvyUiApp')
         filtro:"="
       },
       template:
-        '<a id="left-panel" href="#left-panel-link">LEFT PANEL</a>'+
+        '<div class="buttons">'+
+          '<a class="btn red" id="left-panel" href="#left-panel-link">¿Desea Filtrar?</a>'+
+        '</div>'+
         '<div id="loader"></div>'+
         '<div id="map"></div>'+
-        '<div id="mapa-establecimientos"></div>',
+        '<div id="mapa-establecimiento-popup"></div>',
       link: function postLink(scope, element, attrs) {
 
         $('#left-panel').panelslider({side: 'left', duration: 300, clickClose: true, onOpen: null });        
@@ -99,6 +101,8 @@ angular.module('yvyUiApp')
           MECONF.infoBox.addTo(map);
           L.control.layers(baseMaps).addTo(map);
 
+          crearPopup();
+
           return map;
         };
 
@@ -119,25 +123,39 @@ angular.module('yvyUiApp')
         }
 
         function draw_popup(target){
-          //Contiene las coordenadas del punto que se clickeo
-          //console.log(target);
 
+          var marker = target.layer.feature.properties;
+          $.each(marker, function(attr, valor){
+            $('#'+_.camelCase('popup '+attr)).text(valor);
+          });
+
+          $('#right-panel').click();
+
+        }
+
+        //Funcion que crea el Popup
+        function crearPopup(){
           var definicion = 
-          '<a id="right-panel" href="#right-panel-link">RIGHT PANEL</a>'+
-          '<div id="right-panel-link" class="right-panel" role="navigation">'+
-            '<h2>Información</h2><br/>'+
-            '<label>Periodo</label><br/>'+
-            '<label>Departamento</label><br/>'+
-            '<label>Distrito</label><br/>'+
-            '<label>Barrio/Localidad</label><br/>'+
-            '<label>Zona</label><br/>'+
-            '<label>Proyecto 111</label><br/>'+
-            '<label>Proyecto 822</label>'+
-          '</div>';
-
-          angular.element("#mapa-establecimientos").html(definicion);
+            '<a id="right-panel" href="#right-panel-link" style="visibility: hidden"></a>'+
+            '<div id="right-panel-link" class="right-panel" role="navigation">'+
+              '<h2>Información</h2><br/>'+
+              '<label>Periodo</label><br/>'+
+              '<label id="popupPeriodo"></label><br/>'+
+              '<label>Departamento</label><br/>'+
+              '<label id="popupDepartamento"></label><br/>'+
+              '<label>Distrito</label><br/>'+
+              '<label id="popupDistrito"></label><br/>'+
+              '<label>Barrio/Localidad</label><br/>'+
+              '<label id="popupBarrioLocalidad"></label><br/>'+
+              '<label>Zona</label><br/>'+
+              '<label id="popupZona"></label><br/>'+
+              '<label>Proyecto 111</label><br/>'+
+              '<label id="popupProyecto111"></label><br/>'+
+              '<label>Proyecto 822</label><br/>'+
+              '<label id="popupProyecto822"></label>'+
+            '</div>';
+          angular.element("#mapa-establecimiento-popup").html(definicion);
           $('#right-panel').panelslider({side: 'right', duration: 300, clickClose: true, onOpen: null });
-
         }
 
         //Funcion que dibuja el resumen de los establecimientos

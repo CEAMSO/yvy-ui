@@ -13,13 +13,14 @@ angular.module('yvyUiApp')
       scope: {
         data:"=",
         filtro:"=",
-        local:"="
+        local:"=",
+        prueba:"="
       },
       template:
       '<div id="left-panel-link" class="left-panel" role="navigation">'+
         '<div id="mapa-filtro">'+
           '<label>Periodo</label><br/>'+
-          '<select id="filtroPeriodo" name="filtroPeriodo" ng-model="local.periodo" ng-change="updateFiltro(local)"></select><br/>'+
+          '<select id="filtroPeriodo" class="filtroPeriodo" name="filtroPeriodo" ng-model="local.periodo" ng-change="updateFiltro(local)"></select><br/>'+
           '<label>Departamento</label><br/>'+
           '<select id="filtroDepartamento" name="filtroDepartamento" ng-model="local.departamento" ng-change="updateFiltro(local)"></select><br/>'+
           '<label>Distrito</label><br/>'+
@@ -70,16 +71,20 @@ angular.module('yvyUiApp')
 
           //Append a las listas desplegables
           var firstTime;
-          $.each(filtros, function(attr, array){
+          $.each(filtros, function(attr, array){ //ciclo por cada filtro existe
             firstTime=0;
             $.each(array, function(index, a){
-              if(attr!=='periodo' && firstTime===0){
+              if(attr!=='periodo' && firstTime===0){ //ciclo que añade los valores posibles del filtro
                 $('#'+_.camelCase('filtro '+attr)).append('<option value="">---</option>');
                 firstTime=1;
               }
               $('#'+_.camelCase('filtro '+attr)).append('<option value="'+a+'">'+a+'</option>');
             });
           });
+
+          /*$('.filtroPeriodo').select2({
+            allowClear:true
+          });*/
 
         };//var cargar = function(establecimientos){        
 
