@@ -13,25 +13,24 @@ angular.module('yvyUiApp')
       scope: {
         data:"=",
         filtro:"=",
-        local:"=",
-        prueba:"="
+        local:"="
       },
       template:
       '<div id="left-panel-link" class="left-panel" role="navigation">'+
         '<div id="mapa-filtro">'+
-          '<label>Periodo</label><br/>'+
-          '<select id="filtroPeriodo" class="filtroPeriodo" name="filtroPeriodo" ng-model="local.periodo" ng-change="updateFiltro(local)"></select><br/>'+
-          '<label>Departamento</label><br/>'+
+          '<h4>Periodo</h4>'+
+          '<select id="filtroPeriodo" name="filtroPeriodo" ng-model="local.periodo" ng-change="updateFiltro(local)"></select><br/>'+
+          '<h4>Departamento</h4>'+
           '<select id="filtroDepartamento" name="filtroDepartamento" ng-model="local.departamento" ng-change="updateFiltro(local)"></select><br/>'+
-          '<label>Distrito</label><br/>'+
+          '<h4>Distrito</h4>'+
           '<select id="filtroDistrito" name="filtroDistrito" ng-model="local.distrito" ng-change="updateFiltro(local)"></select><br/>'+
-          '<label>Barrio/Localidad</label><br/>'+
+          '<h4>Barrio/Localidad</h4>'+
           '<select id="filtroBarrioLocalidad" name="filtroBarrioLocalidad" ng-model="local.barrioLocalidad" ng-change="updateFiltro(local)"></select><br/>'+
-          '<label>Zona</label><br/>'+
+          '<h4>Zona</h4>'+
           '<select id="filtroZona" name="filtroZona" ng-model="local.zona" ng-change="updateFiltro(local)"></select><br/>'+
-          '<label>Proyecto 111</label><br/>'+
+          '<h4>Proyecto 111</h4>'+
           '<select id="filtroProyecto111" name="filtroProyecto111" ng-model="local.proyecto111" ng-change="updateFiltro(local)"></select><br/>'+
-          '<label>Proyecto 822</label><br/>'+
+          '<h4>Proyecto 822</h4>'+
           '<select id="filtroProyecto822" name="filtroProyecto822" ng-model="local.proyecto822" ng-change="updateFiltro(local)"></select><br/>'+
         '</div>'+
       '</div>',
@@ -44,19 +43,12 @@ angular.module('yvyUiApp')
           //Definicion de un array, donde cada indice representa el filtro (Ej: periodo, departamento), donde cada indice esta asociado a un array con los valores posibles para el mismo
           var filtros = {periodo:[], departamento:[], distrito:[], barrioLocalidad:[], zona:[], proyecto111:[], proyecto822:[]};
 
-          //Funcion que busca si un elemento existe o no en el array. Exsite->1; No Existe->0;
-          var lookup = function(array, value) {
-            for (var i = 0, len = array.length; i < len; i++)
-              if (array[i] === value) return 1;
-            return 0;
-          };
-
           //Carga de los distintos valores para cada filtro
-          var result = 1;
+          var result = true;
           $.each(establecimientos.features, function(index, e){
             $.each(e.properties, function(attr, val){
-              result = lookup(filtros[attr],val);
-              if (result===0) filtros[attr].push(val);
+              result = _.includes(filtros[attr], val); //Verifica si el campo ya fue cargado anteriormente. True -> Si, False -> No.
+              if (result===false) filtros[attr].push(val);
             });
           });
 
@@ -72,19 +64,19 @@ angular.module('yvyUiApp')
           //Append a las listas desplegables
           var firstTime;
           $.each(filtros, function(attr, array){ //ciclo por cada filtro existe
-            firstTime=0;
+            firstTime=true;
             $.each(array, function(index, a){
-              if(attr!=='periodo' && firstTime===0){ //ciclo que añade los valores posibles del filtro
+              if(attr!=='periodo' && firstTime===true){ //ciclo que añade los valores posibles del filtro
                 $('#'+_.camelCase('filtro '+attr)).append('<option value="">---</option>');
-                firstTime=1;
+                firstTime=false;
               }
               $('#'+_.camelCase('filtro '+attr)).append('<option value="'+a+'">'+a+'</option>');
             });
           });
 
-          /*$('.filtroPeriodo').select2({
-            allowClear:true
-          });*/
+          $.each(filtros, function(attr, array){
+            $('#'+_.camelCase('filtro '+attr)).select2( {dropdownAutoWidth:true} );
+          });
 
         };//var cargar = function(establecimientos){        
 
