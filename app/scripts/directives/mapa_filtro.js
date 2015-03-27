@@ -21,11 +21,11 @@ angular.module('yvyUiApp')
           '<h4>Periodo</h4>'+
           '<select id="filtroPeriodo" name="filtroPeriodo" ng-model="local.periodo" ng-change="updateFiltro(local)"></select><br/>'+
           '<h4>Departamento</h4>'+
-          '<select id="filtroDepartamento" name="filtroDepartamento" ng-model="local.departamento" ng-change="updateFiltro(local)"></select><br/>'+
+          '<select multiple id="filtroDepartamento" name="filtroDepartamento" ng-model="local.departamento" ng-change="updateFiltro(local)"></select><br/>'+
           '<h4>Distrito</h4>'+
-          '<select id="filtroDistrito" name="filtroDistrito" ng-model="local.distrito" ng-change="updateFiltro(local)"></select><br/>'+
+          '<select multiple id="filtroDistrito" name="filtroDistrito" ng-model="local.distrito" ng-change="updateFiltro(local)"></select><br/>'+
           '<h4>Barrio/Localidad</h4>'+
-          '<select id="filtroBarrioLocalidad" name="filtroBarrioLocalidad" ng-model="local.barrioLocalidad" ng-change="updateFiltro(local)"></select><br/>'+
+          '<select multiple id="filtroBarrioLocalidad" name="filtroBarrioLocalidad" ng-model="local.barrioLocalidad" ng-change="updateFiltro(local)"></select><br/>'+
           '<h4>Zona</h4>'+
           '<select id="filtroZona" name="filtroZona" ng-model="local.zona" ng-change="updateFiltro(local)"></select><br/>'+
           '<h4>Proyecto 111</h4>'+
@@ -75,7 +75,7 @@ angular.module('yvyUiApp')
           });
 
           $.each(filtros, function(attr, array){
-            $('#'+_.camelCase('filtro '+attr)).select2( {dropdownAutoWidth:true} );
+            $('#'+_.camelCase('filtro '+attr)).select2();
           });
 
         };//var cargar = function(establecimientos){        
