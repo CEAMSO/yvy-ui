@@ -1,5 +1,7 @@
 # yvy-ui
 
+[![Join the chat at https://gitter.im/nemesiscodex/yvy-ui](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/nemesiscodex/yvy-ui?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 Mapa base.
 
 Creado utilizando el Angular generator de Yeoman: https://github.com/yeoman/generator-angular
