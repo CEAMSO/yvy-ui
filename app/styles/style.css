@@ -8,6 +8,8 @@
     font-family: 'open_sansregular', Helvetica, Arial, sans-serif;
     font-size: 16px;
 }
+
+/* Propiedades del loader*/
 #loader {
     position: absolute;
     top: 0;
@@ -28,6 +30,8 @@
 #loader.hide {
     display:none;
 }
+
+/* Propiedades del Mapa */
 #map {
     height:600px;
     width:102%;
@@ -35,34 +39,48 @@
     /*position: absolute;*/
     margin-left: -14px !important;
 }
+
+/* Propiedades del panel de filtros */
 .left-panel {
   display: none;
   width: 240px;
-  background-color: #8c0505;
-  box-shadow: inset 0 0 5px 5px #222;
+  background-color: #e7e7e7;
+  box-shadow: inset 0 0 3px 3px #714141;
   text-align: center;
 }
-.left-panel select{
-    width: 180px;
-}
 .left-panel h4{
-    color: #fff;
+    color: #000000;
 }
 
+/* Propiedades de los filtros */
+.filtro-ancho{
+  margin: 0px !important;
+  height: 30px !important;
+  width: 180px !important;
+}
+
+/* Propiedades del panel Popup */
 .right-panel {
   display: none;
+  text-align: center;
   width: 350px;
-  background-color: #8c0505;
-  box-shadow: inset 0 0 5px 5px #222;
+  background-color: #e7e7e7;
+  box-shadow: inset 0 0 3px 3px #714141;
   color: #000000;
 }
 .right-panel h3{
-    color: #fff;
+    color: #000000;
+}
+.right-panel table{
+  width: 80%;
+  margin: 0 auto;
+}
+.attr-title {
+  font-weight: bold;
 }
 
-
-/*****/
-.btn-slide {
+/* Propiedades del boton */
+.btn-red {
   cursor: pointer;  
   border-radius: 5px;
   text-decoration: none;
@@ -71,10 +89,12 @@
   -webkit-transition: .5s;
   -moz-transition: .5s;
   -o-transition: .5s;
+}
+.btn-red-slide {
   /*margin-left: -67px;*/
   margin-left: -70px;
-  position: fixed;
-  margin-top: 20%;
+  position: absolute;
+  margin-top: 300px;
   z-index: 2;
   -ms-transform:rotate(270deg); /* IE 9 */
   -moz-transform:rotate(270deg); /* Firefox */
@@ -82,7 +102,7 @@
   -o-transform:rotate(270deg); /* Opera */  
 }
 
-.btn:hover {
+.btn-red:hover {
   cursor: url(http://cur.cursors-4u.net/symbols/sym-1/sym46.cur), auto;
 }
 

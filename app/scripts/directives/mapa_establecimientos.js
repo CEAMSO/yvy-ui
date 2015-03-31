@@ -17,29 +17,25 @@ angular.module('yvyUiApp')
       template:
         '<div id="loader"></div>'+
         '<div id="map">'+
-            '<a class="btn btn-slide red" id="left-panel" href="#left-panel-link">¿Desea Filtrar?</a>'+
+            '<a class="btn btn-red btn-red-slide red" id="left-panel" href="#left-panel-link">¿Desea Filtrar?</a>'+
         '</div>'+
         '<div id="mapa-establecimiento-popup"></div>',
       link: function postLink(scope, element, attrs) {
 
         $('#left-panel').panelslider({side: 'left', duration: 300, clickClose: false, onOpen: null });        
         
-        /*
-        El watch nos permitira filtrar los establecimientos (y por consiguiente, los respectivos Markers)
-        */
+        /* El watch nos permitira filtrar los establecimientos (y por consiguiente, los respectivos Markers) */
         scope.$watch('filtro', function(filtro){
           var establecimientos_visibles = establecimientos;
           $.each(filtro, function(index, value){
-              establecimientos_visibles = filtrar_estableciminentos(establecimientos_visibles, value);
+            establecimientos_visibles = filtrar_estableciminentos(establecimientos_visibles, value);
           });
 
           map = draw_map(establecimientos_visibles); //dibujamos el mapa con los establecimientos filtrados           
 
-        }, true); //scope.$watch('filtro', function(filtro){
+        }, true);
 
-        /*
-        Funcion que reduce la lista de establecimientos acorde al filtro seleccionado
-        */
+        /* Funcion que reduce la lista de establecimientos acorde al filtro seleccionado */
         var filtrar_estableciminentos = function(establecimientos, filtro){
           var e =  
           { "type" : "FeatureCollection",
@@ -51,9 +47,9 @@ angular.module('yvyUiApp')
             }
           });
           return e;
-        }; //var filtrar_estableciminentos = function(establecimientos, filtro){
+        };
 
-        //Funcion que inicializa el mapa  
+        /* Funcion que inicializa el mapa */
         var init_map = function(establecimientos) {
           startLoading();
 
@@ -67,7 +63,7 @@ angular.module('yvyUiApp')
 
 
           var map = L.map('map', {maxZoom: 18, minZoom: 3, worldCopyJump: true, attributionControl: false})
-                  .setView([-23.388, -60.189], 7)
+                  .setView([-23.388, -57.189], 6)
                   .on('baselayerchange', startLoading);
 
           var baseMaps = {
@@ -79,9 +75,9 @@ angular.module('yvyUiApp')
 
           map.addLayer(gglRoadmap);
 
-          MECONF.geoJson = L.mapbox.featureLayer();
+          var geoJson = L.mapbox.featureLayer();
 
-          MECONF.geoJson.on('layeradd', function (e) {
+          geoJson.on('layeradd', function (e) {
               var marker = e.layer,
                       feature = marker.feature;
 
@@ -96,6 +92,8 @@ angular.module('yvyUiApp')
               }
           });
 
+          MECONF.geoJsonLayer = geoJson; //Sobre esta variable se aplican los filtros
+
           MECONF.infoBox = draw_info_box();
           MECONF.infoBox.addTo(map);
           L.control.layers(baseMaps).addTo(map);
@@ -105,22 +103,23 @@ angular.module('yvyUiApp')
           return map;
         };
 
-        //Funcion que dibuja el mapa de acuerdo a los establecimientos filtrados
+        /* Funcion que dibuja el mapa de acuerdo a los establecimientos filtrados */
         var draw_map = function(establecimientos){
-          MECONF.geoJson.setGeoJSON(establecimientos);
-          MECONF.geoJson.addTo(map);
+          MECONF.geoJsonLayer.setGeoJSON(establecimientos);
+          MECONF.geoJsonLayer.addTo(map);
           MECONF.infoBox.update();
 
-          MECONF.geoJson.on('click', draw_popup);
+          MECONF.geoJsonLayer.on('click', draw_popup);
           
           return map;
         };
         
-        //Funcion que calcula la distancia entre dos puntos
+        /* Funcion que calcula la distancia entre dos puntos */
         function two_points_distances() {
           
         }
 
+        /* Funcion que carga el resumen del Popup */
         function draw_popup(target){
           $("#popupTable tr").remove();
 
@@ -129,9 +128,9 @@ angular.module('yvyUiApp')
 
           $.each(marker, function(attr, valor){
             if(attr=='barrioLocalidad')
-              row = '<tr><td>Barrio/Localidad</td><td>'+valor+'</td></tr>';
+              row = '<tr><td class="attr-title">Barrio/Localidad</td><td>'+valor+'</td></tr>';
             else
-              row = '<tr><td>'+_.capitalize(attr)+'</td><td>'+valor+'</td></tr>';
+              row = '<tr><td class="attr-title">'+_.capitalize(attr)+'</td><td>'+valor+'</td></tr>';
             $('#popupTable > tbody:last').append(row);
           });
 
@@ -139,22 +138,23 @@ angular.module('yvyUiApp')
 
         }
 
-        //Funcion que crea el Popup
+        /* Funcion que crea el Popup */
         function crearPopup(){
           var definicion = 
-            '<a id="right-panel" href="#right-panel-link" style="visibility: hidden"></a>'+
             '<div id="right-panel-link" class="right-panel" role="navigation">'+
               '<h3>Detalles del Establecimiento</h2><br/>'+
               '<table id="popupTable" class="table table-striped table-bordered">'+
               '<tbody>'+
               '</tbody>'+
               '</table>'+
+              '<br/>'+
+              '<a class="btn btn-red red" id="right-panel" href="#right-panel-link">¿Finalizar la Consulta?</a>'+
             '</div>';
           angular.element("#mapa-establecimiento-popup").html(definicion);
-          $('#right-panel').panelslider({side: 'right', duration: 300, clickClose: true, onOpen: null });
+          $('#right-panel').panelslider({side: 'right', duration: 300, clickClose: false, onOpen: null });
         }
 
-        //Funcion que dibuja el resumen de los establecimientos
+        /* Funcion que dibuja el resumen de los establecimientos */
         function draw_info_box() {
           var info = L.control();
 
@@ -173,11 +173,10 @@ angular.module('yvyUiApp')
                   msg = sprintf('Mostrando un asentamiento del proyecto %s con %s viviendas',
                           f.properties['Proyecto'], f.properties['Cantidad de Viviendas']);
               } else {
-                  /*var features = _(MECONF.geoJsonLayer.getLayers()).map(function (l) {
+                  var features = _(MECONF.geoJsonLayer.getLayers()).map(function (l) {
                       return l.feature;
                   });
-                  msg = get_summary_message(features);*/
-                  msg = 'Esto es una prueba';
+                  msg = get_summary_message(features);
               }
 
               this._div.innerHTML = msg;
@@ -191,16 +190,21 @@ angular.module('yvyUiApp')
               .map(function (f) {
                   return f.properties['departamento'];
               })
-              .filter(function (e) {
-                  return !(e === "Capital");
-              })
               .unique().value().length;
 
           if (cantidadDepartamentos === 0) {
               cantidadDepartamentos += 1;
           }
 
-          var cantidadProyectos = features.length;
+          var cantidadEstablecimientos = _(features).chain()
+            .map(function (f){
+              return f.properties['codigo_establecimiento'];
+            })
+            .unique().value().length;
+          
+          return sprintf('6 establecimientos en %s departamentos', cantidadEstablecimientos, cantidadDepartamentos)
+
+          /*var cantidadProyectos = features.length;
           var cantidadViviendas = _(features).chain().filter(function (f) {
               return !isNaN(f.properties['Cantidad de Viviendas'])
           }).value()
@@ -213,7 +217,7 @@ angular.module('yvyUiApp')
           var proyectoLabel = cantidadProyectos > 1 ? 'obras' : 'obra';
           var viviendaLabel = cantidadViviendas > 1 ? 'viviendas' : 'vivienda';
           return sprintf('%s %s de %s %s, %s a %s %s.',
-                  cantidadProyectos, proyectoLabel, cantidadDepartamentos, departamentoLabel, equivalenteLabel, cantidadViviendas, viviendaLabel);
+                  cantidadProyectos, proyectoLabel, cantidadDepartamentos, departamentoLabel, equivalenteLabel, cantidadViviendas, viviendaLabel);*/
         }
 
         //Funcion que inicializa el Spinner (Loading)
@@ -248,10 +252,7 @@ angular.module('yvyUiApp')
           google.maps.event.addListenerOnce(this._google, 'tilesloaded', finishedLoading);
         };
 
-        /*
-        INICIO
-        */
-        var establecimientos = scope.data;
+        /******************************** INICIO **************************************/        
         
         //Detalles de la configuracion del mapa
         var MECONF = MECONF || {};
@@ -271,10 +272,11 @@ angular.module('yvyUiApp')
         };
 
         MECONF.ESTADO_TO_ICON = {
-          '2014': 'images/yeoman.png',
-          '2012': 'images/yeoman.png'
+          '2014': 'images/marker.png',
+          '2012': 'images/marker.png'
         };
 
+        var establecimientos = scope.data;
         var map = init_map(establecimientos);
 
       }//link: function postLink(scope, element, attrs) {
