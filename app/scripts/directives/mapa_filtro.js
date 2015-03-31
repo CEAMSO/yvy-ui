@@ -37,7 +37,7 @@ angular.module('yvyUiApp')
       '</div>',
       link: function postLink(scope, element, attrs) {
         //Botones, el primer parametro es el ID del filtro, el segundo parametro representa la lista de valores posibles
-        var filtrosBotones = {zona:['RURAL', 'URBANA'], proyecto111:['SI', 'NO'], proyecto822:['SI', 'NO']};
+        var filtrosBotones = {periodo: ['2014', '2012'], zona:['RURAL', 'URBANA'], proyecto111:['SI', 'NO'], proyecto822:['SI', 'NO']};
 
         //Definicion de un array, donde cada indice representa el filtro (Ej: departamento, distrito), donde cada indice esta asociado a un array con los valores posibles para el mismo
         var filtrosSelect = {departamento:[], distrito:[], barrioLocalidad:[]};
@@ -66,10 +66,6 @@ angular.module('yvyUiApp')
           $.each(filtrosSelect, function(attr, array){ //ciclo por cada filtro existe
             firstTime=true;
             $.each(array, function(index, a){
-              /*if(firstTime===true){ //ciclo que añade los valores posibles del filtro
-                $('#'+_.camelCase('filtro '+attr)).append('<option value="">---</option>');
-                firstTime=false;
-              }*/
               $('#'+_.camelCase('filtro '+attr)).append('<option value="'+a+'">'+a+'</option>');
             });
           });
