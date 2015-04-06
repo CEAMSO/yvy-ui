@@ -20,6 +20,8 @@ angular.module('yvyUiApp')
         '<div id="mapa-filtro">'+
           '<h4>Periodo</h4>'+
           '<div id="filtroPeriodo" class="btn-group-vertical" data-toggle="buttons"></div>'+
+          '<h4>Codigo Establecimiento</h4>'+
+          '<select multiple id="filtroCodigoEstablecimiento" name="filtroCodigoEstablecimiento" class="filtro-ancho" ng-model="local.codigoEstablecimiento" ng-change="updateFiltro(local)"></select><br/>'+
           '<h4>Departamento</h4>'+
           '<select multiple id="filtroDepartamento" name="filtroDepartamento" class="filtro-ancho" ng-model="local.departamento" ng-change="updateFiltro(local)"></select><br/>'+
           '<h4>Distrito</h4>'+
@@ -40,7 +42,7 @@ angular.module('yvyUiApp')
         var filtrosBotones = {periodo: ['2014', '2012'], zona:['RURAL', 'URBANA'], proyecto111:['SI', 'NO'], proyecto822:['SI', 'NO']};
 
         //Definicion de un array, donde cada indice representa el filtro (Ej: departamento, distrito), donde cada indice esta asociado a un array con los valores posibles para el mismo
-        var filtrosSelect = {departamento:[], distrito:[], barrioLocalidad:[]};
+        var filtrosSelect = {codigoEstablecimiento:[], departamento:[], distrito:[], barrioLocalidad:[]};
 
         /* Funcion que inicializa los filtros de manera dinamica */
         var cargar = function(establecimientos){

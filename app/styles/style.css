@@ -36,7 +36,7 @@
     height:600px;
     width:102%;
     z-index: 1;
-    /*position: absolute;*/
+    /*position: relative;*/
     margin-left: -14px !important;
 }
 

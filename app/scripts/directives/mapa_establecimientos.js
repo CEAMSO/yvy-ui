@@ -121,6 +121,9 @@ angular.module('yvyUiApp')
 
         /* Funcion que carga el resumen del Popup */
         function draw_popup(target){
+
+          map.panTo(target.layer.getLatLng()); //funcion que centra el mapa sobre el marker
+
           $("#popupTable tr").remove();
 
           var marker = target.layer.feature.properties;
@@ -129,6 +132,8 @@ angular.module('yvyUiApp')
           $.each(marker, function(attr, valor){
             if(attr=='barrioLocalidad')
               row = '<tr><td class="attr-title">Barrio/Localidad</td><td>'+valor+'</td></tr>';
+            else if(attr=='codigoEstablecimiento')
+              row = '<tr><td class="attr-title">Codigo Establecimiento</td><td>'+valor+'</td></tr>';
             else
               row = '<tr><td class="attr-title">'+_.capitalize(attr)+'</td><td>'+valor+'</td></tr>';
             $('#popupTable > tbody:last').append(row);
@@ -142,7 +147,7 @@ angular.module('yvyUiApp')
         function crearPopup(){
           var definicion = 
             '<div id="right-panel-link" class="right-panel" role="navigation">'+
-              '<h3>Detalles del Establecimiento</h2><br/>'+
+              '<h3><span class="label label-info">Detalles del Establecimiento</span></h3><br/>'+
               '<table id="popupTable" class="table table-striped table-bordered">'+
               '<tbody>'+
               '</tbody>'+
@@ -202,7 +207,7 @@ angular.module('yvyUiApp')
             })
             .unique().value().length;
           
-          return sprintf('6 establecimientos en %s departamentos', cantidadEstablecimientos, cantidadDepartamentos)
+          return sprintf('6 establecimientos en %s departamentos', cantidadEstablecimientos, cantidadDepartamentos);
 
           /*var cantidadProyectos = features.length;
           var cantidadViviendas = _(features).chain().filter(function (f) {
