@@ -17,12 +17,12 @@ angular.module('yvyUiApp')
       template:
         '<div id="loader"></div>'+
         '<div id="map">'+
-            '<a class="btn btn-red btn-red-slide red" id="left-panel" href="#left-panel-link">¿Desea Filtrar?</a>'+
+            '<a class="btn btn-tag btn-tag-slide tag" id="left-panel" href="#left-panel-link">¿Desea Filtrar?</a>'+
         '</div>'+
         '<div id="mapa-establecimiento-popup"></div>',
       link: function postLink(scope, element, attrs) {
 
-        $('#left-panel').panelslider({side: 'left', duration: 300, clickClose: false, onOpen: null });        
+        $('#left-panel').panelslider({side: 'left', duration: 300, clickClose: false, container: $('[ng-view]') });        
         
         /* El watch nos permitira filtrar los establecimientos (y por consiguiente, los respectivos Markers) */
         scope.$watch('filtro', function(filtro){
@@ -151,7 +151,7 @@ angular.module('yvyUiApp')
               '<a class="btn btn-red red" id="right-panel" href="#right-panel-link">¿Finalizar la Consulta?</a>'+
             '</div>';
           angular.element("#mapa-establecimiento-popup").html(definicion);
-          $('#right-panel').panelslider({side: 'right', duration: 300, clickClose: false, onOpen: null });
+          $('#right-panel').panelslider({side: 'right', duration: 300, clickClose: false, container: $('[ng-view]') });
         }
 
         /* Funcion que dibuja el resumen de los establecimientos */
@@ -223,7 +223,7 @@ angular.module('yvyUiApp')
         //Funcion que inicializa el Spinner (Loading)
         var startLoading = function() {
           var spinner = new Spinner({
-              color: "#8c0505",
+              color: "#ffb885",
               radius: 30,
               width: 15,
               length: 20

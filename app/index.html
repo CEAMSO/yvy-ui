@@ -8,7 +8,6 @@
     <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
     <!-- build:css(.) styles/vendor.css -->
     <!-- bower:css -->
-    <link rel="stylesheet" href="bower_components/leaflet/dist/leaflet.css" />
     <link rel="stylesheet" href="bower_components/mapbox.js/mapbox.css" />
     <!-- endbower -->
     <!-- endbuild -->
@@ -29,19 +28,19 @@
     <div class="container">
       <div class="header">
         <ul class="nav nav-pills pull-right">
-          <li class="active"><a ng-href="#">Home</a></li>
-          <li><a ng-href="#/about">About</a></li>
-          <li><a ng-href="#">Contact</a></li>
+          <li class="active"><a class="btn" ng-href="#">Home</a></li>
+          <li><a class="btn" ng-href="#/about">About</a></li>
+          <li><a class="btn" ng-href="#">Contact</a></li>
         </ul>
         <h3 class="text-muted">yvyUi</h3>
       </div>
 
-      <div ng-view=""></div>
+      <div ng-view="" style="height: 85%;"></div>
       
       <!--<mapa-leaflet lon="-25.308" lat="-57.6" zoom="13" height="500px"></mapa-leaflet>-->
 
       <div class="footer">
-        <p><span class="glyphicon glyphicon-heart"></span> from the Yeoman team</p>
+        <p>2015 - Visualización construida y mantenida por el <a href="http://mec.gov.py/">MEC</a> con el apoyo del <a href="http://ceamso.org.py/es/proyectos/20-programa-de-democracia-y-gobernabilidad">Programa Democracia y Gobernabilidad (USAID-CEAMSO)</a></p>
       </div>
     </div>
 
@@ -77,8 +76,6 @@
     <script src="bower_components/angular-sanitize/angular-sanitize.js"></script>
     <script src="bower_components/angular-touch/angular-touch.js"></script>
     <script src="bower_components/lodash/lodash.js"></script>
-    <script src="bower_components/leaflet/dist/leaflet.js"></script>
-    <script src="bower_components/leaflet/dist/leaflet-src.js"></script>
     <script src="bower_components/spin-js/spin.js"></script>
     <script src="bower_components/sprintf/src/sprintf.js"></script>
     <script src="bower_components/mapbox.js/mapbox.js"></script>

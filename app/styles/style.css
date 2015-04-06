@@ -33,23 +33,23 @@
 
 /* Propiedades del Mapa */
 #map {
-    height:600px;
-    width:102%;
+    height: 100%;
+    width:100%;
     z-index: 1;
     /*position: absolute;*/
-    margin-left: -14px !important;
 }
 
 /* Propiedades del panel de filtros */
 .left-panel {
+  height: 84.75% !important;
   display: none;
   width: 240px;
-  background-color: #e7e7e7;
-  box-shadow: inset 0 0 3px 3px #714141;
+  background-color: #eee;
+  box-shadow: inset 0 0 0 0.325em rgba(0,0,0,0.1);
   text-align: center;
-}
-.left-panel h4{
-    color: #000000;
+  top: 74px !important;
+  color: #000000;
+  overflow: auto;
 }
 
 /* Propiedades de los filtros */
@@ -64,10 +64,13 @@
   display: none;
   text-align: center;
   width: 350px;
-  background-color: #e7e7e7;
-  box-shadow: inset 0 0 3px 3px #714141;
+  background-color: #eee;
+  box-shadow: inset 0 0 0 0.325em rgba(0,0,0,0.1);
   color: #000000;
+  height: 84.75% !important;
+  top: 74px !important;
 }
+
 .right-panel h3{
     color: #000000;
 }
@@ -80,7 +83,7 @@
 }
 
 /* Propiedades del boton */
-.btn-red {
+.btn-tag {
   cursor: pointer;  
   border-radius: 5px;
   text-decoration: none;
@@ -90,11 +93,11 @@
   -moz-transition: .5s;
   -o-transition: .5s;
 }
-.btn-red-slide {
+.btn-tag-slide {
   /*margin-left: -67px;*/
   margin-left: -70px;
   position: absolute;
-  margin-top: 300px;
+  margin-top: 12.5em;
   z-index: 2;
   -ms-transform:rotate(270deg); /* IE 9 */
   -moz-transform:rotate(270deg); /* Firefox */
@@ -102,16 +105,16 @@
   -o-transform:rotate(270deg); /* Opera */  
 }
 
-.btn-red:hover {
+.btn-tag:hover {
   cursor: url(http://cur.cursors-4u.net/symbols/sym-1/sym46.cur), auto;
 }
 
-.red {
-  color: #8c0505 !important;
-  border: 2px #8c0505 solid;
+.tag {
+  color: #337ab7 !important;
+  border: 2px #337ab7 solid;
 }
 
-.red:hover {
+.tag:hover {
   color: #fff !important;
-  background-color: #8c0505;
+  background-color: #21759b;
 }
