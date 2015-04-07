@@ -17,7 +17,7 @@ angular.module('yvyUiApp')
       template:
         '<div id="loader"></div>'+
         '<div id="map">'+
-            '<a class="btn btn-tag btn-tag-slide tag" id="left-panel" href="#left-panel-link">¿Desea Filtrar?</a>'+
+              '<a class="btn btn-tag btn-tag-slide tag" id="left-panel" href="#left-panel-link">¿Desea Filtrar?</a>'+
         '</div>'+
         '<div id="mapa-establecimiento-popup"></div>',
       link: function postLink(scope, element, attrs) {
@@ -153,10 +153,26 @@ angular.module('yvyUiApp')
               '</tbody>'+
               '</table>'+
               '<br/>'+
-              '<a class="btn btn-red red" id="right-panel" href="#right-panel-link">¿Finalizar la Consulta?</a>'+
+              '<a class="btn btn-tag tag" id="right-panel" href="#right-panel-link">¿Finalizar la Consulta?</a>'+
             '</div>';
           angular.element("#mapa-establecimiento-popup").html(definicion);
-          $('#right-panel').panelslider({side: 'right', duration: 300, clickClose: false, container: $('[ng-view]') });
+          
+          function onOpen(){
+            $('#left-panel').css('margin-left', '280px');
+          }
+
+          function onClose(){
+            $('#left-panel').css('margin-left', '-70px');
+          }
+          $('#right-panel').panelslider({
+                                side: 'right',
+                                duration: 300,
+                                clickClose: false,
+                                container: $('[ng-view]'),
+                                onOpen: onOpen,
+                                onClose: onClose,
+                                animateCallbacks: false 
+                              });
         }
 
         /* Funcion que dibuja el resumen de los establecimientos */
