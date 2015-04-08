@@ -39,6 +39,11 @@
     /*position: absolute;*/
 }
 
+#map-container{
+  height: 100%;
+  width:100%;
+}
+
 /* Propiedades del panel de filtros */
 .left-panel {
   height: 85% !important;

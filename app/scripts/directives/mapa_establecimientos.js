@@ -15,14 +15,24 @@ angular.module('yvyUiApp')
         filtro:"="
       },
       template:
-        '<div id="loader"></div>'+
-        '<div id="map">'+
+        '<div id="map-container"><div id="map">'+
               '<a class="btn btn-tag btn-tag-slide tag" id="left-panel" href="#left-panel-link">¿Desea Filtrar?</a>'+
-        '</div>'+
+        '</div></div>'+
         '<div id="mapa-establecimiento-popup"></div>',
       link: function postLink(scope, element, attrs) {
 
-        $('#left-panel').panelslider({side: 'left', duration: 300, clickClose: false, container: $('[ng-view]') });        
+        $('#left-panel').panelslider({
+                                  side: 'left',
+                                  duration: 300,
+                                  clickClose: false,
+                                  container: $('[ng-view]'),
+                                  onOpen: function(){
+                                    map.invalidateSize();
+                                  },
+                                  onClose: function(){
+                                    map.invalidateSize();
+                                  }
+                                });        
         
         /* El watch nos permitira filtrar los establecimientos (y por consiguiente, los respectivos Markers) */
         scope.$watch('filtro', function(filtro){
@@ -122,7 +132,7 @@ angular.module('yvyUiApp')
         /* Funcion que carga el resumen del Popup */
         function draw_popup(target){
 
-          map.panTo(target.layer.getLatLng()); //funcion que centra el mapa sobre el marker
+          //map.panTo(target.layer.getLatLng()); //funcion que centra el mapa sobre el marker
 
           $("#popupTable tr").remove();
 
@@ -157,11 +167,11 @@ angular.module('yvyUiApp')
             '</div>';
           angular.element("#mapa-establecimiento-popup").html(definicion);
           
-          function onOpen(){
+          function onStartOpen(){
             $('#left-panel').css('margin-left', '280px');
           }
 
-          function onClose(){
+          function onStartClose(){
             $('#left-panel').css('margin-left', '-70px');
           }
           $('#right-panel').panelslider({
@@ -169,9 +179,15 @@ angular.module('yvyUiApp')
                                 duration: 300,
                                 clickClose: false,
                                 container: $('[ng-view]'),
-                                onOpen: onOpen,
-                                onClose: onClose,
-                                animateCallbacks: false 
+                                onStartOpen: onStartOpen,
+                                onStartClose: onStartClose,
+                                onOpen: function(){
+                                  //console.log('invalidate');
+                                  map.invalidateSize();
+                                },
+                                onClose: function(){
+                                  map.invalidateSize();
+                                }
                               });
         }
 
@@ -245,27 +261,19 @@ angular.module('yvyUiApp')
         var startLoading = function() {
           var spinner = new Spinner({
               color: "#ffb885",
-              radius: 30,
-              width: 15,
-              length: 20
+              radius: 10,
+              width: 5,
+              length: 10,
+              top: '92%',
+              left: '98%'
           }).spin();
-          $("#loader").removeClass().append(spinner.el);
+          $("#map").append(spinner.el);
         };
 
 
         //Funcion que finaliza el Spinner (Loading)
         var finishedLoading = function() {
-          // first, toggle the class 'done', which makes the loading screen
-          // fade out
-          var loader = $("#loader");
-          loader.addClass('done');
-          setTimeout(function () {
-              // then, after a half-second, add the class 'hide', which hides
-              // it completely and ensures that the user can interact with the
-              // map again.
-              loader.addClass('hide');
-              loader.empty();
-          }, 200);
+          $(".spinner").remove();
         };
        
         //Configuracion del Gmaps listener
