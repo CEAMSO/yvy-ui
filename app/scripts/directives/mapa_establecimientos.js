@@ -21,8 +21,15 @@ angular.module('yvyUiApp')
               '<a class="btn btn-tag btn-tag-slide tag" id="left-panel" href="#left-panel-link">¿Desea Filtrar?</a>'+
         '</div>',
       link: function postLink(scope, element, attrs) {
+        
+        function onClose(){
+          $('#filtroCodigoEstablecimiento').select2("close");
+          $('#filtroDepartamento').select2("close");
+          $('#filtroDistrito').select2("close");
+          $('#filtroBarrioLocalidad').select2("close");
+        }
 
-        $('#left-panel').panelslider({side: 'left', duration: 300, clickClose: false, container: $('[ng-view]') });        
+        $('#left-panel').panelslider({side: 'left', duration: 300, clickClose: false, container: $('[ng-view]'), onClose: onClose });        
         
         /* El watch nos permitira filtrar los establecimientos (y por consiguiente, los respectivos Markers) */
         scope.$watch('filtro', function(filtro){
