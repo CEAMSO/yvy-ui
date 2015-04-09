@@ -12,26 +12,27 @@ angular.module('yvyUiApp')
       replace: false,
       scope: {
         data:"=",
-        filtro:"="
+        filtro:"=",
+        detalle:"="
       },
       template:
         '<div id="map-container"><div id="map">'+
               '<a class="btn btn-tag btn-tag-slide tag" id="left-panel" href="#left-panel-link">¿Desea Filtrar?</a>'+
-        '</div></div>'+
-        '<div id="mapa-establecimiento-popup"></div>',
+        '</div>',
       link: function postLink(scope, element, attrs) {
+
+        var invalidateSize = function(){ map.invalidateSize(); };
+        var target;
+
+        $('#map').data('right-sidebar-visible', false);
 
         $('#left-panel').panelslider({
                                   side: 'left',
                                   duration: 300,
                                   clickClose: false,
                                   container: $('[ng-view]'),
-                                  onOpen: function(){
-                                    map.invalidateSize();
-                                  },
-                                  onClose: function(){
-                                    map.invalidateSize();
-                                  }
+                                  onOpen: invalidateSize,
+                                  onClose: invalidateSize
                                 });        
         
         /* El watch nos permitira filtrar los establecimientos (y por consiguiente, los respectivos Markers) */
@@ -44,6 +45,22 @@ angular.module('yvyUiApp')
           map = draw_map(establecimientos_visibles); //dibujamos el mapa con los establecimientos filtrados           
 
         }, true);
+
+        scope.$on('detail-open', function(){
+          $('#map').css('width', 'calc(100% - 700px)');
+          $('#map').css('left', '350px');
+          invalidateSize(true);
+          //map.panTo(target.layer.getLatLng());
+        });
+
+        scope.$on('detail-close', function(){
+          $('#map').css('width', '100%');
+          $('#map').css('left', '0px');
+          invalidateSize(true);
+          invalidateSize(true);
+          invalidateSize(true);
+          invalidateSize(true);
+        });
 
         /* Funcion que reduce la lista de establecimientos acorde al filtro seleccionado */
         var filtrar_estableciminentos = function(establecimientos, filtro){
@@ -108,8 +125,6 @@ angular.module('yvyUiApp')
           MECONF.infoBox.addTo(map);
           L.control.layers(baseMaps).addTo(map);
 
-          crearPopup();
-
           return map;
         };
 
@@ -130,65 +145,14 @@ angular.module('yvyUiApp')
         }
 
         /* Funcion que carga el resumen del Popup */
-        function draw_popup(target){
-
+        function draw_popup(t){
+          target = t;
           //map.panTo(target.layer.getLatLng()); //funcion que centra el mapa sobre el marker
 
-          $("#popupTable tr").remove();
-
-          var marker = target.layer.feature.properties;
-          var row = '';
-
-          $.each(marker, function(attr, valor){
-            if(attr=='barrioLocalidad')
-              row = '<tr><td class="attr-title">Barrio/Localidad</td><td>'+valor+'</td></tr>';
-            else if(attr=='codigoEstablecimiento')
-              row = '<tr><td class="attr-title">Codigo Establecimiento</td><td>'+valor+'</td></tr>';
-            else
-              row = '<tr><td class="attr-title">'+_.capitalize(attr)+'</td><td>'+valor+'</td></tr>';
-            $('#popupTable > tbody:last').append(row);
+          scope.$apply(function(){
+            scope.detalle = target.layer.feature.properties;
           });
 
-          $('#right-panel').click();
-
-        }
-
-        /* Funcion que crea el Popup */
-        function crearPopup(){
-          var definicion = 
-            '<div id="right-panel-link" class="right-panel" role="navigation">'+
-              '<h3><span class="label label-info">Detalles del Establecimiento</span></h3><br/>'+
-              '<table id="popupTable" class="table table-striped table-bordered">'+
-              '<tbody>'+
-              '</tbody>'+
-              '</table>'+
-              '<br/>'+
-              '<a class="btn btn-tag tag" id="right-panel" href="#right-panel-link">¿Finalizar la Consulta?</a>'+
-            '</div>';
-          angular.element("#mapa-establecimiento-popup").html(definicion);
-          
-          function onStartOpen(){
-            $('#left-panel').css('margin-left', '280px');
-          }
-
-          function onStartClose(){
-            $('#left-panel').css('margin-left', '-70px');
-          }
-          $('#right-panel').panelslider({
-                                side: 'right',
-                                duration: 300,
-                                clickClose: false,
-                                container: $('[ng-view]'),
-                                onStartOpen: onStartOpen,
-                                onStartClose: onStartClose,
-                                onOpen: function(){
-                                  //console.log('invalidate');
-                                  map.invalidateSize();
-                                },
-                                onClose: function(){
-                                  map.invalidateSize();
-                                }
-                              });
         }
 
         /* Funcion que dibuja el resumen de los establecimientos */

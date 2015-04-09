@@ -13,8 +13,11 @@ describe('Directive: mapaLeaflet', function () {
   }));
 
   it('should make hidden element visible', inject(function ($compile) {
-    element = angular.element('<mapa-leaflet></mapa-leaflet>');
-    element = $compile(element)(scope);
-    expect(element.text()).toBe('this is the mapaLeaflet directive');
+    
+    element = document.createElement('mapa-leaflet');
+    document.body.appendChild(element);
+    element = angular.element(document.getElementsByTagName('mapa-leaflet'));
+    $compile(document.getElementsByTagName('mapa-leaflet'))(scope)
+    expect(element.text()).toBe('+-Leaflet | © OpenStreetMap Contributors, CC-BY-SA, Imagery © OpenStreetMap');
   }));
 });
