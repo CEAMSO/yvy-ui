@@ -46,13 +46,12 @@
 
 /* Propiedades del panel de filtros */
 .left-panel {
-  height: 85% !important;
+  height: 95% !important;
   display: none;
   width: 240px;
   background-color: #eee;
   box-shadow: inset 0 0 0 0.325em rgba(0,0,0,0.1);
   text-align: center;
-  top: 72px !important;
   color: #000000;
   overflow: auto;
 }
@@ -72,8 +71,7 @@
   background-color: #eee;
   box-shadow: inset 0 0 0 0.325em rgba(0,0,0,0.1);
   color: #000000;
-  height: 85% !important;
-  top: 72px !important;
+  height: 95% !important;
 }
 
 .right-panel h3{

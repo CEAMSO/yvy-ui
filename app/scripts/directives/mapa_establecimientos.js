@@ -21,7 +21,7 @@ angular.module('yvyUiApp')
         '</div>',
       link: function postLink(scope, element, attrs) {
 
-        var invalidateSize = function(){ map.invalidateSize(); };
+        var invalidateSize = function(animate){ map.invalidateSize(animate); };
         var target;
 
         $('#map').data('right-sidebar-visible', false);
@@ -31,8 +31,17 @@ angular.module('yvyUiApp')
                                   duration: 300,
                                   clickClose: false,
                                   container: $('[ng-view]'),
-                                  onOpen: invalidateSize,
-                                  onClose: invalidateSize
+                                  onOpen: function(){
+                                    invalidateSize(true);
+                                  },
+                                  onClose: function(){
+                                    $('#map').css('width', '100%');
+                                    invalidateSize(true);
+                                  },
+                                  onStartClose: function(){
+                                    $('#map').css('width', 'calc(100% + 240px)');
+                                    invalidateSize(false);
+                                  }
                                 });        
         
         /* El watch nos permitira filtrar los establecimientos (y por consiguiente, los respectivos Markers) */
@@ -47,18 +56,19 @@ angular.module('yvyUiApp')
         }, true);
 
         scope.$on('detail-open', function(){
-          $('#map').css('width', 'calc(100% - 700px)');
-          $('#map').css('left', '350px');
+          $('#map').css('width', 'calc(100% - 350px)');
           invalidateSize(true);
-          //map.panTo(target.layer.getLatLng());
+          map.setZoom(16);
+          map.panTo(target.layer.getLatLng());
         });
 
         scope.$on('detail-close', function(){
+          invalidateSize(true);
+          map.setView([-23.388, -57.189], 6)
+        });
+
+        scope.$on('detail-start-close', function(){
           $('#map').css('width', '100%');
-          $('#map').css('left', '0px');
-          invalidateSize(true);
-          invalidateSize(true);
-          invalidateSize(true);
           invalidateSize(true);
         });
 

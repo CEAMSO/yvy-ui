@@ -30,23 +30,22 @@ angular.module('yvyUiApp')
               '<a class="btn btn-tag tag" id="right-panel" href="#right-panel-link">¿Finalizar la Consulta?</a>';
           angular.element("#mapa-establecimiento-popup").html(definicion);
           
-          function onStartOpen(){
-            //$('#left-panel').css('margin-left', '280px');
-          }
-
-          function onStartClose(){
-            //$('#left-panel').css('margin-left', '-70px');
-          }
-
           $('#right-panel').panelslider({
                                 side: 'right',
                                 duration: 300,
                                 clickClose: false,
                                 container: $('[ng-view]'),
+                                onStartOpen: function(){
+                                  //$('#left-panel').css('margin-left', '280px');
+                                },
                                 onOpen: function(){
                                   $rootScope.$broadcast('detail-open');
                                 },
                                 onStartClose: function(){
+                                  //$('#left-panel').css('margin-left', '-70px');
+                                  $rootScope.$broadcast('detail-start-close');
+                                },
+                                onClose: function(){
                                   $rootScope.$broadcast('detail-close');
                                 } 
                               });
