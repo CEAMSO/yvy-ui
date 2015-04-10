@@ -11,7 +11,7 @@ angular.module('yvyUiApp')
       restrict: 'E',
       replace: false,
       scope: {
-        detalle:"="
+        detalle:'='
       },
       template:
       '<div id="right-panel-link" class="right-panel" role="navigation">'+
@@ -28,7 +28,7 @@ angular.module('yvyUiApp')
               '</table>'+
               '<br/>'+
               '<a class="btn btn-tag tag" id="right-panel" href="#right-panel-link">¿Finalizar la Consulta?</a>';
-          angular.element("#mapa-establecimiento-popup").html(definicion);
+          angular.element('#mapa-establecimiento-popup').html(definicion);
           
           $('#right-panel').panelslider({
                                 side: 'right',
@@ -49,11 +49,11 @@ angular.module('yvyUiApp')
                                   $rootScope.$broadcast('detail-close');
                                 } 
                               });
-        }
+        };
       
         scope.$watch('detalle', function(detalle){
 
-          if(typeof detalle !== "undefined" && detalle !== ''){
+          if(typeof detalle !== 'undefined' && detalle !== ''){
 
             crearPopup();
           
@@ -61,12 +61,13 @@ angular.module('yvyUiApp')
             var row = '';          
 
             $.each(marker, function(attr, valor){
-              if(attr=='barrioLocalidad')
+              if(attr==='barrioLocalidad'){
                 row = '<tr><td class="attr-title">Barrio/Localidad</td><td>'+valor+'</td></tr>';
-              else if(attr=='codigoEstablecimiento')
+              }else if(attr==='codigoEstablecimiento'){
                 row = '<tr><td class="attr-title">Codigo Establecimiento</td><td>'+valor+'</td></tr>';
-              else
+              }else{
                 row = '<tr><td class="attr-title">'+_.capitalize(attr)+'</td><td>'+valor+'</td></tr>';
+              }
               $('#popupTable > tbody:last').append(row);
             });
 

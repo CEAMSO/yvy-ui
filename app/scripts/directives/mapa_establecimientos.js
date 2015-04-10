@@ -11,9 +11,9 @@ angular.module('yvyUiApp')
       restrict: 'E',
       replace: false,
       scope: {
-        data:"=",
-        filtro:"=",
-        detalle:"="
+        data:'=',
+        filtro:'=',
+        detalle:'='
       },
       template:
         '<div id="map-container"><div id="map">'+
@@ -35,6 +35,10 @@ angular.module('yvyUiApp')
                                     invalidateSize(true);
                                   },
                                   onClose: function(){
+			            $('#filtroDepartamento').select2('close');
+          			    $('#filtroDistrito').select2('close');
+          			    $('#filtroBarrioLocalidad').select2('close');
+				    $('#filtroCodigoEstablecimiento').select2('close');
                                     $('#map').css('width', '100%');
                                     invalidateSize(true);
                                   },
@@ -75,8 +79,8 @@ angular.module('yvyUiApp')
         /* Funcion que reduce la lista de establecimientos acorde al filtro seleccionado */
         var filtrar_estableciminentos = function(establecimientos, filtro){
           var e =  
-          { "type" : "FeatureCollection",
-            "features" : []
+          { 'type' : 'FeatureCollection',
+            'features' : []
           };
           $.each(establecimientos.features, function(index, value){
             if (filtro.eval(value.properties[filtro.atributo])){
@@ -95,8 +99,8 @@ angular.module('yvyUiApp')
           var mapbox = layers.MAPBOX.on('load', finishedLoading);
           var osm = layers.OPEN_STREET_MAPS.on('load', finishedLoading);
 
-          var gglHybrid = layers.GOOGLE_HYBRID.on("MapObjectInitialized", setup_gmaps);
-          var gglRoadmap = layers.GOOGLE_ROADMAP.on("MapObjectInitialized", setup_gmaps);
+          var gglHybrid = layers.GOOGLE_HYBRID.on('MapObjectInitialized', setup_gmaps);
+          var gglRoadmap = layers.GOOGLE_ROADMAP.on('MapObjectInitialized', setup_gmaps);
 
 
           var map = L.map('map', {maxZoom: 18, minZoom: 3, worldCopyJump: true, attributionControl: false})
@@ -104,10 +108,10 @@ angular.module('yvyUiApp')
                   .on('baselayerchange', startLoading);
 
           var baseMaps = {
-              "Calles OpenStreetMap": osm,
-              "Terreno": mapbox,
-              "Satélite": gglHybrid,
-              "Calles Google Maps": gglRoadmap
+              'Calles OpenStreetMap': osm,
+              'Terreno': mapbox,
+              'Satélite': gglHybrid,
+              'Calles Google Maps': gglRoadmap
           };
 
           map.addLayer(gglRoadmap);
@@ -241,7 +245,7 @@ angular.module('yvyUiApp')
               top: '92%',
               left: '98%'
           }).spin();
-          $("#map").append(spinner.el);
+          $("#loader").removeClass().append(spinner.el);
         };
 
 
@@ -264,8 +268,8 @@ angular.module('yvyUiApp')
             var mapbox = L.tileLayer(
                     'http://api.tiles.mapbox.com/v4/rparra.jmk7g7ep/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoicnBhcnJhIiwiYSI6IkEzVklSMm8ifQ.a9trB68u6h4kWVDDfVsJSg');
             var osm = L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {minZoom: 3});
-            var gglHybrid = new L.Google("HYBRID");
-            var gglRoadmap = new L.Google("ROADMAP");
+            var gglHybrid = new L.Google('HYBRID');
+            var gglRoadmap = new L.Google('ROADMAP');
             return {
                 MAPBOX: mapbox,
                 OPEN_STREET_MAPS: osm,

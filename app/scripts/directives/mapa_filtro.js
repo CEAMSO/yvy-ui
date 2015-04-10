@@ -11,9 +11,9 @@ angular.module('yvyUiApp')
       restrict: 'E',
       replace: false,
       scope: {
-        data:"=",
-        filtro:"=",
-        local:"="
+        data:'=',
+        filtro:'=',
+        local:'='
       },
       template:
       '<div id="left-panel-link" class="left-panel" role="navigation">'+
@@ -53,7 +53,7 @@ angular.module('yvyUiApp')
             $.each(e.properties, function(attr, val){
               if(_.has(filtrosSelect, attr)){
                 result = _.includes(filtrosSelect[attr], val); //Verifica si el campo ya fue cargado anteriormente. True -> Si, False -> No.
-                if (result===false) filtrosSelect[attr].push(val);
+                if (result===false){ filtrosSelect[attr].push(val); } 
               }
             });
           });
