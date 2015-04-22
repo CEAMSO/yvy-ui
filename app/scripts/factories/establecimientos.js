@@ -8,10 +8,62 @@
  * Controller of the yvyUiApp
  */
 angular.module('yvyUiApp')
-  .factory('establecimientosFactory', function() {
+  .factory('mapaEstablecimientoFactory', function($http) {
     return {
-    	getEstablecimientos: function(){
-    		var e =  
+
+		getDatosCluster: function(parametro){
+
+			var req = {
+				method: 'GET',
+				dataType: "json",
+			    url: 'http://localhost:3000/app/mapa_establecimientos/datos',
+			    params: parametro,
+			    headers: {
+			        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+			    }
+			};
+
+			$http(req).
+				success(function(data, status, headers, config) {
+					return data;
+			  	}).
+			 	error(function(data, status, headers, config) {
+			 		console.log('error');
+			 	});
+
+			return $http(req);
+		},
+
+		getDatosEstablecimientos: function(parametro){
+
+			var req = {
+				method: 'GET',
+				dataType: "json",
+			    url: 'http://localhost:3000/app/mapa_establecimientos/datos',
+			    params: parametro,
+			    headers: {
+			        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+			    }
+			};
+
+			$http(req).
+				success(function(data, status, headers, config) {
+					return data;
+			  	}).
+			 	error(function(data, status, headers, config) {
+			 		console.log('error');
+			 	});
+
+			return $http(req);
+		}
+
+	}; //return
+});
+
+
+/*
+
+var e =  
     		{ 'type' : 'FeatureCollection',
       		'features' : 
       		[
@@ -178,6 +230,34 @@ angular.module('yvyUiApp')
         	]
 			};
 			return e;
-		}
-	}; //return
+
+*/
+
+/* *************************************************************************************************** */
+
+/* 
+
+var tipo = {
+	tipo:'1' //establecimientos
+};
+
+$.ajax({
+	url : 'http://localhost:3000/app/mapa_establecimientos/datos',
+	type: "POST",
+	data : tipo,
+	dataType: 'json',
+	//async:false,
+	//headers: {'X-Requested-With': 'XMLHttpRequest'},
+	success:function(data, textStatus, jqXHR) {
+		console.log('success');
+		//$scope.data = JSON.parse(data[0].e_geojson);
+		$scope.$apply(function() {
+		    $scope.data='FUNCIONA';
+		});
+	},
+	error: function(jqXHR, textStatus, errorThrown) {
+		console.log(textStatus);
+	}
 });
+
+*/

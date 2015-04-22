@@ -55,15 +55,15 @@ angular.module('yvyUiApp')
             crearPopup();
           
             var marker = detalle;
-            var row = '';          
+            var row = '';
+            var atributo = '';
 
             $.each(marker, function(attr, valor){
-              if(attr==='barrioLocalidad'){
+              if(attr==='nombre_barrio_localidad'){
                 row = '<tr><td class="attr-title">Barrio/Localidad</td><td>'+valor+'</td></tr>';
-              }else if(attr==='codigoEstablecimiento'){
-                row = '<tr><td class="attr-title">Codigo Establecimiento</td><td>'+valor+'</td></tr>';
               }else{
-                row = '<tr><td class="attr-title">'+_.capitalize(attr)+'</td><td>'+valor+'</td></tr>';
+                atributo = _.startCase(attr.replace(/nombre/g, ''));
+                row = '<tr><td class="attr-title">'+atributo+'</td><td>'+valor+'</td></tr>';
               }
               $('#popupTable > tbody:last').append(row);
             });
