@@ -35,10 +35,10 @@ angular.module('yvyUiApp')
                                     invalidateSize(true);
                                   },
                                   onClose: function(){
-			            $('#filtroDepartamento').select2('close');
-          			    $('#filtroDistrito').select2('close');
-          			    $('#filtroBarrioLocalidad').select2('close');
-				    $('#filtroCodigoEstablecimiento').select2('close');
+                			              $('#filtroDepartamento').select2('close');
+                          			    $('#filtroDistrito').select2('close');
+                          			    $('#filtroBarrioLocalidad').select2('close');
+                				            $('#filtroCodigoEstablecimiento').select2('close');
                                     $('#map').css('width', '100%');
                                     invalidateSize(true);
                                   },
@@ -62,13 +62,18 @@ angular.module('yvyUiApp')
         scope.$on('detail-open', function(){
           $('#map').css('width', 'calc(100% - 350px)');
           invalidateSize(true);
-          map.setZoom(16);
+          //map.setZoom(16);
+          //map.panTo(target.layer.getLatLng());
+        });
+
+        scope.$on('detail-start-open', function(){
+          map.setZoom(16, {animate: true});
           map.panTo(target.layer.getLatLng());
         });
 
         scope.$on('detail-close', function(){
           invalidateSize(true);
-          map.setView([-23.388, -57.189], 6)
+          map.setView([-23.388, -57.189], 6, {animate: true});
         });
 
         scope.$on('detail-start-close', function(){

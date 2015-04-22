@@ -36,13 +36,14 @@ angular.module('yvyUiApp')
                                 clickClose: false,
                                 container: $('[ng-view]'),
                                 onStartOpen: function(){
-                                  //$('#left-panel').css('margin-left', '280px');
+                                  $rootScope.$broadcast('detail-start-open');
+                                  $('#left-panel').css('margin-left', '280px');
                                 },
                                 onOpen: function(){
                                   $rootScope.$broadcast('detail-open');
                                 },
                                 onStartClose: function(){
-                                  //$('#left-panel').css('margin-left', '-70px');
+                                  $('#left-panel').css('margin-left', '-70px');
                                   $rootScope.$broadcast('detail-start-close');
                                 },
                                 onClose: function(){
