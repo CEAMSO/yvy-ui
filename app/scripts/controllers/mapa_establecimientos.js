@@ -20,35 +20,25 @@ angular.module('yvyUiApp')
     parametro = { tipo_consulta:'01' }; //Cluster por departamento
 
     mapaEstablecimientoFactory.getDatosCluster(parametro).then(function(data){
-      var e = JSON.parse(data.data[0].e_geojson);
-      localStorage['cluster_departamento'] = JSON.stringify(e);
-      //console.log('departamento');
-      //console.log(e);
+      localStorage['cluster_departamento'] = JSON.stringify(data.data);
     }); 
 
     parametro = { tipo_consulta:'02' }; //Cluster por distrito
 
     mapaEstablecimientoFactory.getDatosCluster(parametro).then(function(data){
-      var e = JSON.parse(data.data[0].e_geojson);
-      localStorage['cluster_distrito'] = JSON.stringify(e);
-      //console.log('distrito');
-      //console.log(e);
+      localStorage['cluster_distrito'] = JSON.stringify(data.data);
     }); 
 
     parametro = { tipo_consulta:'03' }; //Cluster por barrio/localidad
 
     mapaEstablecimientoFactory.getDatosCluster(parametro).then(function(data){
-      var e = JSON.parse(data.data[0].e_geojson);
-      localStorage['cluster_barrio_localidad'] = JSON.stringify(e);
-      //console.log('barrio_localidad');
-      //console.log(e);
+      localStorage['cluster_barrio_localidad'] = JSON.stringify(data.data);
     });
 
     parametro = { tipo_consulta:'11' }; //Todos los establecimentos con periodo 2014
 
     mapaEstablecimientoFactory.getDatosEstablecimientos(parametro).then(function(data){
-      var e = JSON.parse(data.data[0].e_geojson);
-      $scope.data = e;
+      $scope.data = data.data;
     }); 
 
     $scope.getInstituciones = function(establecimientos){
@@ -60,10 +50,11 @@ angular.module('yvyUiApp')
           //console.log(data.data); //lista de instituciones
           return data.data; //lista de instituciones
           
-          /* Group By por departamento
+          /* Group By por departamento*/
+          /*
           var i = data.data;
           var p = _.groupBy(i, 'nombre_departamento');
-          console.log(p1);
+          console.log(p);
           */
         });
 
