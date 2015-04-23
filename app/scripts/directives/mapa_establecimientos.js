@@ -305,6 +305,14 @@ angular.module('yvyUiApp')
           google.maps.event.addListenerOnce(this._google, 'tilesloaded', finishedLoading);
         };
 
+        //Funcion que cierra todos los Selects del filtro
+        function onClose(){
+          $('#filtro_codigo_establecimiento').select2('close');
+          $('#filtro_nombre_departamento').select2('close');
+          $('#filtro_nombre_distrito').select2('close');
+          $('#filtro_nombre_barrio_localidad').select2('close');
+        }
+
         /******************************** INICIO **************************************/        
         
         //Detalles de la configuracion del mapa
@@ -341,13 +349,6 @@ angular.module('yvyUiApp')
 
             establecimientos = data;
             map = init_map(establecimientos);
-
-            function onClose(){
-              $('#filtro_codigo_establecimiento').select2('close');
-              $('#filtro_nombre_departamento').select2('close');
-              $('#filtro_nombre_distrito').select2('close');
-              $('#filtro_nombre_barrio_localidad').select2('close');
-            }
 
             $('#left-panel').panelslider({side: 'left', duration: 300, clickClose: false, container: $('[ng-view]'), onClose: onClose });
 
