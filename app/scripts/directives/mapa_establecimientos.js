@@ -50,12 +50,15 @@ angular.module('yvyUiApp')
         
         /* El watch nos permitira filtrar los establecimientos (y por consiguiente, los respectivos Markers) */
         scope.$watch('filtro', function(filtro){
-          var establecimientos_visibles = establecimientos;
-          $.each(filtro, function(index, value){
-            establecimientos_visibles = filtrar_estableciminentos(establecimientos_visibles, value);
-          });
-
-          map = draw_map(establecimientos_visibles); //dibujamos el mapa con los establecimientos filtrados           
+          
+          if(filtro){
+            var establecimientos_visibles = establecimientos;
+            $.each(filtro, function(index, value){
+              establecimientos_visibles = filtrar_estableciminentos(establecimientos_visibles, value);
+            });
+            MECONF.establecimientosVisibles = establecimientos_visibles;
+            map = draw_map('filtro'); //dibujamos el mapa con los establecimientos filtrados
+          }
 
         }, true);
 
@@ -139,23 +142,105 @@ angular.module('yvyUiApp')
           });
 
           MECONF.geoJsonLayer = geoJson; //Sobre esta variable se aplican los filtros
+          MECONF.geoJsonLayer.on('click', draw_popup);
 
           MECONF.infoBox = draw_info_box();
           MECONF.infoBox.addTo(map);
           L.control.layers(baseMaps).addTo(map);
 
+          map.on('zoomend', function(e) {
+            draw_map('zoom'); //dibujamos el mapa de acuerdo al zoom
+          });
+
           return map;
         };
 
-        /* Funcion que dibuja el mapa de acuerdo a los establecimientos filtrados */
-        var draw_map = function(establecimientos){
-          MECONF.geoJsonLayer.setGeoJSON(establecimientos);
+        /* Funcion que dibuja el mapa de acuerdo a los establecimientos filtrados y al zoom actual */
+        var draw_map = function(accionInvocante){
+          
+          var levelZoom = map.getZoom();
+          var e = '';
+
+          if (levelZoom < MECONF.nivelesZoom['departamento']) { //cluster por departamento (por defecto)
+            e = filtrar_cluster('departamento');
+          } else if (levelZoom >= MECONF.nivelesZoom['departamento'] && levelZoom < MECONF.nivelesZoom['distrito']) { //cluster por distrito
+            e = filtrar_cluster('distrito');
+          } else if (levelZoom >= MECONF.nivelesZoom['distrito'] && levelZoom < MECONF.nivelesZoom['barrio_localidad']) { //cluster por barrio/localidad
+            e = filtrar_cluster('barrio_localidad');
+          }else{
+            e = MECONF.establecimientosVisibles;
+          }
+
+          /*if( levelZoom < MECONF.nivelesZoom['barrio_localidad'] && accionInvocante=='filtro' ){
+            var codigos_establecimientos = _.pluck(MECONF.establecimientosVisibles.features, 'properties');
+            codigos_establecimientos =  _.pluck(codigos_establecimientos, 'codigo_establecimiento');
+            var i = scope.$parent.getInstituciones(codigos_establecimientos);
+          }*/
+          console.log('A MOSTRAR:');
+           console.log(e);
+          //BORRAR BORRAR BORRAR BORRAR BORRAR
+          //e = MECONF.establecimientosVisibles;//DESPUES TENGO QUE BORRAR
+          //BORRAR BORRAR BORRAR BORRAR BORRAR
+
+          MECONF.geoJsonLayer.setGeoJSON(e);
           MECONF.geoJsonLayer.addTo(map);
           MECONF.infoBox.update();
-
-          MECONF.geoJsonLayer.on('click', draw_popup);
           
           return map;
+        };
+
+        /* Funcion que filtra el cluster a mostrar, ya sea por Departamentos/Distritos/BarrioLocalidad */
+        var filtrar_cluster = function(tipo){
+
+          var tipo_cluster = 'cluster_'+tipo;
+
+          var cluster = JSON.parse(localStorage[tipo_cluster]);
+
+          var e =  
+          { 'type' : 'FeatureCollection',
+            'features' : []
+          };
+
+          if (tipo=='departamento'){
+
+            $.each(cluster.features, function(attr_clr, clr){
+              $.each(MECONF.establecimientosVisibles.features, function(attr, evs){
+                if ( evs.properties['nombre_departamento']==clr.properties['nombre_departamento'] ){ 
+                  e.features.push(clr);
+                  return false;
+                }
+              });
+            });
+
+          }else if (tipo=='distrito'){
+
+            $.each(cluster.features, function(attr_clr, clr){
+              $.each(MECONF.establecimientosVisibles.features, function(attr, evs){
+                if ( evs.properties['nombre_departamento']==clr.properties['nombre_departamento'] && 
+                  evs.properties['nombre_distrito']==clr.properties['nombre_distrito'] ){ 
+                  e.features.push(clr);
+                  return false;
+                }
+              });
+            });
+
+          }else if (tipo=='barrio_localidad'){
+
+            $.each(cluster.features, function(attr_clr, clr){
+              $.each(MECONF.establecimientosVisibles.features, function(attr, evs){
+                if ( evs.properties['nombre_departamento']==clr.properties['nombre_departamento'] && 
+                  evs.properties['nombre_distrito']==clr.properties['nombre_distrito'] && 
+                  evs.properties['nombre_barrio_localidad']==clr.properties['nombre_barrio_localidad'] ){ 
+                  e.features.push(clr);
+                  return false;
+                }
+              });
+            });
+
+          }
+
+          return e;
+
         };
         
         /* Funcion que calcula la distancia entre dos puntos */
@@ -169,7 +254,13 @@ angular.module('yvyUiApp')
           //map.panTo(target.layer.getLatLng()); //funcion que centra el mapa sobre el marker
 
           scope.$apply(function(){
-            scope.detalle = target.layer.feature.properties;
+            var levelZoom = map.getZoom();
+            if(levelZoom >= MECONF.nivelesZoom['barrio_localidad']){ //Verificamos el zoom para mostrar el popup
+              scope.detalle = target.layer.feature.properties;
+              MECONF.infoBox.update(target.layer.feature);
+            }else{
+              map.setView(target.layer.getLatLng(), levelZoom+1); //funcion que centra el mapa sobre el marker
+            }
           });
 
         }
@@ -188,11 +279,14 @@ angular.module('yvyUiApp')
           info.update = function (f) {
               var msg = this._div.innerHTML;
               if (f instanceof Array) {
+                  //Cuando se hace hover sobre un Marker de Cluster
                   msg = get_summary_message(f);
               } else if (f) {
-                  msg = sprintf('Mostrando un asentamiento del proyecto %s con %s viviendas',
-                          f.properties['Proyecto'], f.properties['Cantidad de Viviendas']);
+                  //Cuando es hace el popup de un Marker
+                  msg = sprintf('Mostrando un establecimiento del departamento %s',
+                          f.properties['nombre_departamento']);
               } else {
+                  //Resumen General
                   var features = _(MECONF.geoJsonLayer.getLayers()).map(function (l) {
                       return l.feature;
                   });
@@ -208,7 +302,7 @@ angular.module('yvyUiApp')
         function get_summary_message(features) {
           var cantidadDepartamentos = _(features).chain()
               .map(function (f) {
-                  return f.properties['departamento'];
+                  return f.properties['nombre_departamento'];
               })
               .unique().value().length;
 
@@ -221,23 +315,11 @@ angular.module('yvyUiApp')
               return f.properties['codigo_establecimiento'];
             })
             .unique().value().length;
-          
-          return sprintf('6 establecimientos en %s departamentos', cantidadEstablecimientos, cantidadDepartamentos);
 
-          /*var cantidadProyectos = features.length;
-          var cantidadViviendas = _(features).chain().filter(function (f) {
-              return !isNaN(f.properties['Cantidad de Viviendas'])
-          }).value()
-                  .reduce(function (cont, f) {
-                      return cont + parseInt(f.properties['Cantidad de Viviendas'])
-                  }, 0);
-
+          var establecimientosLabel = cantidadEstablecimientos > 1 ? 'establecimientos' : 'establecimiento';
           var departamentoLabel = cantidadDepartamentos > 1 ? 'departamentos' : 'departamento';
-          var equivalenteLabel = cantidadProyectos > 1 ? 'equivalentes' : 'equivalente';
-          var proyectoLabel = cantidadProyectos > 1 ? 'obras' : 'obra';
-          var viviendaLabel = cantidadViviendas > 1 ? 'viviendas' : 'vivienda';
-          return sprintf('%s %s de %s %s, %s a %s %s.',
-                  cantidadProyectos, proyectoLabel, cantidadDepartamentos, departamentoLabel, equivalenteLabel, cantidadViviendas, viviendaLabel);*/
+          return sprintf('%s %s de %s %s',
+                  cantidadEstablecimientos, establecimientosLabel, cantidadDepartamentos, departamentoLabel);
         }
 
         //Funcion que inicializa el Spinner (Loading)
@@ -288,8 +370,30 @@ angular.module('yvyUiApp')
           '2012': 'images/marker.png'
         };
 
-        var establecimientos = scope.data;
-        var map = init_map(establecimientos);
+        MECONF.nivelesZoom = {departamento:7, distrito:10, barrio_localidad:13}; //niveles de zoom para departamento/distrito/barrioLocalidad
+
+        var establecimientos = '';
+        var map = '';
+
+        var unwatch =  scope.$watch('data', function(data) {
+          if(data){
+            
+            unwatch(); //Remove the watch
+
+            establecimientos = data;
+            map = init_map(establecimientos);
+
+            function onClose(){
+              $('#filtro_codigo_establecimiento').select2('close');
+              $('#filtro_nombre_departamento').select2('close');
+              $('#filtro_nombre_distrito').select2('close');
+              $('#filtro_nombre_barrio_localidad').select2('close');
+            }
+
+            $('#left-panel').panelslider({side: 'left', duration: 300, clickClose: false, container: $('[ng-view]'), onClose: onClose });
+
+          }
+        });
 
       }//link: function postLink(scope, element, attrs) {
     };

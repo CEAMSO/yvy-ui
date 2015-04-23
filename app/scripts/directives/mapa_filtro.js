@@ -19,34 +19,34 @@ angular.module('yvyUiApp')
       '<div id="left-panel-link" class="left-panel" role="navigation">'+
         '<div id="mapa-filtro">'+
           '<h4>Periodo</h4>'+
-          '<div id="filtroPeriodo" class="btn-group-vertical" data-toggle="buttons"></div>'+
+          '<div id="filtro_periodo" class="btn-group-vertical" data-toggle="buttons"></div>'+
           '<h4>Codigo Establecimiento</h4>'+
-          '<select multiple id="filtroCodigoEstablecimiento" name="filtroCodigoEstablecimiento" class="filtro-ancho" ng-model="local.codigoEstablecimiento" ng-change="updateFiltro(local)"></select><br/>'+
+          '<select multiple id="filtro_codigo_establecimiento" name="filtro_codigo_establecimiento" class="filtro-ancho" ng-model="local.codigo_establecimiento" ng-change="updateFiltro(local)"></select><br/>'+
           '<h4>Departamento</h4>'+
-          '<select multiple id="filtroDepartamento" name="filtroDepartamento" class="filtro-ancho" ng-model="local.departamento" ng-change="updateFiltro(local)"></select><br/>'+
+          '<select multiple id="filtro_nombre_departamento" name="filtro_nombre_departamento" class="filtro-ancho" ng-model="local.nombre_departamento" ng-change="updateFiltro(local)"></select><br/>'+
           '<h4>Distrito</h4>'+
-          '<select multiple id="filtroDistrito" name="filtroDistrito" class="filtro-ancho" ng-model="local.distrito" ng-change="updateFiltro(local)"></select><br/>'+
+          '<select multiple id="filtro_nombre_distrito" name="filtro_nombre_distrito" class="filtro-ancho" ng-model="local.nombre_distrito" ng-change="updateFiltro(local)"></select><br/>'+
           '<h4>Barrio/Localidad</h4>'+
-          '<select multiple id="filtroBarrioLocalidad" name="filtroBarrioLocalidad" class="filtro-ancho" ng-model="local.barrioLocalidad" ng-change="updateFiltro(local)"></select><br/>'+
+          '<select multiple id="filtro_nombre_barrio_localidad" name="filtro_nombre_barrio_localidad" class="filtro-ancho" ng-model="local.nombre_barrio_localidad" ng-change="updateFiltro(local)"></select><br/>'+
           '<h4>Zona</h4>'+
-          '<div id="filtroZona" class="btn-group-vertical" data-toggle="buttons"></div>'+
+          '<div id="filtro_nombre_zona" class="btn-group-vertical" data-toggle="buttons"></div>'+
           '<h4>Proyecto 111</h4>'+
-          '<div id="filtroProyecto111" class="btn-group-vertical" data-toggle="buttons"></div>'+
+          '<div id="filtro_proyecto111" class="btn-group-vertical" data-toggle="buttons"></div>'+
           '<h4>Proyecto 822</h4>'+
-          '<div id="filtroProyecto822" class="btn-group-vertical" data-toggle="buttons"></div>'+
+          '<div id="filtro_proyecto822" class="btn-group-vertical" data-toggle="buttons"></div>'+
         '</div>'+
         '<br/>'+
       '</div>',
       link: function postLink(scope, element, attrs) {
         //Botones, el primer parametro es el ID del filtro, el segundo parametro representa la lista de valores posibles
-        var filtrosBotones = {periodo: ['2014', '2012'], zona:['RURAL', 'URBANA'], proyecto111:['SI', 'NO'], proyecto822:['SI', 'NO']};
+        var filtrosBotones = {periodo: ['2014', '2012'], nombre_zona:['RURAL', 'URBANA'], proyecto111:['SI', 'NO'], proyecto822:['SI', 'NO']};
 
         //Definicion de un array, donde cada indice representa el filtro (Ej: departamento, distrito), donde cada indice esta asociado a un array con los valores posibles para el mismo
-        var filtrosSelect = {codigoEstablecimiento:[], departamento:[], distrito:[], barrioLocalidad:[]};
+        var filtrosSelect = {codigo_establecimiento:[] , nombre_departamento:[], nombre_distrito:[], nombre_barrio_localidad:[]};
 
         /* Funcion que inicializa los filtros de manera dinamica */
         var cargar = function(establecimientos){
-
+          
           //Carga de los distintos valores para cada filtro
           var result = true;
           $.each(establecimientos.features, function(index, e){
@@ -68,24 +68,24 @@ angular.module('yvyUiApp')
           $.each(filtrosSelect, function(attr, array){ //ciclo por cada filtro existe
             firstTime=true;
             $.each(array, function(index, a){
-              $('#'+_.camelCase('filtro '+attr)).append('<option value="'+a+'">'+a+'</option>');
+              $('#filtro_'+attr).append('<option value="'+a+'">'+a+'</option>');
             });
           });
 
           //Convertimos a Select2 cada filtro correspondiente a una lista desplegable
           $.each(filtrosSelect, function(attr, array){
-            $('#'+_.camelCase('filtro '+attr)).select2();
+            $('#filtro_'+attr).select2();
           });
           
           //Cargamos los valores de filtros para los botones
           var boton = '';
           $.each(filtrosBotones, function(attr, array){
-            boton = '#'+_.camelCase('filtro '+attr);
+            boton = '#filtro_'+attr;
             setup_checkbox_values(boton, array);
           });
 
           // Convertimos el grupo de checboxes de periodo en algo similar a un grupo de radio buttons
-          $('#filtroPeriodo label.btn').click(function(){
+          $('#filtro_periodo label.btn').click(function(){
             var self = $(this);
             $(this).children('input:checkbox').each(function(){
               if(!this.checked){
@@ -104,7 +104,7 @@ angular.module('yvyUiApp')
           });
 
           //Dejamos seleccionado 2014 como valor por defecto del PERIODO
-          _.each($('#filtroPeriodo label'), function(l){
+          _.each($('#filtro_periodo label'), function(l){
             if(l.innerText==='2014'){
               l.classList.add('active');
               l.children[0].checked=true;
@@ -115,7 +115,7 @@ angular.module('yvyUiApp')
           scope.updateFiltro(scope.local);
 
           //Definimos un onChange sobre cada boton, de modo a que los cambios hechos sobre el filtro se reflejen en el mapa
-          $('#filtroZona label input, #filtroProyecto111 label input, #filtroProyecto822 label input').change(function(){
+          $('#filtro_nombre_zona label input, #filtro_proyecto111 label input, #filtro_proyecto822 label input').change(function(){
             scope.$apply(function () {
               scope.updateFiltro(scope.local);
             });
@@ -173,7 +173,7 @@ angular.module('yvyUiApp')
           //Filtros con Botones
           var content = [];
           $.each(filtrosBotones, function(attr, value){
-            content = get_selected_checkbox( '#'+_.camelCase('filtro '+attr)+' label' );
+            content = get_selected_checkbox( '#filtro_'+attr+' label' );
             if (content.length > 0){
               f = {
                 atributo:attr,
@@ -191,8 +191,16 @@ angular.module('yvyUiApp')
         };
 
         /*********************** INICIO ***********************************/
-        var establecimientos = scope.data;
-        cargar(establecimientos);
+
+        var establecimientos = '';
+
+        var unwatch =  scope.$watch('data', function(data) {
+          if(data){
+            unwatch(); //Remove the watch
+            establecimientos = data;
+            cargar(establecimientos);
+          }
+        });
 
       }
     };
