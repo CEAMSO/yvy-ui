@@ -17,7 +17,7 @@ angular.module('yvyUiApp')
 
     var parametro = {};
 
-    parametro = { tipo:'01' }; //Cluster por departamento
+    parametro = { tipo_consulta:'01' }; //Cluster por departamento
 
     mapaEstablecimientoFactory.getDatosCluster(parametro).then(function(data){
       var e = JSON.parse(data.data[0].e_geojson);
@@ -26,7 +26,7 @@ angular.module('yvyUiApp')
       //console.log(e);
     }); 
 
-    parametro = { tipo:'02' }; //Cluster por distrito
+    parametro = { tipo_consulta:'02' }; //Cluster por distrito
 
     mapaEstablecimientoFactory.getDatosCluster(parametro).then(function(data){
       var e = JSON.parse(data.data[0].e_geojson);
@@ -35,7 +35,7 @@ angular.module('yvyUiApp')
       //console.log(e);
     }); 
 
-    parametro = { tipo:'03' }; //Cluster por barrio/localidad
+    parametro = { tipo_consulta:'03' }; //Cluster por barrio/localidad
 
     mapaEstablecimientoFactory.getDatosCluster(parametro).then(function(data){
       var e = JSON.parse(data.data[0].e_geojson);
@@ -44,7 +44,7 @@ angular.module('yvyUiApp')
       //console.log(e);
     });
 
-    parametro = { tipo:'11' }; //Todos los establecimentos con periodo 2014
+    parametro = { tipo_consulta:'11' }; //Todos los establecimentos con periodo 2014
 
     mapaEstablecimientoFactory.getDatosEstablecimientos(parametro).then(function(data){
       var e = JSON.parse(data.data[0].e_geojson);
@@ -54,10 +54,17 @@ angular.module('yvyUiApp')
     $scope.getInstituciones = function(establecimientos){
       if( typeof establecimientos !== "undefined" || establecimientos=='' ) {
 
-        parametro = { tipo:'12', establecimientos:JSON.stringify(establecimientos) }; //Todos los instituciones en base a los establecimientos filtrados
+        parametro = { tipo_consulta:'12', establecimientos:JSON.stringify(establecimientos) }; //Todos los instituciones en base a los establecimientos filtrados
         mapaEstablecimientoFactory.getDatosEstablecimientos(parametro).then(function(data){
-          //var e = JSON.parse(data.data[0].e_geojson);
-          console.log(data);
+          
+          //console.log(data.data); //lista de instituciones
+          return data.data; //lista de instituciones
+          
+          /* Group By por departamento
+          var i = data.data;
+          var p = _.groupBy(i, 'nombre_departamento');
+          console.log(p1);
+          */
         });
 
       }else{

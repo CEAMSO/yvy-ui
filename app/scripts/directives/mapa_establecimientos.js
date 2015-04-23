@@ -123,13 +123,14 @@ angular.module('yvyUiApp')
             e = MECONF.establecimientosVisibles;
           }
 
-          /*if( levelZoom < MECONF.nivelesZoom['barrio_localidad'] && accionInvocante=='filtro' ){
+          if( levelZoom < MECONF.nivelesZoom['barrio_localidad'] && accionInvocante=='filtro' ){
             var codigos_establecimientos = _.pluck(MECONF.establecimientosVisibles.features, 'properties');
             codigos_establecimientos =  _.pluck(codigos_establecimientos, 'codigo_establecimiento');
-            var i = scope.$parent.getInstituciones(codigos_establecimientos);
-          }*/
-          console.log('A MOSTRAR:');
-           console.log(e);
+            scope.$parent.getInstituciones(codigos_establecimientos); //El controller se encarga de cargar la Lista de Detalles
+          }
+          
+          //console.log('A MOSTRAR:');
+          //console.log(e);
           //BORRAR BORRAR BORRAR BORRAR BORRAR
           //e = MECONF.establecimientosVisibles;//DESPUES TENGO QUE BORRAR
           //BORRAR BORRAR BORRAR BORRAR BORRAR
