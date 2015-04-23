@@ -13,7 +13,7 @@ angular.module('yvyUiApp')
       scope: {
         detalle:'='
       },
-      templateUrl: 'views/template_detalle.html',
+      templateUrl: 'views/templates/template_detalle.html',
       link: function postLink(scope, element, attrs) {
 
         var crearPopup = function (){
@@ -28,11 +28,11 @@ angular.module('yvyUiApp')
           angular.element('#mapa-establecimiento-popup').html(definicion);
           
           function onOpen(){
-            $('#left-panel').css('margin-left', '280px');
+            $('#left-panel').css('margin-left', '305px');
           }
 
           function onClose(){
-            $('#left-panel').css('margin-left', '-70px');
+            $('#left-panel').css('margin-left', '-45px');
           }
           $('#right-panel').panelslider({
                                 side: 'right',

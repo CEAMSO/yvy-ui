@@ -94,8 +94,7 @@
   -o-transition: .5s;
 }
 .btn-tag-slide {
-  /*margin-left: -67px;*/
-  margin-left: -70px;
+  margin-left: -45px;
   position: absolute;
   margin-top: 12.5em;
   z-index: 2;

@@ -15,7 +15,7 @@ angular.module('yvyUiApp')
         filtro:'=',
         local:'='
       },
-      templateUrl: 'views/template_filtro.html',
+      templateUrl: 'views/templates/template_filtro.html',
       link: function postLink(scope, element, attrs) {
         //Botones, el primer parametro es el ID del filtro, el segundo parametro representa la lista de valores posibles
         var filtrosBotones = {periodo: ['2014', '2012'], nombre_zona:['RURAL', 'URBANA'], proyecto111:['SI', 'NO'], proyecto822:['SI', 'NO']};
