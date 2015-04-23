@@ -23,13 +23,6 @@ angular.module('yvyUiApp')
 			    }
 			};
 
-			$http(req).
-				success(function(data, status, headers, config) {
-					return data;
-			  	}).
-			 	error(function(data, status, headers, config) {
-			 		console.log('error');
-			 	});
 
 			return $http(req);
 		},
@@ -45,14 +38,6 @@ angular.module('yvyUiApp')
 			        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
 			    }
 			};
-
-			$http(req).
-				success(function(data, status, headers, config) {
-					return data;
-			  	}).
-			 	error(function(data, status, headers, config) {
-			 		console.log('error');
-			 	});
 
 			return $http(req);
 		}

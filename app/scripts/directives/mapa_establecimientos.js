@@ -15,10 +15,7 @@ angular.module('yvyUiApp')
         filtro:'=',
         detalle:'='
       },
-      template:
-        '<div id="map-container"><div id="map">'+
-              '<a class="btn btn-tag btn-tag-slide tag" id="left-panel" href="#left-panel-link">¿Desea Filtrar?</a>'+
-        '</div>',
+      templateUrl: 'views/templates/template_mapa.html',
       link: function postLink(scope, element, attrs) {
 
         var invalidateSize = function(animate){ map.invalidateSize(animate); };
@@ -171,13 +168,14 @@ angular.module('yvyUiApp')
             e = MECONF.establecimientosVisibles;
           }
 
-          /*if( levelZoom < MECONF.nivelesZoom['barrio_localidad'] && accionInvocante=='filtro' ){
+          if( levelZoom < MECONF.nivelesZoom['barrio_localidad'] && accionInvocante=='filtro' ){
             var codigos_establecimientos = _.pluck(MECONF.establecimientosVisibles.features, 'properties');
             codigos_establecimientos =  _.pluck(codigos_establecimientos, 'codigo_establecimiento');
-            var i = scope.$parent.getInstituciones(codigos_establecimientos);
-          }*/
-          console.log('A MOSTRAR:');
-           console.log(e);
+            //scope.$parent.getInstituciones(codigos_establecimientos); //El controller se encarga de cargar la Lista de Detalles
+          }
+          
+          //console.log('A MOSTRAR:');
+          //console.log(e);
           //BORRAR BORRAR BORRAR BORRAR BORRAR
           //e = MECONF.establecimientosVisibles;//DESPUES TENGO QUE BORRAR
           //BORRAR BORRAR BORRAR BORRAR BORRAR
@@ -346,6 +344,14 @@ angular.module('yvyUiApp')
           google.maps.event.addListenerOnce(this._google, 'tilesloaded', finishedLoading);
         };
 
+        //Funcion que cierra todos los Selects del filtro
+        function onClose(){
+          $('#filtro_codigo_establecimiento').select2('close');
+          $('#filtro_nombre_departamento').select2('close');
+          $('#filtro_nombre_distrito').select2('close');
+          $('#filtro_nombre_barrio_localidad').select2('close');
+        }
+
         /******************************** INICIO **************************************/        
         
         //Detalles de la configuracion del mapa
@@ -382,13 +388,6 @@ angular.module('yvyUiApp')
 
             establecimientos = data;
             map = init_map(establecimientos);
-
-            function onClose(){
-              $('#filtro_codigo_establecimiento').select2('close');
-              $('#filtro_nombre_departamento').select2('close');
-              $('#filtro_nombre_distrito').select2('close');
-              $('#filtro_nombre_barrio_localidad').select2('close');
-            }
 
             $('#left-panel').panelslider({side: 'left', duration: 300, clickClose: false, container: $('[ng-view]'), onClose: onClose });
 

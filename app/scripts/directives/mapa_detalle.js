@@ -13,10 +13,7 @@ angular.module('yvyUiApp')
       scope: {
         detalle:'='
       },
-      template:
-      '<div id="right-panel-link" class="right-panel" role="navigation">'+
-          '<div id="mapa-establecimiento-popup"></div>'+
-      '</div>',
+      templateUrl: 'views/templates/template_detalle.html',
       link: function postLink(scope, element, attrs) {
 
         var crearPopup = function (){
@@ -30,6 +27,13 @@ angular.module('yvyUiApp')
               '<a class="btn btn-tag tag" id="right-panel" href="#right-panel-link">¿Finalizar la Consulta?</a>';
           angular.element('#mapa-establecimiento-popup').html(definicion);
           
+          function onOpen(){
+            $('#left-panel').css('margin-left', '280px');
+          }
+
+          function onClose(){
+            $('#left-panel').css('margin-left', '-70px');
+          }
           $('#right-panel').panelslider({
                                 side: 'right',
                                 duration: 300,
