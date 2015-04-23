@@ -13,10 +13,7 @@ angular.module('yvyUiApp')
       scope: {
         detalle:'='
       },
-      template:
-      '<div id="right-panel-link" class="right-panel" role="navigation">'+
-          '<div id="mapa-establecimiento-popup"></div>'+
-      '</div>',
+      templateUrl: 'views/template_detalle.html',
       link: function postLink(scope, element, attrs) {
 
         var crearPopup = function (){

@@ -15,11 +15,7 @@ angular.module('yvyUiApp')
         filtro:'=',
         detalle:'='
       },
-      template:
-        '<div id="loader"></div>'+
-        '<div id="map">'+
-              '<a class="btn btn-tag btn-tag-slide tag" id="left-panel" href="#left-panel-link">¿Desea Filtrar?</a>'+
-        '</div>',
+      templateUrl: 'views/template_mapa.html',
       link: function postLink(scope, element, attrs) {
         
         /* El watch nos permitira filtrar los establecimientos (y por consiguiente, los respectivos Markers) */
