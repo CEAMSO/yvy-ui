@@ -9,38 +9,69 @@
  */
 angular.module('yvyUiApp')
   .factory('mapaEstablecimientoFactory', function($http) {
+  	var paramToKey = {
+  		'01': 'cluster_departamento',
+  		'02': 'cluster_distrito',
+  		'03': 'cluster_barrio_localidad',
+  		'11': 'establecimientos'
+  	}
+
     return {
 
-		getDatosCluster: function(parametro){
+			getDatosCluster: function(parametro){
 
-			var req = {
-				method: 'GET',
-				dataType: "json",
-			    url: 'http://localhost:3000/app/mapa_establecimientos/datos',
-			    params: parametro,
-			    headers: {
-			        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
-			    }
-			};
+				var req = {
+					method: 'GET',
+					dataType: "json",
+				    url: 'http://localhost:3000/app/mapa_establecimientos/datos',
+				    params: parametro,
+				    headers: {
+				        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+				    }
+				};
 
 
-			return $http(req);
-		},
+				return $http(req).then(function(data){
+					localStorage[paramToKey[parametro.tipo_consulta]] = JSON.stringify(data.data);
+				});
+			},
 
-		getDatosEstablecimientos: function(parametro){
+			getClusterIndex: function(key){
+				var cluster = JSON.parse(localStorage[key]);
+				var clusterIndex = {};
+				//build a cluster index
+				if(cluster){
+	        _.each(cluster.features, function(c){
+	          var key = _.deburr(c.properties['nombre_departamento']);
+	          if(c.properties['nombre_distrito']) key += _.deburr(c.properties['nombre_distrito']);
+	          if(c.properties['nombre_barrio_localidad']) key += _.deburr(c.properties['nombre_barrio_localidad']);
+	          if(c.properties['codigo_establecimiento']) key += _.deburr(c.properties['codigo_establecimiento']);
+	          c.properties.features = [];
+	          clusterIndex[key] = c;
+	        });
+				}else{
+					console.log('Invalid cluster key');
+				}
+				return clusterIndex;
+				
+			},
 
-			var req = {
-				method: 'GET',
-				dataType: "json",
-			    url: 'http://localhost:3000/app/mapa_establecimientos/datos',
-			    params: parametro,
-			    headers: {
-			        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
-			    }
-			};
+			getDatosEstablecimientos: function(parametro){
 
-			return $http(req);
-		}
+				var req = {
+					method: 'GET',
+					dataType: "json",
+				    url: 'http://localhost:3000/app/mapa_establecimientos/datos',
+				    params: parametro,
+				    headers: {
+				        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+				    }
+				};
+
+				return $http(req).then(function(data){
+					localStorage[paramToKey[parametro.tipo_consulta]] = JSON.stringify(data.data);
+				});
+			}
 
 	}; //return
 });

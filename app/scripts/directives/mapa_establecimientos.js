@@ -6,7 +6,7 @@
  * # mapaLeaflet
  */
 angular.module('yvyUiApp')
-  .directive('mapaEstablecimientos', function () {
+  .directive('mapaEstablecimientos', function (mapaEstablecimientoFactory) {
     return {
       restrict: 'E',
       replace: false,
@@ -52,7 +52,7 @@ angular.module('yvyUiApp')
           if(filtro){
             var establecimientos_visibles = establecimientos;
             $.each(filtro, function(index, value){
-              establecimientos_visibles = filtrar_estableciminentos(establecimientos_visibles, value);
+              establecimientos_visibles = filtrar_establecimientos(establecimientos_visibles, value);
             });
             MECONF.establecimientosVisibles = establecimientos_visibles;
             map = draw_map('filtro'); //dibujamos el mapa con los establecimientos filtrados
@@ -83,7 +83,7 @@ angular.module('yvyUiApp')
         });
 
         /* Funcion que reduce la lista de establecimientos acorde al filtro seleccionado */
-        var filtrar_estableciminentos = function(establecimientos, filtro){
+        var filtrar_establecimientos = function(establecimientos, filtro){
           var e =  
           { 'type' : 'FeatureCollection',
             'features' : []
@@ -161,17 +161,21 @@ angular.module('yvyUiApp')
             draw_map('zoom'); //dibujamos el mapa de acuerdo al zoom
           });
 
+          map.on('move', function(e) {
+            draw_map('move'); //dibujamos el mapa de acuerdo al zoom
+          });
+
         }
 
         /* Funcion que dibuja el mapa de acuerdo a los establecimientos filtrados y al zoom actual */
         var draw_map = function(accionInvocante){
           console.time('draw_map');
           var levelZoom = map.getZoom();
+          console.log('zoomlevel: ' + levelZoom);
           var e = '';
+          console.time('filtrado');
           if (levelZoom < MECONF.nivelesZoom['departamento']) { //cluster por departamento (por defecto)
-            console.time('filtrado');
             e = filtrar_cluster('departamento');
-            console.timeEnd('filtrado');
           } else if (levelZoom >= MECONF.nivelesZoom['departamento'] && levelZoom < MECONF.nivelesZoom['distrito']) { //cluster por distrito
             e = filtrar_cluster('distrito');
           } else if (levelZoom >= MECONF.nivelesZoom['distrito'] && levelZoom < MECONF.nivelesZoom['barrio_localidad']) { //cluster por barrio/localidad
@@ -179,6 +183,7 @@ angular.module('yvyUiApp')
           }else{
             e = MECONF.establecimientosVisibles;
           }
+          console.timeEnd('filtrado');
 
           if( levelZoom < MECONF.nivelesZoom['barrio_localidad'] && accionInvocante=='filtro' ){
             var codigos_establecimientos = _.pluck(MECONF.establecimientosVisibles.features, 'properties');
@@ -191,14 +196,19 @@ angular.module('yvyUiApp')
           //BORRAR BORRAR BORRAR BORRAR BORRAR
           //e = MECONF.establecimientosVisibles;//DESPUES TENGO QUE BORRAR
           //BORRAR BORRAR BORRAR BORRAR BORRAR
+          var bounds = map.getBounds();
+          console.log(e.features.length);
 
-          console.time('geoJsonLayer');
+          console.time('bounds filter');
+          e.features = _.filter(e.features, function(punto){
+            var latLon = [punto.geometry.coordinates[1], punto.geometry.coordinates[0]];
+            return bounds.contains(latLon);
+          });
+          console.timeEnd('bounds filter');
+
           //console.log(e);
           MECONF.geoJsonLayer.setGeoJSON(e);
-          console.timeEnd('geoJsonLayer');
-          console.time('infoBox');
           MECONF.infoBox.update();
-          console.timeEnd('infoBox');
           console.timeEnd('draw_map');
           return map;
         };
@@ -206,48 +216,36 @@ angular.module('yvyUiApp')
         /* Funcion que filtra el cluster a mostrar, ya sea por Departamentos/Distritos/BarrioLocalidad */
         var filtrar_cluster = function(tipo){
           var tipo_cluster = 'cluster_'+tipo;
+          //Reemplazar por llamada al service
           var cluster = JSON.parse(localStorage[tipo_cluster]);
+          
+          //build a cluster index
+          var clusterIndex = mapaEstablecimientoFactory.getClusterIndex(tipo_cluster);
 
           var e =  
           { 'type' : 'FeatureCollection',
             'features' : []
           };
 
-          if (tipo=='departamento'){
-            $.each(cluster.features, function(attr_clr, clr){
-              $.each(MECONF.establecimientosVisibles.features, function(attr, evs){
-                if ( evs.properties['nombre_departamento']==clr.properties['nombre_departamento'] ){ 
-                  e.features.push(clr);
-                  return false;
-                }
-              });
-            });
-          }else if (tipo=='distrito'){
-
-            $.each(cluster.features, function(attr_clr, clr){
-              $.each(MECONF.establecimientosVisibles.features, function(attr, evs){
-                if ( evs.properties['nombre_departamento']==clr.properties['nombre_departamento'] && 
-                  evs.properties['nombre_distrito']==clr.properties['nombre_distrito'] ){ 
-                  e.features.push(clr);
-                  return false;
-                }
-              });
-            });
-
-          }else if (tipo=='barrio_localidad'){
-
-            $.each(cluster.features, function(attr_clr, clr){
-              $.each(MECONF.establecimientosVisibles.features, function(attr, evs){
-                if ( evs.properties['nombre_departamento']==clr.properties['nombre_departamento'] && 
-                  evs.properties['nombre_distrito']==clr.properties['nombre_distrito'] && 
-                  evs.properties['nombre_barrio_localidad']==clr.properties['nombre_barrio_localidad'] ){ 
-                  e.features.push(clr);
-                  return false;
-                }
-              });
-            });
-
+          var keyAccesor;
+          switch(tipo){
+            case 'departamento':
+              keyAccesor = function(f){ return _.deburr(f.properties['nombre_departamento']); };
+              break;
+            case 'distrito':
+              keyAccesor = function(f){ return _.deburr(f.properties['nombre_departamento']) + _.deburr(f.properties['nombre_distrito']); };
+              break;
+            case 'barrio_localidad':
+              keyAccesor = function(f){ return _.deburr(f.properties['nombre_departamento']) + _.deburr(f.properties['nombre_distrito']) + _.deburr(f.properties['nombre_barrio_localidad']); };
+              break;
           }
+
+          _.each(MECONF.establecimientosVisibles.features, function(f){
+            var key = keyAccesor(f);
+            if(clusterIndex[key]) clusterIndex[key].properties.features.push(f);
+          });
+
+          e.features = _(clusterIndex).values().filter(function(f){ return f.properties.features.length; }).value();
           return e;
 
         };
@@ -260,15 +258,19 @@ angular.module('yvyUiApp')
         /* Funcion que carga el resumen del Popup */
         function draw_popup(t){
           target = t;
+          console.log(target);
           //map.panTo(target.layer.getLatLng()); //funcion que centra el mapa sobre el marker
 
           scope.$apply(function(){
             var levelZoom = map.getZoom();
+            var latLon, targetChild;
             if(levelZoom >= MECONF.nivelesZoom['barrio_localidad']){ //Verificamos el zoom para mostrar el popup
               scope.detalle = target.layer.feature.properties;
               MECONF.infoBox.update(target.layer.feature);
             }else{
-              map.setView(target.layer.getLatLng(), levelZoom+1); //funcion que centra el mapa sobre el marker
+              targetChild = target.layer.feature.properties.features[0]; //Se toma el primero, se podria tomar random tambien
+              latLon = [targetChild.geometry.coordinates[1], targetChild.geometry.coordinates[0]];
+              map.setView(latLon, levelZoom + 3); //funcion que centra el mapa sobre el marker
             }
           });
 

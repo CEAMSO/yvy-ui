@@ -19,31 +19,22 @@ angular.module('yvyUiApp')
 
     parametro = { tipo_consulta:'01' }; //Cluster por departamento
 
-    mapaEstablecimientoFactory.getDatosCluster(parametro).then(function(data){
-      localStorage['cluster_departamento'] = JSON.stringify(data.data);
-    });
+    mapaEstablecimientoFactory.getDatosCluster(parametro);
 
     parametro = { tipo_consulta:'11' }; //Todos los establecimentos con periodo 2014
 
     console.time('servicio');
     console.time('rest');
     mapaEstablecimientoFactory.getDatosEstablecimientos(parametro).then(function(data){
-      console.timeEnd('rest');
-      //$scope.data = data.data;
-      localStorage['establecimientos'] = JSON.stringify(data.data);
       $scope.ready = true;
       console.time('scope notified');
       parametro = { tipo_consulta:'02' }; //Cluster por distrito
 
-      mapaEstablecimientoFactory.getDatosCluster(parametro).then(function(data){
-        localStorage['cluster_distrito'] = JSON.stringify(data.data);
-      }); 
+      mapaEstablecimientoFactory.getDatosCluster(parametro);
 
       parametro = { tipo_consulta:'03' }; //Cluster por barrio/localidad
 
-      mapaEstablecimientoFactory.getDatosCluster(parametro).then(function(data){
-        localStorage['cluster_barrio_localidad'] = JSON.stringify(data.data);
-     });
+      mapaEstablecimientoFactory.getDatosCluster(parametro);
     }); 
 
 
