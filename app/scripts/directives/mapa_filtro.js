@@ -77,7 +77,7 @@ angular.module('yvyUiApp')
 
           //Append a las listas desplegables
           console.time('loop cargar');
-          $.each(filtrosSelect, function(attr, array){ //ciclo por cada filtro existe
+          $.each(filtrosSelect, function(attr, array){ //ciclo por cada filtro existente
             var options = _.reduce(array, function(memo, a){ return memo + '<option value="'+a+'">'+a+'</option>'; }, '');
             document.getElementById('filtro_'+ attr).innerHTML = options;
             $('#filtro_'+attr).select2();

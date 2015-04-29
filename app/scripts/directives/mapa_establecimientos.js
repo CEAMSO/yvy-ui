@@ -401,7 +401,7 @@ angular.module('yvyUiApp')
           '2012': 'images/marker.png'
         };
 
-        MECONF.nivelesZoom = {departamento:7, distrito:10, barrio_localidad:13}; //niveles de zoom para departamento/distrito/barrioLocalidad
+        MECONF.nivelesZoom = {departamento:10, distrito:13, barrio_localidad:16}; //niveles de zoom para departamento/distrito/barrioLocalidad
 
         var establecimientos;
         var map = init_map();
