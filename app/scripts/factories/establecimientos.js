@@ -33,6 +33,8 @@ angular.module('yvyUiApp')
 
 				return $http(req).then(function(data){
 					localStorage[paramToKey[parametro.tipo_consulta]] = JSON.stringify(data.data);
+					//var objeto = _.keys(data.data.objects);
+					//localStorage[paramToKey[parametro.tipo_consulta]] = JSON.stringify(topojson.feature(data.data, data.data.objects[objeto]));
 				});
 			},
 
@@ -70,6 +72,8 @@ angular.module('yvyUiApp')
 
 				return $http(req).then(function(data){
 					localStorage[paramToKey[parametro.tipo_consulta]] = JSON.stringify(data.data);
+					//var objeto = _.keys(data.data.objects);
+					//localStorage[paramToKey[parametro.tipo_consulta]] = JSON.stringify(topojson.feature(data.data, data.data.objects[objeto]));
 				});
 			}
 
