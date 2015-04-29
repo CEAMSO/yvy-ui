@@ -145,6 +145,17 @@ angular.module('yvyUiApp')
                       iconUrl: img,
                       iconSize: [32, 32]
                   }));
+              }else{
+
+                var color = 'darkblue';
+                var propertiesMarker = L.AwesomeMarkers.icon({
+                  icon: '',
+                  markerColor: color,
+                  prefix: 'fa',
+                  html: feature.properties.features.length
+                });
+
+                marker.setIcon(propertiesMarker);
               }
           });
 
