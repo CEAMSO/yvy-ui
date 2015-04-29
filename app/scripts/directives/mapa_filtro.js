@@ -29,8 +29,10 @@ angular.module('yvyUiApp')
         se actualiza la variable de scope "filtro" (sobre la cual, la directiva "mapa_establecimientos.js" esta realizando un watch
         que permite la aplicacion de los filtros sobre el mapa)
         */
-        scope.updateFiltro = function(localFiltro){
-
+        scope.updateFiltro = function(primeraVez){
+          if (primeraVez == true) { scope.local={periodo:'2014'}; }
+          
+          var localFiltro = scope.local;
           var filtroBase = [];
           var f = '';
 
@@ -61,7 +63,6 @@ angular.module('yvyUiApp')
               filtroBase.push(f);
             }
           });
-
           scope.filtro = filtroBase;
 
         };
@@ -121,7 +122,9 @@ angular.module('yvyUiApp')
 
           //Definimos un onChange sobre cada boton, de modo a que los cambios hechos sobre el filtro se reflejen en el mapa
           $('#filtro_nombre_zona label input, #filtro_proyecto111 label input, #filtro_proyecto822 label input').change(function(){
-            self.updateFiltro(localFilter);
+            scope.$apply(function() {
+              scope.updateFiltro();
+            });
           });
 
         };
@@ -160,7 +163,7 @@ angular.module('yvyUiApp')
           if(ready){
             unwatch(); //Remove the watch
             establecimientos = JSON.parse(localStorage['establecimientos']);
-            scope.updateFiltro({periodo:'2014'});
+            scope.updateFiltro(true);
             console.time('cargar establecimientos');
             cargar(establecimientos);
             console.timeEnd('cargar establecimientos');
