@@ -93,7 +93,8 @@ angular.module('yvyUiApp')
           });
 
           // Convertimos el grupo de checboxes de periodo en algo similar a un grupo de radio buttons
-          $('#filtro_periodo label.btn').click(function(){
+          $('#filtro_periodo label.btn, #filtro_nombre_zona label.btn, #filtro_proyecto111 label.btn, #filtro_proyecto822 label.btn')
+          .click(function(){
             var self = $(this);
             $(this).children('input:checkbox').each(function(){
               if(!this.checked){
