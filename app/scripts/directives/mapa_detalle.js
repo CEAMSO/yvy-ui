@@ -15,10 +15,10 @@ angular.module('yvyUiApp')
       },
       templateUrl: 'views/templates/template_detalle.html',
       link: function postLink(scope, element, attrs) {
-
+        var detailOpen = false;
         var crearPopup = function (){
           var definicion = 
-              '<h3><span class="label label-info">Detalles del Establecimiento</span></h3><br/>'+
+              '<h4><span class="label label-primary">Detalles del Establecimiento</span></h4><br/>'+
               '<table id="popupTable" class="table table-striped table-bordered">'+
               '<tbody>'+
               '</tbody>'+
@@ -41,17 +41,19 @@ angular.module('yvyUiApp')
                                 container: $('[ng-view]'),
                                 onStartOpen: function(){
                                   $rootScope.$broadcast('detail-start-open');
-                                  $('#left-panel').css('margin-left', '300px');
+                                  $('#left-panel').css('margin-left', '310px');
                                 },
                                 onOpen: function(){
                                   $rootScope.$broadcast('detail-open');
+                                  detailOpen = true;
                                 },
                                 onStartClose: function(){
-                                  $('#left-panel').css('margin-left', '-50px');
+                                  $('#left-panel').css('margin-left', '-40px');
                                   $rootScope.$broadcast('detail-start-close');
                                 },
                                 onClose: function(){
                                   $rootScope.$broadcast('detail-close');
+                                  detailOpen = false;
                                 } 
                               });
         };
@@ -59,6 +61,7 @@ angular.module('yvyUiApp')
         scope.$watch('detalle', function(detalle){
 
           if(typeof detalle !== 'undefined' && detalle !== ''){
+            console.log(detalle);
 
             crearPopup();
           
@@ -76,7 +79,9 @@ angular.module('yvyUiApp')
               $('#popupTable > tbody:last').append(row);
             });
 
-            $('#right-panel').click();
+            if(!detailOpen){
+              $('#right-panel').click();
+            }
             scope.detalle=''; //ponemos a vacio para poder seleccionar el mismo marker nuevamente
 
           }else{

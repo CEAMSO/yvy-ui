@@ -20,7 +20,7 @@ angular.module('yvyUiApp')
       link: function postLink(scope, element, attrs) {
 
         var invalidateSize = function(animate){ map.invalidateSize(animate); };
-        var target, result;
+        var target, result, rightPanelOpen;
 
         $('#map').data('right-sidebar-visible', false);
 
@@ -30,14 +30,15 @@ angular.module('yvyUiApp')
                                   clickClose: false,
                                   container: $('[ng-view]'),
                                   onOpen: function(){
-                                    invalidateSize(true);
+                                    //invalidateSize(true);
                                   },
                                   onClose: function(){
+                                    var width = rightPanelOpen ? 'calc(100% - 350px)' : '100%'
                 			              $('#filtroDepartamento').select2('close');
                           			    $('#filtroDistrito').select2('close');
                           			    $('#filtroBarrioLocalidad').select2('close');
                 				            $('#filtroCodigoEstablecimiento').select2('close');
-                                    $('#map').css('width', '100%');
+                                    $('#map').css('width', width);
                                     invalidateSize(true);
                                   },
                                   onStartClose: function(){
@@ -70,12 +71,13 @@ angular.module('yvyUiApp')
         });
 
         var addUpdateHandlers = function(){
-          map.on('zoomend', updateMap);
+          //map.on('zoomend', updateMap);
           map.on('move', updateMap);
           map.off('moveend', addUpdateHandlers);
         }
 
         scope.$on('detail-open', function(){
+          rightPanelOpen = true;
           $('#map').css('width', 'calc(100% - 350px)');
           invalidateSize(true);
           //map.setZoom(16);
@@ -91,7 +93,9 @@ angular.module('yvyUiApp')
         });
 
         scope.$on('detail-close', function(){
+          rightPanelOpen = false;
           invalidateSize(true);
+          MECONF.infoBox.update(MECONF.establecimientosVisibles.features);
           //map.setView([-23.388, -57.189], 6, {animate: true});
         });
 
@@ -157,27 +161,28 @@ angular.module('yvyUiApp')
           var geoJson = L.mapbox.featureLayer();
 
           geoJson.on('layeradd', function (e) {
-              var marker = e.layer,
+              var icon, color, marker = e.layer,
                       feature = marker.feature;
 
               var img = MECONF.ESTADO_TO_ICON[feature.properties['periodo']];
               if (img) {
-                  marker.setIcon(L.icon({
-                      iconUrl: img,
-                      iconSize: [32, 32]
-                  }));
+                color = 'orange';
+                icon = L.AwesomeMarkers.icon({
+                  icon: 'home',
+                  markerColor: color,
+                  prefix: 'glyphicon'
+                });
               }else{
-
-                var color = 'darkblue';
-                var propertiesMarker = L.AwesomeMarkers.icon({
+                color = 'blue';
+                icon = L.AwesomeMarkers.icon({
                   icon: '',
                   markerColor: color,
                   prefix: 'fa',
                   html: feature.properties.features.length
                 });
 
-                marker.setIcon(propertiesMarker);
               }
+              marker.setIcon(icon);
           });
 
           MECONF.geoJsonLayer = geoJson; //Sobre esta variable se aplican los filtros
@@ -188,8 +193,7 @@ angular.module('yvyUiApp')
           MECONF.infoBox = draw_info_box();
           MECONF.infoBox.addTo(map);
 
-
-          map.on('zoomend', updateMap);
+          //map.on('zoomend', updateMap);
           map.on('move', updateMap);
 
         }
@@ -243,7 +247,6 @@ angular.module('yvyUiApp')
           //e = MECONF.establecimientosVisibles;//DESPUES TENGO QUE BORRAR
           //BORRAR BORRAR BORRAR BORRAR BORRAR
           var bounds = map.getBounds();
-          var infoFeatures = e.features;
 
           if(!filtros){
             e.features = _.filter(e.features, function(punto){
@@ -252,9 +255,8 @@ angular.module('yvyUiApp')
             });
           }
 
-
           //console.log(e);
-          MECONF.infoBox.update(infoFeatures);
+          MECONF.infoBox.update(MECONF.establecimientosVisibles.features);
           MECONF.geoJsonLayer.setGeoJSON(e);
           console.timeEnd('draw_map');
           return {map: map, maxZoom: maxZoom };
