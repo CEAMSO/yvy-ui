@@ -178,7 +178,7 @@ angular.module('yvyUiApp')
                   icon: '',
                   markerColor: color,
                   prefix: 'fa',
-                  html: feature.properties.features.length
+                  html: feature.properties.cantidad
                 });
 
               }
@@ -218,6 +218,7 @@ angular.module('yvyUiApp')
             }
             levelZoom = maxZoom;
           }
+
           console.log('levelZoom: ' + levelZoom);
           console.time('filtrado');
           if(redrawClusters){
@@ -235,6 +236,7 @@ angular.module('yvyUiApp')
               console.log('no cluster');
               e = _.clone(MECONF.establecimientosVisibles);
             }
+            e.allFeatures = e.features;
           }else{
             e = MECONF.geoJsonLayer.getGeoJSON();
           }
@@ -253,9 +255,8 @@ angular.module('yvyUiApp')
           //e = MECONF.establecimientosVisibles;//DESPUES TENGO QUE BORRAR
           //BORRAR BORRAR BORRAR BORRAR BORRAR
           var bounds = map.getBounds();
-
           if(!filtros){
-            e.features = _.filter(e.features, function(punto){
+            e.features = _.filter(e.allFeatures, function(punto){
               var latLon = [punto.geometry.coordinates[1], punto.geometry.coordinates[0]];
               return bounds.contains(latLon);
             });
@@ -263,7 +264,10 @@ angular.module('yvyUiApp')
 
           //console.log(e);
           MECONF.infoBox.update(MECONF.establecimientosVisibles.features);
+          console.time('geojson');
           MECONF.geoJsonLayer.setGeoJSON(e);
+          console.timeEnd('geojson');
+
           console.timeEnd('draw_map');
           currentZoom = levelZoom;
           return {map: map, maxZoom: maxZoom };
@@ -300,13 +304,17 @@ angular.module('yvyUiApp')
           console.time('cluster features');
           _.each(MECONF.establecimientosVisibles.features, function(f){
             var key = keyAccesor(f);
-            if(clusterIndex[key]) clusterIndex[key].properties.features.push(f);
+            if(clusterIndex[key]){
+              clusterIndex[key].properties.cantidad++;
+              clusterIndex[key].properties.targetChild = f;
+            } 
           });
           console.timeEnd('cluster features');
 
           console.time('cluster filter');
-          e.features = _(clusterIndex).values().filter(function(f){ return f.properties.features.length; }).value();
+          e.features = _(clusterIndex).values().filter(function(f){ return f.properties.cantidad; }).value();
           console.timeEnd('cluster filter');
+          console.log(e);
           return e;
 
         };
@@ -329,7 +337,7 @@ angular.module('yvyUiApp')
               scope.detalle = target.layer.feature.properties;
               MECONF.infoBox.update(target.layer.feature);
             }else{
-              targetChild = target.layer.feature.properties.features[0]; //Se toma el primero, se podria tomar random tambien
+              targetChild = target.layer.feature.properties.targetChild; //Se toma el primero, se podria tomar random tambien
               latLon = [targetChild.geometry.coordinates[1], targetChild.geometry.coordinates[0]];
               map.setView(latLon, levelZoom + 3); //funcion que centra el mapa sobre el marker
             }
