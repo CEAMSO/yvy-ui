@@ -31,6 +31,10 @@ angular.module('yvyUiApp')
       parametro = { tipo_consulta:'03' }; //Cluster por barrio/localidad
 
       mapaEstablecimientoFactory.getDatosCluster(parametro);
+
+      parametro = { tipo_consulta:'12' }; //Todas las instituciones con periodo 2014
+
+      mapaEstablecimientoFactory.getDatosInstituciones(parametro);
     }); 
     
   });

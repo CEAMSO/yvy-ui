@@ -82,6 +82,24 @@ angular.module('yvyUiApp')
 			getDatosInstituciones: function(parametro){
 
 				var req = {
+					method: 'GET',
+					dataType: "json",
+				    url: 'http://localhost:3000/app/mapa_establecimientos/datos',
+				    params: parametro,
+				    headers: {
+				        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+				    }
+				};
+
+				return $http(req).then(function(data){
+					console.log(parametro);
+					console.log(data.data);
+					//localStorage[paramToKey[parametro.tipo_consulta]] = JSON.stringify(data.data);
+					//console.log(localStorage[paramToKey[parametro.tipo_consulta]]);
+				});
+
+				/*
+				var req = {
 					method: 'POST',
 					dataType: "json",
 				    url: 'http://localhost:3000/app/mapa_establecimientos/datos',
@@ -95,6 +113,7 @@ angular.module('yvyUiApp')
 					console.log("Instituciones");
 					console.log(returnServerData);
 				});
+				*/
 
 			}
 
