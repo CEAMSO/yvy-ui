@@ -46,7 +46,7 @@ angular.module('yvyUiApp')
 			getClusterIndex: function(key){
 				if(clusterIndexes[key]){
 					return _.mapValues(clusterIndexes[key], function(c){
-						c.properties.features = [];
+						c.properties.cantidad = 0;
 						return c;
 					});
 				}else{
