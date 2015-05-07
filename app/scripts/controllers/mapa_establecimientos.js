@@ -9,11 +9,7 @@
  */
 angular.module('yvyUiApp')
   .controller('MapaEstablecimientosCtrl', function ($scope, mapaEstablecimientoFactory) {
-    $scope.awesomeThings = [
-      'HTML5 Boilerplate',
-      'AngularJS',
-      'Karma'
-    ];
+
     $scope.ready = false;
     var parametro = {};
 

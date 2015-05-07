@@ -50,10 +50,9 @@
   display: none;
   width: 240px;
   background-color: #eee;
-  box-shadow: inset 0 0 0 0.325em rgba(0,0,0,0.1);
   text-align: center;
-  color: #000000;
-  overflow: auto;
+/*  color: #000000;
+*/  overflow: auto;
 }
 
 /* Propiedades de los filtros */
@@ -69,7 +68,6 @@
   text-align: center;
   width: 350px;
   background-color: #eee;
-  box-shadow: inset 0 0 0 0.325em rgba(0,0,0,0.1);
   color: #000000;
   height: 95% !important;
 }
@@ -97,7 +95,7 @@
   -o-transition: .5s;
 }
 .btn-tag-slide {
-  margin-left: -45px;
+  margin-left: -40px;
   position: absolute;
   margin-top: 12.5em;
   z-index: 2;
@@ -112,11 +110,11 @@
 }
 
 .tag {
-  color: #337ab7 !important;
-  border: 2px #337ab7 solid;
+  color: #0c7cd5 !important;
+  border: 2px #0c7cd5 solid;
 }
 
 .tag:hover {
   color: #fff !important;
-  background-color: #21759b;
+  background-color: #2196f3;
 }
