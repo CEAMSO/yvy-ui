@@ -17,10 +17,12 @@ angular.module('yvyUiApp')
   		'12': 'instituciones'
   	}
 
+  	var clusterIndexes = {}
+
     return {
 
 			getDatosCluster: function(parametro){
-
+				var self = this;
 				var req = {
 					method: 'GET',
 					dataType: "json",
@@ -35,28 +37,39 @@ angular.module('yvyUiApp')
 				return $http(req).then(function(data){
 					//localStorage[paramToKey[parametro.tipo_consulta]] = JSON.stringify(data.data);
 					var objeto = _.keys(data.data.objects);
-					localStorage[paramToKey[parametro.tipo_consulta]] = JSON.stringify(topojson.feature(data.data, data.data.objects[objeto]));
+					var key = paramToKey[parametro.tipo_consulta];
+					localStorage[key] = JSON.stringify(topojson.feature(data.data, data.data.objects[objeto]));
+					clusterIndexes[key] = self.getClusterIndex(key);
 				});
 			},
 
 			getClusterIndex: function(key){
-				var cluster = JSON.parse(localStorage[key]);
-				var clusterIndex = {};
-				//build a cluster index
-				if(cluster){
-			        _.each(cluster.features, function(c){
-		          		var key = _.deburr(c.properties['nombre_departamento']);
-		          		if(c.properties['nombre_distrito']) key += _.deburr(c.properties['nombre_distrito']);
-		          		if(c.properties['nombre_barrio_localidad']) key += _.deburr(c.properties['nombre_barrio_localidad']);
-		          		if(c.properties['codigo_establecimiento']) key += _.deburr(c.properties['codigo_establecimiento']);
-		          		c.properties.features = [];
-		          		//c.properties.cantidadEstablecimientos = 0;
-		          		clusterIndex[key] = c;
-			        });
+				if(clusterIndexes[key]){
+					return _.mapValues(clusterIndexes[key], function(c){
+						c.properties.features = [];
+						return c;
+					});
 				}else{
-					console.log('Invalid cluster key');
+					console.time('cluster parse');
+					var cluster = JSON.parse(localStorage[key]);
+					console.timeEnd('cluster parse');
+					var clusterIndex = {};
+					//build a cluster index
+					if(cluster){
+				        _.each(cluster.features, function(c){
+			          		var key = _.deburr(c.properties['nombre_departamento']);
+			          		if(c.properties['nombre_distrito']) key += _.deburr(c.properties['nombre_distrito']);
+			          		if(c.properties['nombre_barrio_localidad']) key += _.deburr(c.properties['nombre_barrio_localidad']);
+			          		if(c.properties['codigo_establecimiento']) key += _.deburr(c.properties['codigo_establecimiento']);
+			          		c.properties.features = [];
+			          		//c.properties.cantidadEstablecimientos = 0;
+			          		clusterIndex[key] = c;
+				        });
+					}else{
+						console.log('Invalid cluster key');
+					}
+					return clusterIndex;
 				}
-				return clusterIndex;
 				
 			},
 

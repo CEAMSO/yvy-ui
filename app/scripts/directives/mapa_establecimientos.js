@@ -20,7 +20,7 @@ angular.module('yvyUiApp')
       link: function postLink(scope, element, attrs) {
 
         var invalidateSize = function(animate){ map.invalidateSize(animate); };
-        var target, result, rightPanelOpen;
+        var target, result, rightPanelOpen, currentZoom;
 
         $('#map').data('right-sidebar-visible', false);
 
@@ -204,6 +204,7 @@ angular.module('yvyUiApp')
         var draw_map = function(filtros){
           console.time('draw_map');
           var maxZoom, e, filterByDepartamento, filterByDistrito, filterByLocalidad, levelZoom = map.getZoom();
+          var redrawClusters = filtros || levelZoom !== currentZoom;
           if(filtros){
             filterByLocalidad = _.filter(filtros, function(f){ return f.atributo === 'nombre_barrio_localidad' && f.valor.length; }).length > 0;
             filterByDistrito = _.filter(filtros, function(f){ return f.atributo === 'nombre_distrito' && f.valor.length; }).length > 0 && !filterByLocalidad; 
@@ -219,20 +220,25 @@ angular.module('yvyUiApp')
           }
           console.log('levelZoom: ' + levelZoom);
           console.time('filtrado');
-          if (levelZoom < MECONF.nivelesZoom['departamento']) { //cluster por departamento (por defecto)
-            e = filtrar_cluster('departamento');
-            console.log('cluster by departamento');
-          } else if ((levelZoom >= MECONF.nivelesZoom['departamento'] && levelZoom < MECONF.nivelesZoom['distrito'])) { //cluster por distrito
-            e = filtrar_cluster('distrito');
-            console.log('cluster by distrito');
+          if(redrawClusters){
+            if (levelZoom < MECONF.nivelesZoom['departamento']) { //cluster por departamento (por defecto)
+              e = filtrar_cluster('departamento');
+              console.log('cluster by departamento');
+            } else if ((levelZoom >= MECONF.nivelesZoom['departamento'] && levelZoom < MECONF.nivelesZoom['distrito'])) { //cluster por distrito
+              e = filtrar_cluster('distrito');
+              console.log('cluster by distrito');
 
-          } else if ((levelZoom >= MECONF.nivelesZoom['distrito'] && levelZoom < MECONF.nivelesZoom['barrio_localidad'])) { //cluster por barrio/localidad
-            console.log('cluster by localidad');
-            e = filtrar_cluster('barrio_localidad');
+            } else if ((levelZoom >= MECONF.nivelesZoom['distrito'] && levelZoom < MECONF.nivelesZoom['barrio_localidad'])) { //cluster por barrio/localidad
+              console.log('cluster by localidad');
+              e = filtrar_cluster('barrio_localidad');
+            }else{
+              console.log('no cluster');
+              e = _.clone(MECONF.establecimientosVisibles);
+            }
           }else{
-            console.log('no cluster');
-            e = _.clone(MECONF.establecimientosVisibles);
+            e = MECONF.geoJsonLayer.getGeoJSON();
           }
+          
           console.timeEnd('filtrado');
 
           if( levelZoom < MECONF.nivelesZoom['barrio_localidad'] && filtros ){
@@ -259,6 +265,7 @@ angular.module('yvyUiApp')
           MECONF.infoBox.update(MECONF.establecimientosVisibles.features);
           MECONF.geoJsonLayer.setGeoJSON(e);
           console.timeEnd('draw_map');
+          currentZoom = levelZoom;
           return {map: map, maxZoom: maxZoom };
         };
 
@@ -266,10 +273,11 @@ angular.module('yvyUiApp')
         var filtrar_cluster = function(tipo){
           var tipo_cluster = 'cluster_'+tipo;
           //Reemplazar por llamada al service
-          var cluster = JSON.parse(localStorage[tipo_cluster]);
-          
+          console.time('cluster index');
           //build a cluster index
           var clusterIndex = mapaEstablecimientoFactory.getClusterIndex(tipo_cluster);
+          console.log(clusterIndex);
+          console.timeEnd('cluster index');
 
           var e =  
           { 'type' : 'FeatureCollection',
@@ -289,12 +297,16 @@ angular.module('yvyUiApp')
               break;
           }
 
+          console.time('cluster features');
           _.each(MECONF.establecimientosVisibles.features, function(f){
             var key = keyAccesor(f);
             if(clusterIndex[key]) clusterIndex[key].properties.features.push(f);
           });
+          console.timeEnd('cluster features');
 
+          console.time('cluster filter');
           e.features = _(clusterIndex).values().filter(function(f){ return f.properties.features.length; }).value();
+          console.timeEnd('cluster filter');
           return e;
 
         };
