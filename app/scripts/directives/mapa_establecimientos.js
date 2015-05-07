@@ -203,6 +203,7 @@ angular.module('yvyUiApp')
         /* Funcion que dibuja el mapa de acuerdo a los establecimientos filtrados y al zoom actual */
         var draw_map = function(filtros){
           console.time('draw_map');
+          console.time('primera parte');
           var maxZoom, e, filterByDepartamento, filterByDistrito, filterByLocalidad, levelZoom = map.getZoom();
           var redrawClusters = filtros || levelZoom !== currentZoom;
           if(filtros){
@@ -219,7 +220,8 @@ angular.module('yvyUiApp')
             levelZoom = maxZoom;
           }
 
-          console.log('levelZoom: ' + levelZoom);
+          console.timeEnd('primera parte');
+          //console.log('levelZoom: ' + levelZoom);
           console.time('filtrado');
           if(redrawClusters){
             if (levelZoom < MECONF.nivelesZoom['departamento']) { //cluster por departamento (por defecto)
@@ -242,30 +244,28 @@ angular.module('yvyUiApp')
           }
           
           console.timeEnd('filtrado');
+          console.time('bounds');
 
           if( levelZoom < MECONF.nivelesZoom['barrio_localidad'] && filtros ){
             var codigos_establecimientos = _.pluck(MECONF.establecimientosVisibles.features, 'properties');
             codigos_establecimientos =  _.pluck(codigos_establecimientos, 'codigo_establecimiento');
             //scope.$parent.getInstituciones(codigos_establecimientos); //El controller se encarga de cargar la Lista de Detalles
           }
-          
-          //console.log('A MOSTRAR:');
-          //console.log(e);
-          //BORRAR BORRAR BORRAR BORRAR BORRAR
-          //e = MECONF.establecimientosVisibles;//DESPUES TENGO QUE BORRAR
-          //BORRAR BORRAR BORRAR BORRAR BORRAR
           var bounds = map.getBounds();
-          if(!filtros){
-            e.features = _.filter(e.allFeatures, function(punto){
-              var latLon = [punto.geometry.coordinates[1], punto.geometry.coordinates[0]];
-              return bounds.contains(latLon);
-            });
-          }
-
+          console.timeEnd('bounds');
           //console.log(e);
-          MECONF.infoBox.update(MECONF.establecimientosVisibles.features);
+
           console.time('geojson');
-          MECONF.geoJsonLayer.setGeoJSON(e);
+          if(redrawClusters){
+            if(!filtros){
+              e.features = _.filter(e.allFeatures, function(punto){
+                var latLon = [punto.geometry.coordinates[1], punto.geometry.coordinates[0]];
+                return bounds.contains(latLon);
+              });
+            }
+            MECONF.geoJsonLayer.setGeoJSON(e);
+            MECONF.infoBox.update(MECONF.establecimientosVisibles.features);
+          } 
           console.timeEnd('geojson');
 
           console.timeEnd('draw_map');
