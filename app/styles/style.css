@@ -118,3 +118,19 @@
   color: #fff !important;
   background-color: #2196f3;
 }
+
+.tag-red {
+  display: block;
+  padding: 0px !important;
+  float:left;
+  height: 30px;
+  width: 30px;
+  color: #E60000 !important;
+  border: 2px #E60000 solid;
+}
+
+.tag-red:hover {
+  color: #fff !important;
+  background-color: #E60000;
+  box-shadow: inset 0 0 0 5px #B20000;
+}
