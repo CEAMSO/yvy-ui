@@ -130,12 +130,13 @@ h6{
   font-size: 16px;
   font-weight: bold;
   padding: 0px;
-  color: #E60000 !important;
+  color: #fff !important;
+  background-color: #E60000;
   border: 3px #E60000 solid;
 }
 
 .tag-red:hover {
   color: #fff !important;
-  background-color: #E60000;
+  background-color: #FF1919;
   box-shadow: inset 0 0 0 4px #B20000;
 }
