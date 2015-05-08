@@ -20,7 +20,7 @@ angular.module('yvyUiApp')
       link: function postLink(scope, element, attrs) {
 
         var invalidateSize = function(animate){ map.invalidateSize(animate); };
-        var target, result, rightPanelOpen, currentZoom;
+        var target, result, rightPanelOpen, currentZoom, filterFlag = false;
 
         $('#map').data('right-sidebar-visible', false);
 
@@ -62,7 +62,10 @@ angular.module('yvyUiApp')
               map.off('zoomend', updateMap);
               map.off('move', updateMap);
               map.on('moveend', addUpdateHandlers);
-              map.fitBounds(MECONF.geoJsonLayer.getBounds(), {maxZoom: result.maxZoom, paddingTopLeft: [0, 50]});
+              if(filterFlag){
+                map.fitBounds(MECONF.geoJsonLayer.getBounds(), {maxZoom: result.maxZoom, paddingTopLeft: [0, 50]});
+              }
+              filterFlag = true;
             }else{
               map.setView([-23.388, -57.189], 6, {animate: true});
             }
@@ -253,19 +256,20 @@ angular.module('yvyUiApp')
           }
           var bounds = map.getBounds();
           console.timeEnd('bounds');
-          //console.log(e);
+          //console.log(e
+
+          console.time('visible');
+          e.features = _.filter(e.allFeatures, function(punto){
+            var latLon = [punto.geometry.coordinates[1], punto.geometry.coordinates[0]];
+            return bounds.contains(latLon);
+          });
+          console.timeEnd('visible');
 
           console.time('geojson');
           if(redrawClusters){
-            if(!filtros){
-              e.features = _.filter(e.allFeatures, function(punto){
-                var latLon = [punto.geometry.coordinates[1], punto.geometry.coordinates[0]];
-                return bounds.contains(latLon);
-              });
-            }
-            MECONF.geoJsonLayer.setGeoJSON(e);
             MECONF.infoBox.update(MECONF.establecimientosVisibles.features);
-          } 
+          }
+          MECONF.geoJsonLayer.setGeoJSON(e);
           console.timeEnd('geojson');
 
           console.timeEnd('draw_map');
