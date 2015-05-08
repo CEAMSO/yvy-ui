@@ -58,7 +58,6 @@
 /* Propiedades de los filtros */
 .filtro-ancho{
   margin: 0px !important;
-  height: 30px !important;
   width: 180px !important;
 }
 
@@ -117,6 +116,11 @@
 .tag:hover {
   color: #fff !important;
   background-color: #2196f3;
+}
+
+h6{
+  margin-top: 10px;
+  margin-bottom: 10px;
 }
 
 .tag-red {
