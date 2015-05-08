@@ -61,8 +61,6 @@ angular.module('yvyUiApp')
 			          		if(c.properties['nombre_distrito']) key += _.deburr(c.properties['nombre_distrito']);
 			          		if(c.properties['nombre_barrio_localidad']) key += _.deburr(c.properties['nombre_barrio_localidad']);
 			          		if(c.properties['codigo_establecimiento']) key += _.deburr(c.properties['codigo_establecimiento']);
-			          		c.properties.features = [];
-			          		//c.properties.cantidadEstablecimientos = 0;
 			          		clusterIndex[key] = c;
 				        });
 					}else{
@@ -105,8 +103,8 @@ angular.module('yvyUiApp')
 				};
 
 				return $http(req).then(function(data){
-					console.log(parametro);
-					console.log(data.data);
+					//console.log(parametro);
+					//console.log(data.data);
 					//localStorage[paramToKey[parametro.tipo_consulta]] = JSON.stringify(data.data);
 					//console.log(localStorage[paramToKey[parametro.tipo_consulta]]);
 				});
