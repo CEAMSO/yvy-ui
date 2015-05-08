@@ -18,7 +18,7 @@ angular.module('yvyUiApp')
         var detailOpen = false;
         var crearPopup = function (){
           var definicion = 
-              '<a class="btn btn-tag tag-red" id="right-panel" href="#right-panel-link" title="Cerrar el detalle">X</a>'+
+              '<button class="btn btn-tag tag-red" id="right-panel" href="#right-panel-link" title="Cerrar el detalle">X</button>'+
               '<br/><br/>'+
               '<h4>'+
                 '<span class="label label-primary">Detalles del Establecimiento</span>'+
