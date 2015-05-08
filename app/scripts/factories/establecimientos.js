@@ -105,8 +105,8 @@ angular.module('yvyUiApp')
 				};
 
 				return $http(req).then(function(data){
-					console.log(parametro);
-					console.log(data.data);
+					//console.log(parametro);
+					//console.log(data.data);
 					//localStorage[paramToKey[parametro.tipo_consulta]] = JSON.stringify(data.data);
 					//console.log(localStorage[paramToKey[parametro.tipo_consulta]]);
 				});
