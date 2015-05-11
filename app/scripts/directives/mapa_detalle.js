@@ -18,13 +18,15 @@ angular.module('yvyUiApp')
         var detailOpen = false;
         var crearPopup = function (){
           var definicion = 
-              '<h4><span class="label label-primary">Detalles del Establecimiento</span></h4><br/>'+
+              '<button class="btn btn-tag tag-red" id="right-panel" href="#right-panel-link" title="Cerrar el detalle">X</button>'+
+              '<br/><br/>'+
+              '<h4>'+
+                '<span class="label label-primary">Detalles del Establecimiento</span>'+
+              '</h4>'+
               '<table id="popupTable" class="table table-striped table-bordered">'+
               '<tbody>'+
               '</tbody>'+
-              '</table>'+
-              '<br/>'+
-              '<a class="btn btn-tag tag" id="right-panel" href="#right-panel-link">¿Finalizar la Consulta?</a>';
+              '</table>';
           angular.element('#mapa-establecimiento-popup').html(definicion);
           
           function onOpen(){

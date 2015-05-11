@@ -22,7 +22,7 @@ angular.module('yvyUiApp')
         var filtrosBotones = {periodo: ['2014', '2012'], nombre_zona:['RURAL', 'URBANA'], proyecto111:['SI', 'NO'], proyecto822:['SI', 'NO']};
 
         //Definicion de un array, donde cada indice representa el filtro (Ej: departamento, distrito), donde cada indice esta asociado a un array con los valores posibles para el mismo
-        var filtrosSelect = {codigo_establecimiento:[] , nombre_departamento:[], nombre_distrito:[], nombre_barrio_localidad:[]};
+        var filtrosSelect = {nombre_departamento:[], nombre_distrito:[], nombre_barrio_localidad:[]};
 
         /*
         Funcion que se ejecuta por cada parametro nuevo de filtrado. En la misma se reconstruyen los filtros, y posteriormente,
