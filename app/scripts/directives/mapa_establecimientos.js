@@ -26,11 +26,14 @@ angular.module('yvyUiApp')
 
         $('#left-panel').panelslider({
                                   side: 'left',
-                                  duration: 300,
+                                  duration: 1,
                                   clickClose: false,
                                   container: $('[ng-view]'),
-                                  onOpen: function(){
+                                  onStartOpen: function(){
                                     //invalidateSize(true);
+                                  },
+                                  onOpen: function(){
+                                    invalidateSize(true);
                                   },
                                   onClose: function(){
                                     var width = rightPanelOpen ? 'calc(100% - 350px)' : '100%'
@@ -63,11 +66,10 @@ angular.module('yvyUiApp')
 
         var fitMap = function(map, bounds, zoom, callback){
           if(MECONF.geoJsonLayer.getLayers().length){
-            map.off('zoomend', updateMap);
-            map.off('move', updateMap);
-            map.on('moveend', function(){ addUpdateHandlers(callback); });
             if(filterFlag){
-              map.fitBounds(MECONF.geoJsonLayer.getBounds(), {maxZoom: result.maxZoom, paddingTopLeft: [0, 50]});
+              map.off('move', updateMap);
+              map.once('moveend', function(){ addUpdateHandlers(callback); });
+              map.fitBounds(MECONF.geoJsonLayer.getBounds(), {maxZoom: result.maxZoom});
             }
             filterFlag = true;
           }else{
@@ -77,9 +79,8 @@ angular.module('yvyUiApp')
         
         var addUpdateHandlers = function(callback){
           //map.on('zoomend', updateMap);
-          callback();
+          if(_.isFunction(callback)) callback();
           map.on('move', updateMap);
-          map.off('moveend', addUpdateHandlers);
         }
 
         scope.$on('detail-open', function(){
@@ -91,10 +92,9 @@ angular.module('yvyUiApp')
         });
 
         scope.$on('detail-start-open', function(){
-          map.off('zoomend', updateMap);
           map.off('move', updateMap);
           map.on('moveend', addUpdateHandlers);
-          map.setZoom(16, {animate: true});
+          map.setZoom(17, {animate: true});
           map.panTo(target.layer.getLatLng());
         });
 
@@ -204,13 +204,14 @@ angular.module('yvyUiApp')
 
         }
 
-        var updateMap = _.throttle(function(){ draw_map(); }, 100);
+        var updateMap = _.throttle(function(){ draw_map(); }, 200);
 
         /* Funcion que dibuja el mapa de acuerdo a los establecimientos filtrados y al zoom actual */
         var draw_map = function(filtros){
           console.time('draw_map');
           console.time('primera parte');
           var maxZoom, e, filterByDepartamento, filterByDistrito, filterByLocalidad, levelZoom = map.getZoom();
+          MECONF.currentZoom = MECONF.currentZoom || levelZoom;
           var redrawClusters = filtros || levelZoom !== MECONF.currentZoom;
           var testLayer = L.mapbox.featureLayer();
 
@@ -231,7 +232,9 @@ angular.module('yvyUiApp')
           console.timeEnd('primera parte');
           //console.log('levelZoom: ' + levelZoom);
           console.time('filtrado');
+          console.log('zoom: ' + levelZoom);
           if(redrawClusters){
+            console.log('GET CLUSTER BY ZOOM');
             e = getClusterByZoom(levelZoom);
           }else{
             e = MECONF.geoJsonLayer.getGeoJSON();
@@ -245,11 +248,12 @@ angular.module('yvyUiApp')
             codigos_establecimientos =  _.pluck(codigos_establecimientos, 'codigo_establecimiento');
             //scope.$parent.getInstituciones(codigos_establecimientos); //El controller se encarga de cargar la Lista de Detalles
           }
-          var bounds = map.getBounds(), outerBounds;
-          var afterFit = function(){ drawVisibleMarkers(bounds)};
+          var afterFit = function(){ drawVisibleMarkers(e)};
           console.timeEnd('bounds');
 
-          console.time('visible');
+          console.time('ultimo');
+          var outerBounds;
+          console.log(redrawClusters);
           if(redrawClusters){
             MECONF.infoBox.update(MECONF.establecimientosVisibles.features);
             if(filtros){
@@ -258,15 +262,28 @@ angular.module('yvyUiApp')
               console.log(levelZoom);
               fitMap(map, outerBounds, levelZoom, afterFit);
               levelZoom = map.getZoom();
-              e = getClusterByZoom(levelZoom);
+              //e = getClusterByZoom(levelZoom);
+
+            }else{
+              drawVisibleMarkers(e);
             }
+            //console.time('esta');
+            //console.timeEnd('esta');
+
+          }else{
+            drawVisibleMarkers(e);
           }
           
+          MECONF.currentZoom = levelZoom;
+          console.timeEnd('ultimo');              
+          console.timeEnd('draw_map');
           return {map: map, maxZoom: maxZoom };
         };
 
-        var drawVisibleMarkers = function(bounds){
-          e.features = _.filter(e.allFeatures, function(punto){
+        var drawVisibleMarkers = function(e){
+          console.time('visible');
+          var bounds = map.getBounds();
+          e.features = _.filter(MECONF.allFeatures, function(punto){
             var latLon = [punto.geometry.coordinates[1], punto.geometry.coordinates[0]];
             return bounds.contains(latLon);
           });
@@ -277,8 +294,7 @@ angular.module('yvyUiApp')
           MECONF.geoJsonLayer.setGeoJSON(e);
           console.timeEnd('geojson');
 
-          console.timeEnd('draw_map');
-          MECONF.currentZoom = levelZoom;
+          //MECONF.currentZoom = levelZoom;
         }
 
         var getClusterByZoom = function(levelZoom){
@@ -297,7 +313,7 @@ angular.module('yvyUiApp')
               console.log('no cluster');
               e = _.clone(MECONF.establecimientosVisibles);
             }
-            e.allFeatures = e.features;
+            MECONF.allFeatures = e.features;
             return e;
         }
 
@@ -333,7 +349,7 @@ angular.module('yvyUiApp')
             var key = keyAccesor(f);
             if(clusterIndex[key]){
               clusterIndex[key].properties.cantidad++;
-              clusterIndex[key].properties.targetChild = f;
+              //clusterIndex[key].properties.targetChild = f;
             } 
           });
           console.timeEnd('cluster features');
@@ -353,7 +369,7 @@ angular.module('yvyUiApp')
         /* Funcion que carga el resumen del Popup */
         function draw_popup(t){
           target = t;
-          console.log(target);
+          var targetZoom;
           //map.panTo(target.layer.getLatLng()); //funcion que centra el mapa sobre el marker
 
           scope.$apply(function(){
@@ -363,9 +379,11 @@ angular.module('yvyUiApp')
               scope.detalle = target.layer.feature.properties;
               MECONF.infoBox.update(target.layer.feature);
             }else{
-              targetChild = target.layer.feature.properties.targetChild; //Se toma el primero, se podria tomar random tambien
+              //targetChild = target.layer.feature.properties.targetChild; //Se toma el primero, se podria tomar random tambien
+              targetZoom = _.find(_.values(MECONF.nivelesZoom), function(z){ return z > levelZoom; });
+              targetChild = mapaEstablecimientoFactory.getClusterElementChild(target.layer.feature);
               latLon = [targetChild.geometry.coordinates[1], targetChild.geometry.coordinates[0]];
-              map.setView(latLon, levelZoom + 3); //funcion que centra el mapa sobre el marker
+              map.setView(latLon, targetZoom); //funcion que centra el mapa sobre el marker
             }
           });
 
@@ -491,7 +509,7 @@ angular.module('yvyUiApp')
           '2012': 'images/marker.png'
         };
 
-        MECONF.nivelesZoom = {departamento:10, distrito:13, barrio_localidad:16}; //niveles de zoom para departamento/distrito/barrioLocalidad
+        MECONF.nivelesZoom = {departamento:11, distrito:14, barrio_localidad:17}; //niveles de zoom para departamento/distrito/barrioLocalidad
 
         var establecimientos;
         var map = init_map();
