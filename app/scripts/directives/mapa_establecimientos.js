@@ -208,8 +208,6 @@ angular.module('yvyUiApp')
           MECONF.geoJsonLayer.on('click', draw_popup);
 
           MECONF.geoJsonLayer.on('mouseover', function(e){
-            
-            console.log('mouseover');
             var features, properties;
             if (MECONF.currentZoom >= MECONF.nivelesZoom['barrio_localidad']){ //Hover para un solo establecimiento
               //features = e.layer.feature;
@@ -221,14 +219,11 @@ angular.module('yvyUiApp')
                 if(properties.nombre_barrio_localidad){ result = result && _.deburr(n.properties['nombre_barrio_localidad']) == _.deburr(properties.nombre_barrio_localidad); }
                 return result;
               });
+              MECONF.infoBox.update(features);
             }
-
-            MECONF.infoBox.update(features);
-
           });
           
           MECONF.geoJsonLayer.on('mouseout', function(){
-            console.log('mouseout');
             if (MECONF.currentZoom >= MECONF.nivelesZoom['barrio_localidad']){ //Hover para un solo establecimiento
               //nothing to do
             }else{
