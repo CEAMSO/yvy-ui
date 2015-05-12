@@ -206,11 +206,21 @@ angular.module('yvyUiApp')
 
           MECONF.geoJsonLayer.on('mouseover', function(e){
             console.log('mouseover');
-            console.log(e.layer.feature);
-            MECONF.infoBox.update(e.layer.feature);
+            var p = e.layer.feature.properties;
+            var features = _.filter(_.mapValues(MECONF.establecimientosVisibles.features, 'properties'), function(n) {
+              var result = _.deburr(n.nombre_departamento) == _.deburr(p.nombre_departamento);
+              if(p.nombre_distrito){ result = result && _.deburr(n.nombre_distrito) == _.deburr(p.nombre_distrito); }
+              if(p.nombre_barrio_localidad){ result = result && _.deburr(n.nombre_barrio_localidad) == _.deburr(p.nombre_barrio_localidad); }
+              return result;
+            });
+
+            console.log(features);
+
+            MECONF.infoBox.update(features);
           });
           
           MECONF.geoJsonLayer.on('mouseout', function(){
+            console.log('mouseout');
             MECONF.infoBox.update();
           });
           
@@ -393,15 +403,22 @@ angular.module('yvyUiApp')
           };
 
           // method that we will use to update the control based on feature properties passed
-          info.update = function (f) {
+          info.update = function (f, tipo) {
               var msg = this._div.innerHTML;
-              if (f instanceof Array) {
-                  //Cuando se hace hover sobre un Marker de Cluster
+              if (f instanceof Array) { //Cuando se hace hover sobre un Marker de Cluster
+                  console.log('infoBox - f instanceof');
+                  msg = get_summary_message(f);
+              } else if (f) {  //Cuando es hace el popup de un Marker
+                console.log('infoBox - individual');
+                msg = sprintf('Mostrando un establecimiento<br/>del departamento %s,<br/>del distrito %s,<br/>de la localidad %s',
+                          f.properties['nombre_departamento'], f.properties['nombre_distrito'], f.properties['nombre_barrio_localidad']);
+              }else if(typeof f === 'undefined'){ //Primera vez
+                console.log('infoBox - por defecto');
+                if(MECONF.establecimientosVisibles){
                   msg = get_summary_message(MECONF.establecimientosVisibles.features);
-              } else if (f) {
-                  //Cuando es hace el popup de un Marker
-                  msg = sprintf('Mostrando un establecimiento del departamento %s',
-                          f.properties['nombre_departamento']);
+                }else{
+                  //nothing to do
+                }
               }
 
               this._div.innerHTML = msg;
@@ -416,6 +433,13 @@ angular.module('yvyUiApp')
                   return f.properties['nombre_departamento'];
               })
               .filter(function(e){ return e !== 'ASUNCION';})
+              .unique().value().length;
+
+          var cantidadDistritos = _(features).chain()
+              .map(function (f) {
+                  return f.properties['nombre_distrito'];
+              })
+              //.filter(function(e){ return e !== 'ASUNCION';})
               .unique().value().length;
 
           if (cantidadDepartamentos === 0) {
