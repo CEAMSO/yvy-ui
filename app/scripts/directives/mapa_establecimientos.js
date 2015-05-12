@@ -208,23 +208,32 @@ angular.module('yvyUiApp')
           MECONF.geoJsonLayer.on('click', draw_popup);
 
           MECONF.geoJsonLayer.on('mouseover', function(e){
+            
             console.log('mouseover');
-            var p = e.layer.feature.properties;
-            var features = _.filter(_.mapValues(MECONF.establecimientosVisibles.features, 'properties'), function(n) {
-              var result = _.deburr(n.nombre_departamento) == _.deburr(p.nombre_departamento);
-              if(p.nombre_distrito){ result = result && _.deburr(n.nombre_distrito) == _.deburr(p.nombre_distrito); }
-              if(p.nombre_barrio_localidad){ result = result && _.deburr(n.nombre_barrio_localidad) == _.deburr(p.nombre_barrio_localidad); }
-              return result;
-            });
-
-            console.log(features);
+            var features, properties;
+            if (MECONF.currentZoom >= MECONF.nivelesZoom['barrio_localidad']){ //Hover para un solo establecimiento
+              //features = e.layer.feature;
+            }else{
+              properties = e.layer.feature.properties;
+              features = _.filter(MECONF.establecimientosVisibles.features, function(n) {
+                var result = _.deburr(n.properties['nombre_departamento']) == _.deburr(properties.nombre_departamento);
+                if(properties.nombre_distrito){ result = result && _.deburr(n.properties['nombre_distrito']) == _.deburr(properties.nombre_distrito); }
+                if(properties.nombre_barrio_localidad){ result = result && _.deburr(n.properties['nombre_barrio_localidad']) == _.deburr(properties.nombre_barrio_localidad); }
+                return result;
+              });
+            }
 
             MECONF.infoBox.update(features);
+
           });
           
           MECONF.geoJsonLayer.on('mouseout', function(){
             console.log('mouseout');
-            MECONF.infoBox.update();
+            if (MECONF.currentZoom >= MECONF.nivelesZoom['barrio_localidad']){ //Hover para un solo establecimiento
+              //nothing to do
+            }else{
+              MECONF.infoBox.update();
+            }
           });
           
           MECONF.geoJsonLayer.addTo(map);
@@ -442,7 +451,7 @@ angular.module('yvyUiApp')
           };
 
           // method that we will use to update the control based on feature properties passed
-          info.update = function (f, tipo) {
+          info.update = function (f) {
               var msg = this._div.innerHTML;
               if (f instanceof Array) { //Cuando se hace hover sobre un Marker de Cluster
                   console.log('infoBox - f instanceof');
@@ -478,7 +487,12 @@ angular.module('yvyUiApp')
               .map(function (f) {
                   return f.properties['nombre_distrito'];
               })
-              //.filter(function(e){ return e !== 'ASUNCION';})
+              .unique().value().length;
+
+          var cantidadBarriosLocalidaes = _(features).chain()
+              .map(function (f) {
+                  return f.properties['nombre_barrio_localidad'];
+              })
               .unique().value().length;
 
           if (cantidadDepartamentos === 0) {
@@ -493,8 +507,12 @@ angular.module('yvyUiApp')
 
           var establecimientosLabel = cantidadEstablecimientos > 1 ? 'establecimientos' : 'establecimiento';
           var departamentoLabel = cantidadDepartamentos > 1 ? 'departamentos' : 'departamento';
-          return sprintf('%s %s de %s %s',
-                  cantidadEstablecimientos, establecimientosLabel, cantidadDepartamentos, departamentoLabel);
+          var distritoLabel = cantidadDistritos > 1 ? 'distritos' : 'distrito';
+          var barrioLocalidadLabel = cantidadBarriosLocalidaes > 1 ? 'Localidades' : 'Localidad';
+
+          return sprintf('%s %s de %s %s con %s %s y %s %s',
+                  cantidadEstablecimientos, establecimientosLabel, cantidadDepartamentos, departamentoLabel,
+                  cantidadDistritos, distritoLabel, cantidadBarriosLocalidaes, barrioLocalidadLabel);
         }
 
         //Funcion que inicializa el Spinner (Loading)
