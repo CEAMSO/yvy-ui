@@ -32,9 +32,12 @@ angular.module('yvyUiApp')
 
       mapaEstablecimientoFactory.getDatosCluster(parametro);
 
-      parametro = { tipo_consulta:'12' }; //Todas las instituciones con periodo 2014
+      //parametro = { tipo_consulta:'12' };
+      //mapaEstablecimientoFactory.getDatosInstituciones(parametro);
 
-      mapaEstablecimientoFactory.getDatosInstituciones(parametro);
+      //parametro = { tipo_consulta:'13', establecimiento:'1101034' };
+      //mapaEstablecimientoFactory.getDatosInstituciones(parametro);
+      
     }); 
     
   });

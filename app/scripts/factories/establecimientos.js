@@ -13,8 +13,7 @@ angular.module('yvyUiApp')
   		'01': 'cluster_departamento',
   		'02': 'cluster_distrito',
   		'03': 'cluster_barrio_localidad',
-  		'11': 'establecimientos',
-  		'12': 'instituciones'
+  		'11': 'establecimientos'
   	}
 
   	var clusterIndexes = {};
@@ -131,10 +130,8 @@ angular.module('yvyUiApp')
 				};
 
 				return $http(req).then(function(data){
-					//console.log(parametro);
-					//console.log(data.data);
-					//localStorage[paramToKey[parametro.tipo_consulta]] = JSON.stringify(data.data);
-					//console.log(localStorage[paramToKey[parametro.tipo_consulta]]);
+					console.log('Instituciones');
+					console.log(data.data[0]);
 				});
 
 				/*

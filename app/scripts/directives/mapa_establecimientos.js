@@ -101,8 +101,15 @@ angular.module('yvyUiApp')
         scope.$on('detail-close', function(){
           rightPanelOpen = false;
           invalidateSize(true);
-          MECONF.infoBox.update(MECONF.establecimientosVisibles.features);
+          var geojson = MECONF.geoJsonLayer.getGeoJSON();
+          var existeMarker = _.findIndex(geojson.features, function(n){
+            return n.properties.codigo_establecimiento == markerPopup.properties.codigo_establecimiento;
+          });
           markerPopup = '';
+          if (existeMarker >= 0){
+            MECONF.geoJsonLayer.setGeoJSON(MECONF.geoJsonLayer.getGeoJSON());
+          }
+          MECONF.infoBox.update();
           //map.setView([-23.388, -57.189], 6, {animate: true});
         });
 
@@ -170,15 +177,13 @@ angular.module('yvyUiApp')
           geoJson.on('layeradd', function (e) {
             var icon, color, marker = e.layer,
                     feature = marker.feature;
-            
-            if(markerPopup == feature.properties.codigo_establecimiento){
 
+            if( markerPopup && (markerPopup.properties.codigo_establecimiento == feature.properties.codigo_establecimiento) ){
               var img = MECONF.ESTADO_TO_ICON['markerPopup'];
               marker.setIcon(L.icon({
                 iconUrl: img,
                 iconSize: [50, 60]
               }));
-
             }else{
               if (feature.properties['periodo']) {
                 color = 'orange';
@@ -289,7 +294,7 @@ angular.module('yvyUiApp')
           var outerBounds;
           console.log(redrawClusters);
           if(redrawClusters){
-            MECONF.infoBox.update(MECONF.establecimientosVisibles.features);
+            MECONF.infoBox.update();
             if(filtros){
               MECONF.geoJsonLayer.setGeoJSON(e);
               outerBounds = MECONF.geoJsonLayer.getBounds();
@@ -339,7 +344,6 @@ angular.module('yvyUiApp')
             } else if ((levelZoom >= MECONF.nivelesZoom['departamento'] && levelZoom < MECONF.nivelesZoom['distrito'])) { //cluster por distrito
               e = filtrar_cluster('distrito');
               console.log('cluster by distrito');
-
             } else if ((levelZoom >= MECONF.nivelesZoom['distrito'] && levelZoom < MECONF.nivelesZoom['barrio_localidad'])) { //cluster por barrio/localidad
               console.log('cluster by localidad');
               e = filtrar_cluster('barrio_localidad');
@@ -413,12 +417,16 @@ angular.module('yvyUiApp')
             if(levelZoom >= MECONF.nivelesZoom['barrio_localidad']){ //Verificamos el zoom para mostrar el popup
               console.log('InicioPopup');
               
-              var icon, color, marker = target.layer,
+              var marker = target.layer,
                       feature = marker.feature;
+              
+              var img = MECONF.ESTADO_TO_ICON['markerPopup'];
+              marker.setIcon(L.icon({
+                iconUrl: img,
+                iconSize: [50, 60]
+              }));
 
-              markerPopup = feature.properties.codigo_establecimiento;
-              latLon = [feature.geometry.coordinates[1], feature.geometry.coordinates[0]];
-              map.setView(latLon);
+              markerPopup = feature;
 
               console.log('FinPopup');
               scope.detalle = target.layer.feature.properties;
@@ -449,14 +457,11 @@ angular.module('yvyUiApp')
           info.update = function (f) {
               var msg = this._div.innerHTML;
               if (f instanceof Array) { //Cuando se hace hover sobre un Marker de Cluster
-                  console.log('infoBox - f instanceof');
-                  msg = get_summary_message(f);
+                msg = get_summary_message(f);
               } else if (f) {  //Cuando es hace el popup de un Marker
-                console.log('infoBox - individual');
                 msg = sprintf('Mostrando un establecimiento<br/>del departamento %s,<br/>del distrito %s,<br/>de la localidad %s',
                           f.properties['nombre_departamento'], f.properties['nombre_distrito'], f.properties['nombre_barrio_localidad']);
               }else if(typeof f === 'undefined'){ //Primera vez
-                console.log('infoBox - por defecto');
                 if(MECONF.establecimientosVisibles){
                   msg = get_summary_message(MECONF.establecimientosVisibles.features);
                 }else{
