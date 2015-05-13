@@ -6,7 +6,7 @@
  * # mapaLeaflet
  */
 angular.module('yvyUiApp')
-  .directive('mapaFiltro', function () {
+  .directive('mapaFiltro', function (mapaEstablecimientoFactory) {
     return {
       restrict: 'E',
       replace: false,
@@ -163,7 +163,7 @@ angular.module('yvyUiApp')
         var unwatch =  scope.$watch('ready', function(ready) {
           if(ready){
             unwatch(); //Remove the watch
-            establecimientos = JSON.parse(localStorage['establecimientos']);
+            establecimientos = mapaEstablecimientoFactory.getEstablecimientos();
             scope.updateFiltro(true);
             console.time('cargar establecimientos');
             cargar(establecimientos);

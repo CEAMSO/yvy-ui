@@ -17,17 +17,7 @@ angular.module('yvyUiApp')
       link: function postLink(scope, element, attrs) {
         var detailOpen = false;
         var crearPopup = function (){
-          var definicion = 
-              '<button class="btn btn-tag tag-red" id="right-panel" href="#right-panel-link" title="Cerrar el detalle">X</button>'+
-              '<br/><br/>'+
-              '<h4>'+
-                '<span class="label label-primary">Detalles del Establecimiento</span>'+
-              '</h4>'+
-              '<table id="popupTable" class="table table-striped table-bordered">'+
-              '<tbody>'+
-              '</tbody>'+
-              '</table>';
-          angular.element('#mapa-establecimiento-popup').html(definicion);
+          angular.element('#popupTable tbody').html('');
           
           function onOpen(){
             $('#left-panel').css('margin-left', '280px');
@@ -38,7 +28,7 @@ angular.module('yvyUiApp')
           }
           $('#right-panel').panelslider({
                                 side: 'right',
-                                duration: 300,
+                                duration: 1,
                                 clickClose: false,
                                 container: $('[ng-view]'),
                                 onStartOpen: function(){

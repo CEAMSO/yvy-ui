@@ -52,16 +52,18 @@ angular.module('yvyUiApp')
         
         /* El watch nos permitira filtrar los establecimientos (y por consiguiente, los respectivos Markers) */
         scope.$watch('filtro', function(filtro){
-          
+          console.log('watch mapa');
           if(filtro){
+            console.time('filtrando');
             var establecimientos_visibles = establecimientos;
             $.each(filtro, function(index, value){
               establecimientos_visibles = filtrar_establecimientos(establecimientos_visibles, value);
             });
             MECONF.establecimientosVisibles = establecimientos_visibles;
+            console.timeEnd('filtrando');
             result = draw_map(filtro);
           }
-
+          console.log(filtro);
         });
 
         var fitMap = function(map, bounds, zoom, callback){
@@ -73,7 +75,7 @@ angular.module('yvyUiApp')
             }
             filterFlag = true;
           }else{
-            map.setView([-23.388, -57.189], 6, {animate: true});
+            map.setView([-24, -57.189], 7, {animate: true});
           }
         }
         
@@ -144,7 +146,7 @@ angular.module('yvyUiApp')
 
 
           var map = L.map('map', {maxZoom: 18, minZoom: 3, worldCopyJump: true, attributionControl: false})
-                  .setView([-23.388, -57.189], 6)
+                  .setView([-24, -57.189], 7)
                   .on('baselayerchange', startLoading);
 
           var baseMaps = {
@@ -164,11 +166,19 @@ angular.module('yvyUiApp')
           return map;
         };
 
+        var getMarkerClass = function(feature){
+          var clazz = 'm1';
+          if(feature.properties.cantidad > 9) clazz = 'm2';
+          if(feature.properties.cantidad > 99) clazz = 'm3';
+          if(feature.properties.cantidad > 999) clazz = 'm4';
+          return clazz;
+        }
+
         var draw_markers = function(){
           var geoJson = L.mapbox.featureLayer();
 
           geoJson.on('layeradd', function (e) {
-            var icon, color, marker = e.layer,
+            var content, icon, color, marker = e.layer,
                     feature = marker.feature;
             
             if(markerPopup == feature.properties.codigo_establecimiento){
@@ -189,11 +199,10 @@ angular.module('yvyUiApp')
                 });
               }else{
                 color = 'blue';
-                icon = L.AwesomeMarkers.icon({
-                  icon: '',
-                  markerColor: color,
-                  prefix: 'fa',
-                  html: feature.properties.cantidad
+                content = sprintf('<div>%s</div>', feature.properties.cantidad);
+                icon = L.divIcon({
+                  className: getMarkerClass(feature),
+                  html: content
                 });
               }
               marker.setIcon(icon);
@@ -319,26 +328,35 @@ angular.module('yvyUiApp')
 
         var getClusterByZoom = function(levelZoom){
           var e;
-          if (levelZoom < MECONF.nivelesZoom['departamento']) { //cluster por departamento (por defecto)
-              e = filtrar_cluster('departamento');
-              console.log('cluster by departamento');
-            } else if ((levelZoom >= MECONF.nivelesZoom['departamento'] && levelZoom < MECONF.nivelesZoom['distrito'])) { //cluster por distrito
-              e = filtrar_cluster('distrito');
-              console.log('cluster by distrito');
+          if(levelZoom < MECONF.nivelesZoom['pais']){
+            e = filtrar_cluster('pais');
+          } else if (levelZoom < MECONF.nivelesZoom['departamento']) { //cluster por departamento (por defecto)
+            e = filtrar_cluster('departamento');
+            console.log('cluster by departamento');
+          } else if ((levelZoom >= MECONF.nivelesZoom['departamento'] && levelZoom < MECONF.nivelesZoom['distrito'])) { //cluster por distrito
+            e = filtrar_cluster('distrito');
+            console.log('cluster by distrito');
 
-            } else if ((levelZoom >= MECONF.nivelesZoom['distrito'] && levelZoom < MECONF.nivelesZoom['barrio_localidad'])) { //cluster por barrio/localidad
-              console.log('cluster by localidad');
-              e = filtrar_cluster('barrio_localidad');
-            }else{
-              console.log('no cluster');
-              e = _.clone(MECONF.establecimientosVisibles);
-            }
-            MECONF.allFeatures = e.features;
-            return e;
+          } else if ((levelZoom >= MECONF.nivelesZoom['distrito'] && levelZoom < MECONF.nivelesZoom['barrio_localidad'])) { //cluster por barrio/localidad
+            console.log('cluster by localidad');
+            e = filtrar_cluster('barrio_localidad');
+          }else{
+            console.log('no cluster');
+            e = _.clone(MECONF.establecimientosVisibles);
+          }
+          MECONF.allFeatures = e.features;
+          return e;
         }
 
         /* Funcion que filtra el cluster a mostrar, ya sea por Departamentos/Distritos/BarrioLocalidad */
         var filtrar_cluster = function(tipo){
+          var clusterPais;
+          if(tipo === 'pais'){
+            clusterPais = mapaEstablecimientoFactory.getCentroPais();
+            clusterPais.features[0].properties.cantidad = MECONF.establecimientosVisibles.features.length;
+            return clusterPais;
+          }
+
           var tipo_cluster = 'cluster_'+tipo;
           //Reemplazar por llamada al service
           console.time('cluster index');
@@ -397,7 +415,6 @@ angular.module('yvyUiApp')
             var levelZoom = map.getZoom();
             var latLon, targetChild, targetZoom;
             if(levelZoom >= MECONF.nivelesZoom['barrio_localidad']){ //Verificamos el zoom para mostrar el popup
-              console.log('InicioPopup');
               
               var icon, color, marker = target.layer,
                       feature = marker.feature;
@@ -406,7 +423,6 @@ angular.module('yvyUiApp')
               latLon = [feature.geometry.coordinates[1], feature.geometry.coordinates[0]];
               map.setView(latLon);
 
-              console.log('FinPopup');
               scope.detalle = target.layer.feature.properties;
               MECONF.infoBox.update(target.layer.feature);
 
@@ -540,7 +556,7 @@ angular.module('yvyUiApp')
           'markerPopup': '/images/marker.png'
         };
 
-        MECONF.nivelesZoom = {departamento:11, distrito:14, barrio_localidad:17}; //niveles de zoom para departamento/distrito/barrioLocalidad
+        MECONF.nivelesZoom = {pais: 6, departamento:11, distrito:14, barrio_localidad:17}; //niveles de zoom para departamento/distrito/barrioLocalidad
 
         var establecimientos;
         var map = init_map();
@@ -554,7 +570,7 @@ angular.module('yvyUiApp')
             console.time('draw Markers');
             draw_markers();
             console.timeEnd('draw Markers');
-            establecimientos = JSON.parse(localStorage['establecimientos']);
+            establecimientos = mapaEstablecimientoFactory.getEstablecimientos();
             console.timeEnd('servicio');
             finishedLoading();
 
