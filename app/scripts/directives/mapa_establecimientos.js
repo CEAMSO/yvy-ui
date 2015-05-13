@@ -365,6 +365,7 @@ angular.module('yvyUiApp')
           console.time('cluster index');
           //build a cluster index
           var clusterIndex = mapaEstablecimientoFactory.getClusterIndex(tipo_cluster);
+          var coordinatesIndex = {};
           console.timeEnd('cluster index');
 
           var e =  
@@ -390,9 +391,20 @@ angular.module('yvyUiApp')
             var key = keyAccesor(f);
             if(clusterIndex[key]){
               clusterIndex[key].properties.cantidad++;
+              coordinatesIndex[key] = f.geometry.coordinates;
               //clusterIndex[key].properties.targetChild = f;
+            }
+          });
+
+          /* Si el cluster es de un elemento, se desplaza su centro:
+             Del centroide del poligono al punto del unico establecimiento del cluster
+          */
+          _.forOwn(clusterIndex, function(c, k){
+            if(c.properties.cantidad === 1){
+              c.geometry.coordinates = coordinatesIndex[k];    
             } 
           });
+
           console.timeEnd('cluster features');
 
           console.time('cluster filter');

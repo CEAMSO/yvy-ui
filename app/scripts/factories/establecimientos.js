@@ -59,16 +59,13 @@ angular.module('yvyUiApp')
 						return c;
 					});
 				}else{
-					console.time('cluster parse');
-					var cluster = JSON.parse(localStorage[key]);
-					console.timeEnd('cluster parse');
-					var clusterIndex = {};
+					console.time('cluster parse ' + key);
+					var cluster = (key === 'establecimientos') ? establecimientos : JSON.parse(localStorage[key]);
+					console.timeEnd('cluster parse ' + key);
+					var clusterIndex;
 					//build a cluster index
 					if(cluster){
-				        _.each(cluster.features, function(c){
-			          		var key = getKeyFromFeature(c);
-			          		clusterIndex[key] = c;
-				        });
+				  	clusterIndex = _.indexBy(cluster.features, function(c){ return getKeyFromFeature(c); });
 					}else{
 						console.log('Invalid cluster key');
 					}
@@ -113,7 +110,8 @@ angular.module('yvyUiApp')
 
 				return $http(req).then(function(data){
 					//localStorage[paramToKey[parametro.tipo_consulta]] = JSON.stringify(data.data);
-					localStorage[paramToKey[parametro.tipo_consulta]] = JSON.stringify(data);
+					var result = JSON.stringify(data);
+					localStorage[paramToKey[parametro.tipo_consulta]] = result;
 				});
 			},
 
@@ -121,6 +119,7 @@ angular.module('yvyUiApp')
 				var data = JSON.parse(localStorage['establecimientos']);
 				var objeto = _.keys(data.data.objects);
 				establecimientos = topojson.feature(data.data, data.data.objects[objeto]);
+				
 				return establecimientos;
 			},
 
