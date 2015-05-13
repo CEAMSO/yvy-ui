@@ -438,7 +438,9 @@ angular.module('yvyUiApp')
             if(levelZoom >= MECONF.nivelesZoom['barrio_localidad']){ //Verificamos el zoom para mostrar el popup
               
               var marker = target.layer,
-                      markerPopup = marker.feature;
+                      feature = marker.feature;
+              
+              markerPopup = feature;
 
               var geojson = MECONF.geoJsonLayer.getGeoJSON();
               geojson.features.push(markerPopup);
