@@ -104,7 +104,7 @@ angular.module('yvyUiApp')
           rightPanelOpen = false;
           invalidateSize(true);
           MECONF.infoBox.update(MECONF.establecimientosVisibles.features);
-          removeCircles();
+          markerPopup = '';
           //map.setView([-23.388, -57.189], 6, {animate: true});
         });
 
@@ -465,14 +465,11 @@ angular.module('yvyUiApp')
           info.update = function (f) {
               var msg = this._div.innerHTML;
               if (f instanceof Array) { //Cuando se hace hover sobre un Marker de Cluster
-                  console.log('infoBox - f instanceof');
-                  msg = get_summary_message(f);
+                msg = get_summary_message(f);
               } else if (f) {  //Cuando es hace el popup de un Marker
-                console.log('infoBox - individual');
                 msg = sprintf('Mostrando un establecimiento<br/>del departamento %s,<br/>del distrito %s,<br/>de la localidad %s',
                           f.properties['nombre_departamento'], f.properties['nombre_distrito'], f.properties['nombre_barrio_localidad']);
               }else if(typeof f === 'undefined'){ //Primera vez
-                console.log('infoBox - por defecto');
                 if(MECONF.establecimientosVisibles){
                   msg = get_summary_message(MECONF.establecimientosVisibles.features);
                 }else{
