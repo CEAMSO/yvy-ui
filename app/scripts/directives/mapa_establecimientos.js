@@ -438,15 +438,14 @@ angular.module('yvyUiApp')
             if(levelZoom >= MECONF.nivelesZoom['barrio_localidad']){ //Verificamos el zoom para mostrar el popup
               
               var marker = target.layer,
-                      feature = marker.feature;
-              
-              var img = MECONF.ESTADO_TO_ICON['markerPopup'];
-              marker.setIcon(L.icon({
-                iconUrl: img,
-                iconSize: [50, 60]
-              }));
+                      markerPopup = marker.feature;
 
-              markerPopup = feature;
+              var geojson = MECONF.geoJsonLayer.getGeoJSON();
+              geojson.features.push(markerPopup);
+              MECONF.geoJsonLayer.setGeoJSON(geojson);
+              
+              latLon = [markerPopup.geometry.coordinates[1], markerPopup.geometry.coordinates[0]];
+              map.setView(latLon);
 
               scope.detalle = target.layer.feature.properties;
               MECONF.infoBox.update(target.layer.feature);
