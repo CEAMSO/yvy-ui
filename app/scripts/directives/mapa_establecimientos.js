@@ -104,7 +104,7 @@ angular.module('yvyUiApp')
           rightPanelOpen = false;
           invalidateSize(true);
           MECONF.infoBox.update(MECONF.establecimientosVisibles.features);
-          markerPopup = '';
+          removeCircles();
           //map.setView([-23.388, -57.189], 6, {animate: true});
         });
 
@@ -180,33 +180,23 @@ angular.module('yvyUiApp')
           geoJson.on('layeradd', function (e) {
             var content, icon, color, marker = e.layer,
                     feature = marker.feature;
-            
-            if(markerPopup == feature.properties.codigo_establecimiento){
 
-              var img = MECONF.ESTADO_TO_ICON['markerPopup'];
-              marker.setIcon(L.icon({
-                iconUrl: img,
-                iconSize: [50, 60]
-              }));
-
+            if (feature.properties['periodo']) {
+              color = 'orange';
+              icon = L.AwesomeMarkers.icon({
+                icon: 'home',
+                markerColor: color,
+                prefix: 'glyphicon'
+              });
             }else{
-              if (feature.properties['periodo']) {
-                color = 'orange';
-                icon = L.AwesomeMarkers.icon({
-                  icon: 'home',
-                  markerColor: color,
-                  prefix: 'glyphicon'
-                });
-              }else{
-                color = 'blue';
-                content = sprintf('<div>%s</div>', feature.properties.cantidad);
-                icon = L.divIcon({
-                  className: getMarkerClass(feature),
-                  html: content
-                });
-              }
-              marker.setIcon(icon);
+              color = 'blue';
+              content = sprintf('<div>%s</div>', feature.properties.cantidad);
+              icon = L.divIcon({
+                className: getMarkerClass(feature),
+                html: content
+              });
             }
+            marker.setIcon(icon);
           });
 
           MECONF.infoBox = draw_info_box();
@@ -419,8 +409,15 @@ angular.module('yvyUiApp')
           
         }
 
+        function removeCircles(){
+          map.eachLayer(function(layer){
+            if(layer instanceof L.Circle) map.removeLayer(layer);
+          });
+        }
+
         /* Funcion que carga el resumen del Popup */
         function draw_popup(t){
+          removeCircles();
           target = t;
           console.log(target);
           //map.panTo(target.layer.getLatLng()); //funcion que centra el mapa sobre el marker
@@ -433,9 +430,12 @@ angular.module('yvyUiApp')
               var icon, color, marker = target.layer,
                       feature = marker.feature;
 
-              markerPopup = feature.properties.codigo_establecimiento;
               latLon = [feature.geometry.coordinates[1], feature.geometry.coordinates[0]];
               map.setView(latLon);
+              var circle = L.circle(latLon, 25, {
+                  color: 'blue',
+                  fillOpacity: 0.5
+              }).addTo(map);
 
               scope.detalle = target.layer.feature.properties;
               MECONF.infoBox.update(target.layer.feature);
@@ -487,20 +487,20 @@ angular.module('yvyUiApp')
         }
 
         function get_summary_message(features) {
-          var cantidadDepartamentos = _(features).chain()
+          var cantidadDepartamentos = _(features)
               .map(function (f) {
                   return f.properties['nombre_departamento'];
               })
               .filter(function(e){ return e !== 'ASUNCION';})
               .unique().value().length;
 
-          var cantidadDistritos = _(features).chain()
+          var cantidadDistritos = _(features)
               .map(function (f) {
                   return f.properties['nombre_distrito'];
               })
               .unique().value().length;
 
-          var cantidadBarriosLocalidaes = _(features).chain()
+          var cantidadBarriosLocalidaes = _(features)
               .map(function (f) {
                   return f.properties['nombre_barrio_localidad'];
               })
@@ -510,7 +510,7 @@ angular.module('yvyUiApp')
               cantidadDepartamentos += 1;
           }
 
-          var cantidadEstablecimientos = _(features).chain()
+          var cantidadEstablecimientos = _(features)
             .map(function (f){
               return f.properties['codigo_establecimiento'];
             })
@@ -589,15 +589,10 @@ angular.module('yvyUiApp')
             }
         };
 
-        MECONF.ESTADO_TO_ICON = {
-          'markerPopup': '/images/marker.png'
-        };
-
         MECONF.nivelesZoom = {pais: 6, departamento:11, distrito:14, barrio_localidad:17}; //niveles de zoom para departamento/distrito/barrioLocalidad
 
         var establecimientos;
         var map = init_map();
-        var markerPopup = '';
 
         var unwatch = scope.$watch('ready', function(ready) {
           //console.log(ready);

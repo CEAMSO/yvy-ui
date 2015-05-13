@@ -105,7 +105,7 @@
 }
 
 .btn-tag:hover {
-  cursor: url(http://cur.cursors-4u.net/symbols/sym-1/sym46.cur), auto;
+  cursor: pointer;
 }
 
 .tag {
