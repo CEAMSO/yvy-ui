@@ -96,16 +96,15 @@ angular.module('yvyUiApp')
         scope.$on('detail-start-open', function(){
           map.off('move', updateMap);
           map.on('moveend', addUpdateHandlers);
-          map.setZoom(17, {animate: true});
-          map.panTo(target.layer.getLatLng());
+          //map.setZoom(17, {animate: true});
+          map.panTo(target.getLatLng());
         });
 
         scope.$on('detail-close', function(){
           rightPanelOpen = false;
           invalidateSize(true);
           MECONF.infoBox.update(MECONF.establecimientosVisibles.features);
-          markerPopup = '';
-          //map.setView([-23.388, -57.189], 6, {animate: true});
+          removeCircles();
         });
 
         scope.$on('detail-start-close', function(){
@@ -181,7 +180,7 @@ angular.module('yvyUiApp')
             var content, icon, color, marker = e.layer,
                     feature = marker.feature;
 
-            if (feature.properties['periodo']) {
+            if (feature.properties['periodo'] || feature.properties.cantidad === 1) {
               color = 'orange';
               icon = L.AwesomeMarkers.icon({
                 icon: 'home',
@@ -418,32 +417,33 @@ angular.module('yvyUiApp')
         /* Funcion que carga el resumen del Popup */
         function draw_popup(t){
           removeCircles();
-          target = t;
-          console.log(target);
+          target = t.layer;
+          var feature = (target.feature.properties.cantidad === 1) ? mapaEstablecimientoFactory.getClusterElementChild(target.feature) : target.feature;
+          //var feature = target.feature;
           //map.panTo(target.layer.getLatLng()); //funcion que centra el mapa sobre el marker
 
           scope.$apply(function(){
             var levelZoom = map.getZoom();
             var latLon, targetChild, targetZoom;
-            if(levelZoom >= MECONF.nivelesZoom['barrio_localidad']){ //Verificamos el zoom para mostrar el popup
+            var icon, color, radius;
+            if(feature.properties['periodo']){ //Verificamos que se trata de un establecimiento
               
-              var icon, color, marker = target.layer,
-                      feature = marker.feature;
-
-              latLon = [feature.geometry.coordinates[1], feature.geometry.coordinates[0]];
-              map.setView(latLon);
-              var circle = L.circle(latLon, 25, {
+              latLon = [target.feature.geometry.coordinates[1], target.feature.geometry.coordinates[0]];
+              radius = Math.pow(19 - levelZoom, 2) * 10;
+              L.circle(latLon, radius, {
                   color: 'blue',
                   fillOpacity: 0.5
-              }).addTo(map);
+                }).addTo(map);
+              scope.detalle = feature.properties;
+              MECONF.infoBox.update(feature);
+              map.setView(latLon);
 
-              scope.detalle = target.layer.feature.properties;
-              MECONF.infoBox.update(target.layer.feature);
+
 
             }else{
               //targetChild = target.layer.feature.properties.targetChild; //Se toma el primero, se podria tomar random tambien
               targetZoom = _.find(_.values(MECONF.nivelesZoom), function(z){ return z > levelZoom; });
-              targetChild = mapaEstablecimientoFactory.getClusterElementChild(target.layer.feature);
+              targetChild = mapaEstablecimientoFactory.getClusterElementChild(target.feature);
               latLon = [targetChild.geometry.coordinates[1], targetChild.geometry.coordinates[0]];
               map.setView(latLon, targetZoom); //funcion que centra el mapa sobre el marker
             }

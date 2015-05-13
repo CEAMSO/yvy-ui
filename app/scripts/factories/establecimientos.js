@@ -83,7 +83,7 @@ angular.module('yvyUiApp')
 				if(e.properties['nombre_barrio_localidad']){
 					children = establecimientos.features;
 				}else if(e.properties['nombre_distrito']){
-						children = _.values(clusterIndexes['cluster_barrio_localidad']);
+					children = _.values(clusterIndexes['cluster_barrio_localidad']);
 				}else if(e.properties['nombre_departamento']){
 					children = _.values(clusterIndexes['cluster_distrito']);
 				}else{
