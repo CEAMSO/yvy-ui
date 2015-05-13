@@ -159,21 +159,20 @@ angular.module('yvyUiApp')
 
 			},
 
-			getCentroPais(){
+			getCentroPais: function(){
 				return {
-              'type': 'FeatureCollection',
-              'features': [
-                {
-                  'geometry': {
-                    'coordinates': [-57.60479328668649, -25.291172101570684],
-                    'type': "Point"
-                  },
-                  'properties': {},
-                  'type': 'Feature'
-                }
-              ]
-            }
+					'type': 'FeatureCollection',
+					'features': [
+						{
+						'geometry': {
+						'coordinates': [-57.60479328668649, -25.291172101570684],
+						'type': "Point"
+						},
+						'properties': {},
+						'type': 'Feature'
+						}
+					]
+		        }
 			}
-
 	}; //return
 });
