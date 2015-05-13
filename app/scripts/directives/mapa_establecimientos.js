@@ -225,6 +225,8 @@ angular.module('yvyUiApp')
             var features, properties;
             if (MECONF.currentZoom >= MECONF.nivelesZoom['barrio_localidad']){ //Hover para un solo establecimiento
               //features = e.layer.feature;
+            }else if(MECONF.currentZoom < MECONF.nivelesZoom['pais']){
+              MECONF.infoBox.update();
             }else{
               properties = e.layer.feature.properties;
               features = _.filter(MECONF.establecimientosVisibles.features, function(n) {
