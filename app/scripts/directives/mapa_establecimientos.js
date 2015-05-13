@@ -217,13 +217,27 @@ angular.module('yvyUiApp')
           MECONF.geoJsonLayer.on('click', draw_popup);
 
           MECONF.geoJsonLayer.on('mouseover', function(e){
-            console.log('mouseover');
-            console.log(e.layer.feature);
-            MECONF.infoBox.update(e.layer.feature);
+            var features, properties;
+            if (MECONF.currentZoom >= MECONF.nivelesZoom['barrio_localidad']){ //Hover para un solo establecimiento
+              //features = e.layer.feature;
+            }else{
+              properties = e.layer.feature.properties;
+              features = _.filter(MECONF.establecimientosVisibles.features, function(n) {
+                var result = _.deburr(n.properties['nombre_departamento']) == _.deburr(properties.nombre_departamento);
+                if(properties.nombre_distrito){ result = result && _.deburr(n.properties['nombre_distrito']) == _.deburr(properties.nombre_distrito); }
+                if(properties.nombre_barrio_localidad){ result = result && _.deburr(n.properties['nombre_barrio_localidad']) == _.deburr(properties.nombre_barrio_localidad); }
+                return result;
+              });
+              MECONF.infoBox.update(features);
+            }
           });
           
           MECONF.geoJsonLayer.on('mouseout', function(){
-            MECONF.infoBox.update();
+            if (MECONF.currentZoom >= MECONF.nivelesZoom['barrio_localidad']){ //Hover para un solo establecimiento
+              //nothing to do
+            }else{
+              MECONF.infoBox.update();
+            }
           });
           
           MECONF.geoJsonLayer.addTo(map);
@@ -450,13 +464,20 @@ angular.module('yvyUiApp')
           // method that we will use to update the control based on feature properties passed
           info.update = function (f) {
               var msg = this._div.innerHTML;
-              if (f instanceof Array) {
-                  //Cuando se hace hover sobre un Marker de Cluster
+              if (f instanceof Array) { //Cuando se hace hover sobre un Marker de Cluster
+                  console.log('infoBox - f instanceof');
+                  msg = get_summary_message(f);
+              } else if (f) {  //Cuando es hace el popup de un Marker
+                console.log('infoBox - individual');
+                msg = sprintf('Mostrando un establecimiento<br/>del departamento %s,<br/>del distrito %s,<br/>de la localidad %s',
+                          f.properties['nombre_departamento'], f.properties['nombre_distrito'], f.properties['nombre_barrio_localidad']);
+              }else if(typeof f === 'undefined'){ //Primera vez
+                console.log('infoBox - por defecto');
+                if(MECONF.establecimientosVisibles){
                   msg = get_summary_message(MECONF.establecimientosVisibles.features);
-              } else if (f) {
-                  //Cuando es hace el popup de un Marker
-                  msg = sprintf('Mostrando un establecimiento del departamento %s',
-                          f.properties['nombre_departamento']);
+                }else{
+                  //nothing to do
+                }
               }
 
               this._div.innerHTML = msg;
@@ -473,6 +494,18 @@ angular.module('yvyUiApp')
               .filter(function(e){ return e !== 'ASUNCION';})
               .unique().value().length;
 
+          var cantidadDistritos = _(features).chain()
+              .map(function (f) {
+                  return f.properties['nombre_distrito'];
+              })
+              .unique().value().length;
+
+          var cantidadBarriosLocalidaes = _(features).chain()
+              .map(function (f) {
+                  return f.properties['nombre_barrio_localidad'];
+              })
+              .unique().value().length;
+
           if (cantidadDepartamentos === 0) {
               cantidadDepartamentos += 1;
           }
@@ -485,8 +518,12 @@ angular.module('yvyUiApp')
 
           var establecimientosLabel = cantidadEstablecimientos > 1 ? 'establecimientos' : 'establecimiento';
           var departamentoLabel = cantidadDepartamentos > 1 ? 'departamentos' : 'departamento';
-          return sprintf('%s %s de %s %s',
-                  cantidadEstablecimientos, establecimientosLabel, cantidadDepartamentos, departamentoLabel);
+          var distritoLabel = cantidadDistritos > 1 ? 'distritos' : 'distrito';
+          var barrioLocalidadLabel = cantidadBarriosLocalidaes > 1 ? 'localidades' : 'localidad';
+
+          return sprintf('%s %s de %s %s, %s %s y %s %s',
+                  cantidadEstablecimientos, establecimientosLabel, cantidadDepartamentos, departamentoLabel,
+                  cantidadDistritos, distritoLabel, cantidadBarriosLocalidaes, barrioLocalidadLabel);
         }
 
         //Funcion que inicializa el Spinner (Loading)
