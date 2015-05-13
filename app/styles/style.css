@@ -62,7 +62,7 @@
 }
 
 /* Propiedades del panel Popup */
-.right-panel {
+.right-panel{
   display: none;
   text-align: center;
   width: 350px;
@@ -125,18 +125,87 @@ h6{
 
 .tag-red {
   float:left;
-  height: 30px;
-  width: 30px;
-  font-size: 16px;
+  width: 42px;
+  font-size: 1.8em;
   font-weight: bold;
   padding: 0px;
-  color: #fff !important;
-  background-color: #E60000;
-  border: 3px #E60000 solid;
 }
 
-.tag-red:hover {
-  color: #fff !important;
-  background-color: #FF1919;
-  box-shadow: inset 0 0 0 4px #B20000;
+.close-btn:hover {
+  color: #cd2c67 !important;
+  text-decoration: none;
+}
+
+.close-btn{
+  font-family: "Helvetica Neue", Arial, Helvetica, serif;
+  background: #eee;
+  color: #df5656 !important;
+}
+
+.m4{
+  height: 78px !important;
+  line-height: 78px;
+  left: -33px;
+  top: -33px;
+  width: 78px !important;
+  text-align: center;
+  cursor: pointer;
+  color: black;
+  position: absolute;
+  font-size: 11px;
+  font-family: Arial, sans-serif;
+  font-weight: bold;
+  background-image: url(/images/m4.png);
+  background-position: 0px 0px;
+}
+
+.m3{
+  height: 66px !important;
+  line-height: 66px;
+  left: -27px;
+  top: -27px;
+  width: 66px !important;
+  text-align: center;
+  cursor: pointer;
+  color: black;
+  position: absolute;
+  font-size: 11px;
+  font-family: Arial, sans-serif;
+  font-weight: bold;
+  background-image: url(/images/m3.png);
+  background-position: 0px 0px;
+}
+
+.m2{
+  height: 56px !important;
+  line-height: 56px;
+  left: -22px;
+  top: -22px;
+  width: 56px !important;
+  text-align: center;
+  cursor: pointer;
+  color: black;
+  position: absolute;
+  font-size: 11px;
+  font-family: Arial, sans-serif;
+  font-weight: bold;
+  background-image: url(/images/m2.png);
+  background-position: 0px 0px;
+}
+
+.m1{
+  height: 53px !important;
+  line-height: 53px;
+  left: -20.5px;
+  top: -20.5px;
+  width: 53px !important;
+  text-align: center;
+  cursor: pointer;
+  color: black;
+  position: absolute;
+  font-size: 11px;
+  font-family: Arial, sans-serif;
+  font-weight: bold;
+  background-image: url(/images/m1.png);
+  background-position: 0px 0px;
 }

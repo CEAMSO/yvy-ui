@@ -46,6 +46,7 @@ angular.module('yvyUiApp')
 					//localStorage[paramToKey[parametro.tipo_consulta]] = JSON.stringify(data.data);
 					var objeto = _.keys(data.data.objects);
 					var key = paramToKey[parametro.tipo_consulta];
+					console.log(data);
 					localStorage[key] = JSON.stringify(topojson.feature(data.data, data.data.objects[objeto]));
 					clusterIndexes[key] = self.getClusterIndex(key);
 				});
@@ -81,13 +82,14 @@ angular.module('yvyUiApp')
 				var children;
 				if(e.properties['nombre_barrio_localidad']){
 					children = establecimientos.features;
-				}else{
-					if(e.properties['nombre_distrito']){
+				}else if(e.properties['nombre_distrito']){
 						children = _.values(clusterIndexes['cluster_barrio_localidad']);
-					}else{
-						children = _.values(clusterIndexes['cluster_distrito']);
-					}
+				}else if(e.properties['nombre_departamento']){
+					children = _.values(clusterIndexes['cluster_distrito']);
+				}else{
+					return this.getCentroPais().features[0];
 				}
+				
 
 				return _.find(children, function(c){
 					var result = c.properties['nombre_departamento'] === e.properties['nombre_departamento'];
@@ -111,10 +113,15 @@ angular.module('yvyUiApp')
 
 				return $http(req).then(function(data){
 					//localStorage[paramToKey[parametro.tipo_consulta]] = JSON.stringify(data.data);
-					var objeto = _.keys(data.data.objects);
-					establecimientos = topojson.feature(data.data, data.data.objects[objeto]);
-					localStorage[paramToKey[parametro.tipo_consulta]] = JSON.stringify(establecimientos);
+					localStorage[paramToKey[parametro.tipo_consulta]] = JSON.stringify(data);
 				});
+			},
+
+			getEstablecimientos: function(){
+				var data = JSON.parse(localStorage['establecimientos']);
+				var objeto = _.keys(data.data.objects);
+				establecimientos = topojson.feature(data.data, data.data.objects[objeto]);
+				return establecimientos;
 			},
 
 			getDatosInstituciones: function(parametro){
@@ -151,6 +158,22 @@ angular.module('yvyUiApp')
 				});
 				*/
 
+			},
+
+			getCentroPais(){
+				return {
+              'type': 'FeatureCollection',
+              'features': [
+                {
+                  'geometry': {
+                    'coordinates': [-57.60479328668649, -25.291172101570684],
+                    'type': "Point"
+                  },
+                  'properties': {},
+                  'type': 'Feature'
+                }
+              ]
+            }
 			}
 
 	}; //return
