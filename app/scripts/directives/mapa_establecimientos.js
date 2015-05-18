@@ -206,13 +206,12 @@ angular.module('yvyUiApp')
           MECONF.geoJsonLayer.on('click', draw_popup);
 
           MECONF.geoJsonLayer.on('mouseover', function(e){
-            var features, properties;
-            if (MECONF.currentZoom >= MECONF.nivelesZoom['barrio_localidad']){ //Hover para un solo establecimiento
-              //features = e.layer.feature;
-            }else if(MECONF.currentZoom < MECONF.nivelesZoom['pais']){
+            var features, properties = e.layer.feature.properties;
+            if(properties['periodo'] || properties.cantidad === 1){ //Hover para un solo establecimiento
+              //nothing to do
+            }else if(properties.cantidad && !properties.nombre_departamento && !properties.nombre_distrito && !properties.nombre_barrio_localidad){
               MECONF.infoBox.update();
             }else{
-              properties = e.layer.feature.properties;
               features = _.filter(MECONF.establecimientosVisibles.features, function(n) {
                 var result = _.deburr(n.properties['nombre_departamento']) == _.deburr(properties.nombre_departamento);
                 if(properties.nombre_distrito){ result = result && _.deburr(n.properties['nombre_distrito']) == _.deburr(properties.nombre_distrito); }
@@ -223,8 +222,9 @@ angular.module('yvyUiApp')
             }
           });
           
-          MECONF.geoJsonLayer.on('mouseout', function(){
-            if (MECONF.currentZoom >= MECONF.nivelesZoom['barrio_localidad']){ //Hover para un solo establecimiento
+          MECONF.geoJsonLayer.on('mouseout', function(e){
+            var properties = e.layer.feature.properties;
+            if(properties['periodo'] || properties.cantidad === 1){
               //nothing to do
             }else{
               MECONF.infoBox.update();
