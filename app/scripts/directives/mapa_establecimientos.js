@@ -442,7 +442,7 @@ angular.module('yvyUiApp')
             var icon, color, radius;
             if(feature.properties['periodo']){ //Verificamos que se trata de un establecimiento
               
-              latLon = [target.feature.geometry.coordinates[1], target.feature.geometry.coordinates[0]];
+              latLon = [feature.geometry.coordinates[1], feature.geometry.coordinates[0]];
               radius = Math.pow(19 - levelZoom, 2) * 10;
               L.circle(latLon, radius, {
                   color: 'blue',
@@ -450,9 +450,9 @@ angular.module('yvyUiApp')
                 }).addTo(map);
               scope.detalle = feature.properties;
               MECONF.infoBox.update(feature);
-              map.setView(latLon);
-
-
+              if(rightPanelOpen === true){
+                map.setView(latLon);
+              }
 
             }else{
               //targetChild = target.layer.feature.properties.targetChild; //Se toma el primero, se podria tomar random tambien
