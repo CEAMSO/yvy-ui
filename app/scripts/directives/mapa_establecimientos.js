@@ -26,7 +26,7 @@ angular.module('yvyUiApp')
 
         $('#left-panel').panelslider({
                                   side: 'left',
-                                  duration: 1,
+                                  duration: 200,
                                   clickClose: false,
                                   container: $('[ng-view]'),
                                   onStartOpen: function(){
@@ -572,14 +572,6 @@ angular.module('yvyUiApp')
           google.maps.event.addListenerOnce(this._google, 'tilesloaded', tilesLoaded);
         };
 
-        //Funcion que cierra todos los Selects del filtro
-        function onClose(){
-          $('#filtro_codigo_establecimiento').select2('close');
-          $('#filtro_nombre_departamento').select2('close');
-          $('#filtro_nombre_distrito').select2('close');
-          $('#filtro_nombre_barrio_localidad').select2('close');
-        }
-
         /******************************** INICIO **************************************/        
         
         //Detalles de la configuracion del mapa
@@ -616,9 +608,6 @@ angular.module('yvyUiApp')
             establecimientos = mapaEstablecimientoFactory.getEstablecimientos();
             console.timeEnd('servicio');
             finishedLoading();
-
-            $('#left-panel').panelslider({side: 'left', duration: 300, clickClose: false, container: $('[ng-view]'), onClose: onClose });
-
           }
         });
 
