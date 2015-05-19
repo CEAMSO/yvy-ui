@@ -17,7 +17,7 @@ angular.module('yvyUiApp')
 
     mapaEstablecimientoFactory.getDatosCluster(parametro);
 
-    parametro = { tipo_consulta:'11' }; //Todos los establecimentos con periodo 2014
+    parametro = { tipo_consulta:'11', periodo:'2014' }; //Todos los establecimentos con periodo 2014
 
     console.time('servicio');
     console.time('rest');
@@ -38,6 +38,10 @@ angular.module('yvyUiApp')
       //parametro = { tipo_consulta:'13', establecimiento:'1101034' };
       //mapaEstablecimientoFactory.getDatosInstituciones(parametro);
       
-    }); 
+    });
+
+    $scope.updateEstablecimientos = function(periodo){
+      console.log(periodo);
+    };
     
   });
