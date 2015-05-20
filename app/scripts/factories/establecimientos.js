@@ -18,6 +18,7 @@ angular.module('yvyUiApp')
 
   	var clusterIndexes = {};
   	var establecimientos = [];
+  	var instituciones = [];
 
   	var getKeyFromFeature = function(c){
   		var key = _.deburr(c.properties['nombre_departamento']);
@@ -54,10 +55,12 @@ angular.module('yvyUiApp')
 
 			getClusterIndex: function(key){
 				if(clusterIndexes[key]){
-					return _.mapValues(clusterIndexes[key], function(c){
-						c.properties.cantidad = 0;
-						return c;
-					});
+					return  (key === 'instituciones') 
+						? clusterIndexes[key] 
+						: _.mapValues(clusterIndexes[key], function(c){
+						 	c.properties.cantidad = 0;
+							return c;
+						});
 				}else{
 					console.time('cluster parse ' + key);
 					var cluster = (key === 'establecimientos') ? establecimientos : JSON.parse(localStorage[key]);
@@ -136,8 +139,8 @@ angular.module('yvyUiApp')
 				};
 
 				return $http(req).then(function(data){
-					console.log('Instituciones');
-					console.log(data.data[0]);
+					instituciones = data.data;
+					clusterIndexes['instituciones'] = _.groupBy(instituciones, function(i){ return i['codigo_establecimiento']; });
 				});
 
 				/*
@@ -156,6 +159,21 @@ angular.module('yvyUiApp')
 					console.log(returnServerData);
 				});
 				*/
+
+			},
+
+			getInstitucionesPorEstablecimiento: function(establecimiento){
+				var req = {
+					method: 'GET',
+					dataType: "json",
+				    url: 'http://localhost:3000/app/mapa_establecimientos/datos',
+				    params: {tipo_consulta: '13', establecimiento: establecimiento.codigo_establecimiento},
+				    headers: {
+				        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+				    }
+				};
+
+				return $http(req);
 
 			},
 

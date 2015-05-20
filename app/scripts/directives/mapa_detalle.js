@@ -6,7 +6,7 @@
  * # mapaLeaflet
  */
 angular.module('yvyUiApp')
-  .directive('mapaDetalle', function ($rootScope) {
+  .directive('mapaDetalle', function ($rootScope, mapaEstablecimientoFactory) {
     return {
       restrict: 'E',
       replace: false,
@@ -17,7 +17,6 @@ angular.module('yvyUiApp')
       link: function postLink(scope, element, attrs) {
         var detailOpen = false;
         var crearPopup = function (){
-          angular.element('#popupTable tbody').html('');
           
           function onOpen(){
             $('#left-panel').css('margin-left', '280px');
@@ -53,28 +52,18 @@ angular.module('yvyUiApp')
         scope.$watch('detalle', function(detalle){
 
           if(typeof detalle !== 'undefined' && detalle !== ''){
-            console.log(detalle);
+            mapaEstablecimientoFactory.getInstitucionesPorEstablecimiento(detalle)
+              .then(function(data){
+                scope.instituciones = data;
+              });
 
+            console.log(scope.instituciones);
             crearPopup();
-          
-            var marker = detalle;
-            var row = '';
-            var atributo = '';
-
-            $.each(marker, function(attr, valor){
-              if(attr==='nombre_barrio_localidad'){
-                row = '<tr><td class="attr-title">Barrio/Localidad</td><td>'+valor+'</td></tr>';
-              }else{
-                atributo = _.startCase(attr.replace(/nombre/g, ''));
-                row = '<tr><td class="attr-title">'+atributo+'</td><td>'+valor+'</td></tr>';
-              }
-              $('#popupTable > tbody:last').append(row);
-            });
 
             if(!detailOpen){
               $('#right-panel').click();
             }
-            scope.detalle=''; //ponemos a vacio para poder seleccionar el mismo marker nuevamente
+            //scope.detalle=''; //ponemos a vacio para poder seleccionar el mismo marker nuevamente
 
           }else{
             //nothing to do

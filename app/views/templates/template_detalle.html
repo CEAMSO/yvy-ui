@@ -2,13 +2,39 @@
   <a class="close-btn tag-red" id="right-panel" href="#right-panel-link" title="Cerrar el detalle">x</a>
   <div id="mapa-establecimiento-popup">
       <br/>
+      <h4>
+        <span class="label label-primary">Instituciones del Establecimiento</span>
+      </h4>
+      <table class="table table-striped table-bordered">
+        <thead>
+          <tr><th rowspan="2" class="attr-title">Nombre</th><th colspan="2" class="attr-title">Cantidad de Matriculados</th></tr>
+          <tr><th class="attr-title">2012</th><th class="attr-title">2014</th></tr>
+        </thead>
+        <tbody>
+          <tr ng-repeat="institucion in instituciones">
+            <td>{{institucion.nombre_institucion}}</td>
+            <td>{{institucion.cantidad_matriculados['2012']}}</td>
+            <td>{{institucion.cantidad_matriculados['2014']}}</td>
+          </tr>
+        </tbody>
+      </table>
+      </h4>
       <br/>
       <h4>
         <span class="label label-primary">Detalles del Establecimiento</span>
       </h4>
-      <table id="popupTable" class="table table-striped table-bordered">
-      <tbody>
-      </tbody>
+      <table class="table table-striped table-bordered">
+        <tbody>
+          <tr><td class="attr-title">Periodo</td><td>{{detalle.periodo}}</td></tr>
+          <tr><td class="attr-title">Código Establecimiento</td><td>{{detalle.codigo_establecimiento}}</td></tr>
+          <tr><td class="attr-title">Departamento</td><td>{{detalle.nombre_departamento}}</td></tr>
+          <tr><td class="attr-title">Distrito</td><td>{{detalle.nombre_distrito}}</td></tr>
+          <tr><td class="attr-title">Barrio/Localidad</td><td>{{detalle.nombre_barrio_localidad}}</td></tr>
+          <tr><td class="attr-title">Zona</td><td>{{detalle.nombre_zona}}</td></tr>
+          <tr><td class="attr-title">Proyecto 111</td><td>{{detalle.proyecto111}}</td></tr>
+          <tr><td class="attr-title">Proyecto 822</td><td>{{detalle.proyecto822}}</td></tr>
+        </tbody>
       </table>
+      <br/>
   </div>
 </div>

@@ -69,6 +69,7 @@
   background-color: #eee;
   color: #000000;
   height: 95% !important;
+  overflow: auto;
 }
 
 .right-panel h3{
@@ -80,6 +81,7 @@
 }
 .attr-title {
   font-weight: bold;
+  text-align: center;
 }
 
 /* Propiedades del boton */
@@ -129,6 +131,8 @@ h6{
   font-size: 1.8em;
   font-weight: bold;
   padding: 0px;
+  margin-top: -8px;
+  margin-left: -8px;
 }
 
 .close-btn:hover {
