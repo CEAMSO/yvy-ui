@@ -87,8 +87,9 @@ angular.module('yvyUiApp')
 
         scope.$on('detail-open', function(){
           rightPanelOpen = true;
-          $('#map').css('width', 'calc(100% - 350px)');
+          $('#map').css('width', 'calc(100% - 450px)');
           invalidateSize(true);
+          draw_map();
           //map.setZoom(16);
           //map.panTo(target.layer.getLatLng());
         });
@@ -105,6 +106,7 @@ angular.module('yvyUiApp')
           invalidateSize(true);
           MECONF.infoBox.update(MECONF.establecimientosVisibles.features);
           removeCircles();
+          draw_map();
         });
 
         scope.$on('detail-start-close', function(){

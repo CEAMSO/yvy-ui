@@ -32,7 +32,7 @@ angular.module('yvyUiApp')
                                 container: $('[ng-view]'),
                                 onStartOpen: function(){
                                   $rootScope.$broadcast('detail-start-open');
-                                  $('#left-panel').css('margin-left', '310px');
+                                  $('#left-panel').css('margin-left', '410px');
                                 },
                                 onOpen: function(){
                                   $rootScope.$broadcast('detail-open');
@@ -70,6 +70,10 @@ angular.module('yvyUiApp')
           }
 
         }, true);
+
+        scope.unset = function(){
+          scope.detalle = null;
+        }
 
         /*********************** INICIO ***********************************/
 
