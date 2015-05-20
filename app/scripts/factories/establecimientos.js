@@ -173,7 +173,7 @@ angular.module('yvyUiApp')
 				    }
 				};
 
-				return $http(req);
+				return $http(req).then(function(result){ return result.data; });
 
 			},
 
