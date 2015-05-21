@@ -6,7 +6,7 @@
  * # mapaLeaflet
  */
 angular.module('yvyUiApp')
-  .directive('mapaEstablecimientos', function (mapaEstablecimientoFactory) {
+  .directive('mapaEstablecimientos', function (mapaEstablecimientoFactory, $timeout) {
     return {
       restrict: 'E',
       replace: false,
@@ -18,9 +18,111 @@ angular.module('yvyUiApp')
       },
       templateUrl: 'views/templates/template_mapa.html',
       link: function postLink(scope, element, attrs) {
+        var target, result, rightPanelOpen, filterFlag = false;
+        scope.distancia = 0;
+        L.Control.Cobertura = L.Control.extend({
+          options: {
+            // topright, topleft, bottomleft, bottomright
+            position: 'topright'
+          },
+          initialize: function (options) {
+            L.Util.setOptions(this, options);
+          },
+          onAdd: function (map) {
+            var container = L.DomUtil.create('div', 'leaflet-control-cobertura');
+            this.form = L.DomUtil.create('form', 'form', container);
+            var group = L.DomUtil.create('div', 'input-group', this.form);
+            var prefix = L.DomUtil.create('span', 'input-group-addon', group);
+            prefix.textContent = 'Cobertura:'
+            this.input = L.DomUtil.create('input', 'form-control input-sm', group);
+            this.input.type = 'number';
+            this.input.setAttribute('ng-model', 'data');
+            var postfix = L.DomUtil.create('span', 'input-group-addon', group);
+            postfix.textContent = 'metros'
+            this.debouncedChange = _.debounce(this.onChange, 300);
+            this.debouncedDblClick = _.debounce(this.onDblClick, 300)
+            L.DomEvent.addListener(this.input, 'change', this.debouncedChange, this);
+            L.DomEvent.addListener(this.input, 'dblclick', this.debouncedDblClick, this);
+            this.userChangeFlag = false;
+            return container;
+          },
+          onRemove: function (map) {
+            L.DomEvent.removeListener(this.input, 'change', this.debouncedChange);
+            L.DomEvent.removeListener(this.input, 'dblclick', this.debouncedDblClick);
+          },
+          onChange: function(e) {
+            this.userChangeFlag = true;
+            map.eachLayer(function(layer){
+              if(layer instanceof L.Circle) layer.setRadius(e.target.value);
+            });
+          },
+          onDblClick: function(e) {
+            map.doubleClickZoom.enable();
+          },
+          setValue: function(v) {
+            this.userChangeFlag = false;
+            this.input.value = v;
+          },
+          getValue: function() {
+            return this.input.value;
+          },
+          lastChangeByUser: function() {
+            return this.userChangeFlag;
+          }
+        });
+         
+        L.control.cobertura = function(id, options) {
+          return new L.Control.Cobertura(id, options);
+        }
+
+        L.Control.Distancia = L.Control.extend({
+          options: {
+            // topright, topleft, bottomleft, bottomright
+            position: 'topright',
+            checked: false
+          },
+          initialize: function (options) {
+            L.Util.setOptions(this, options);
+          },
+          onAdd: function (map) {
+            var self = this;
+            var container = L.DomUtil.create('div', 'leaflet-control-distancia');
+            this.form = L.DomUtil.create('form', 'form', container);
+            var group = L.DomUtil.create('div', 'input-group', this.form);
+            var prefix = L.DomUtil.create('span', 'input-group-addon', group);
+            prefix.textContent = 'Cálculo Distancia:'
+            this.input = L.DomUtil.create('input', 'form-control input-sm', group);
+            $(this.input).bootstrapSwitch({
+              onText: 'Activo',
+              offText: 'Inactivo'
+            });
+            this.input.type = 'checkbox';
+            this.input.checked = this.options.checked;
+            this.value = this.options.checked;
+            this.proxiedOnChange = function(e, state){ self.onChange.call(self, e, state); }
+            $(this.input).on('switchChange.bootstrapSwitch', this.proxiedOnChange);
+            return container;
+          },
+          onRemove: function (map) {
+            $(this.input).off('switchChange.bootstrapSwitch', this.proxiedOnChange);
+          },
+          onChange: function(e, state) {
+            this.value = state;
+          },
+          onDblClick: function(e) {
+            map.doubleClickZoom.enable();
+          },
+          getValue: function(){
+            return this.value;
+          }
+        });
+         
+        L.control.distancia = function(id, options) {
+          return new L.Control.Distancia(id, options);
+        }
+
 
         var invalidateSize = function(animate){ map.invalidateSize(animate); };
-        var target, result, rightPanelOpen, currentZoom, filterFlag = false;
 
         $('#map').data('right-sidebar-visible', false);
 
@@ -105,7 +207,7 @@ angular.module('yvyUiApp')
           rightPanelOpen = false;
           invalidateSize(true);
           MECONF.infoBox.update(MECONF.establecimientosVisibles.features);
-          removeCircles();
+          removePolygons();
           draw_map();
         });
 
@@ -163,7 +265,17 @@ angular.module('yvyUiApp')
 
           L.control.layers(baseMaps).addTo(map);
           console.timeEnd('init_map');
-
+          MECONF.controlCobertura = L.control.cobertura('control-cobertura');
+          map.addControl(MECONF.controlCobertura);
+          MECONF.controlDistancia = L.control.distancia('control-distancia');
+          map.addControl(MECONF.controlDistancia);
+          
+          //si el doble click ocurre en un control
+          map.on('dblclick', function(e){
+            if($(e.originalEvent.target).is('input')){
+              map.doubleClickZoom.disable();
+            }
+          });
           return map;
         };
 
@@ -205,7 +317,7 @@ angular.module('yvyUiApp')
 
           MECONF.geoJsonLayer = geoJson; //Sobre esta variable se aplican los filtros
           
-          MECONF.geoJsonLayer.on('click', draw_popup);
+          MECONF.geoJsonLayer.on('click', onMarkerClick);
 
           MECONF.geoJsonLayer.on('mouseover', function(e){
             var features, properties = e.layer.feature.properties;
@@ -289,7 +401,7 @@ angular.module('yvyUiApp')
 
           console.time('ultimo');
           var outerBounds;
-          console.log(redrawClusters);
+
           if(redrawClusters){
             MECONF.infoBox.update(MECONF.establecimientosVisibles.features);
             if(filtros){
@@ -418,52 +530,66 @@ angular.module('yvyUiApp')
           return e;
 
         };
-        
-        /* Funcion que calcula la distancia entre dos puntos */
-        function two_points_distances() {
-          
-        }
 
-        function removeCircles(){
+        function removePolygons(clazz){
+          clazz =  clazz || L.Path;
           map.eachLayer(function(layer){
-            if(layer instanceof L.Circle) map.removeLayer(layer);
+            if(layer instanceof clazz) map.removeLayer(layer);
           });
         }
 
-        /* Funcion que carga el resumen del Popup */
-        function draw_popup(t){
-          removeCircles();
+        /* Handler para el click de un marker */
+        function onMarkerClick(t){
           target = t.layer;
+          scope.distancia = 0;
           var feature = (target.feature.properties.cantidad === 1) ? mapaEstablecimientoFactory.getClusterElementChild(target.feature) : target.feature;
           //var feature = target.feature;
           //map.panTo(target.layer.getLatLng()); //funcion que centra el mapa sobre el marker
 
-          scope.$apply(function(){
-            var levelZoom = map.getZoom();
-            var latLon, targetChild, targetZoom;
-            var icon, color, radius;
-            if(feature.properties['periodo']){ //Verificamos que se trata de un establecimiento
-              
-              latLon = [feature.geometry.coordinates[1], feature.geometry.coordinates[0]];
-              radius = Math.pow(19 - levelZoom, 2) * 10;
-              L.circle(latLon, radius, {
+          var levelZoom = map.getZoom();
+          var latLon, targetChild, targetZoom;
+          var icon, color, lineGeoJSON, latLonA, latLonB;
+          if(feature.properties['periodo']){ //Verificamos que se trata de un establecimiento
+            //Si ya hay un establecimiento seleccionado y esta habilitado el control de distancia
+            if(MECONF.controlDistancia.getValue()){
+              scope.$apply(function(){
+                removePolygons(L.Polyline);
+                latLonA = MECONF.fixedMarker.getLatLng();
+                latLonB = target.getLatLng();
+                var polyline = L.polyline([latLonA, latLonB]).addTo(map);
+                scope.distancia = Math.round(latLonA.distanceTo(latLonB));
+                console.log(scope.distancia);
+              });
+            }else{
+              removePolygons();
+              MECONF.fixedMarker = target;
+              //Cambiamos el radio respecto al zoom hasta que el usuario haga un cambio sobre el control
+              if(!MECONF.controlCobertura.lastChangeByUser()){
+                MECONF.controlCobertura.setValue(Math.pow(19 - levelZoom, 2) * 10);
+              }
+
+              L.circle(target.getLatLng(), MECONF.controlCobertura.getValue(), {
                   color: 'blue',
                   fillOpacity: 0.5
                 }).addTo(map);
-              scope.detalle = feature.properties;
-              MECONF.infoBox.update(feature);
-              if(rightPanelOpen === true){
-                map.setView(latLon);
-              }
-
-            }else{
-              //targetChild = target.layer.feature.properties.targetChild; //Se toma el primero, se podria tomar random tambien
-              targetZoom = _.find(_.values(MECONF.nivelesZoom), function(z){ return z > levelZoom; });
-              targetChild = mapaEstablecimientoFactory.getClusterElementChild(target.feature);
-              latLon = [targetChild.geometry.coordinates[1], targetChild.geometry.coordinates[0]];
-              map.setView(latLon, targetZoom); //funcion que centra el mapa sobre el marker
+              $timeout(function(){
+                scope.$apply(function(){
+                  scope.detalle = feature.properties;
+                });
+                MECONF.infoBox.update(feature);
+                  if(rightPanelOpen){
+                  map.setView(target.getLatLng());
+                }
+              });
             }
-          });
+          }else{
+            removePolygons();
+            //targetChild = target.layer.feature.properties.targetChild; //Se toma el primero, se podria tomar random tambien
+            targetZoom = _.find(_.values(MECONF.nivelesZoom), function(z){ return z > levelZoom; });
+            targetChild = mapaEstablecimientoFactory.getClusterElementChild(target.feature);
+            latLon = [targetChild.geometry.coordinates[1], targetChild.geometry.coordinates[0]];
+            map.setView(latLon, targetZoom); //funcion que centra el mapa sobre el marker
+          }
 
         }
 

@@ -6,7 +6,7 @@
  * # mapaLeaflet
  */
 angular.module('yvyUiApp')
-  .directive('mapaDetalle', function ($rootScope, mapaEstablecimientoFactory) {
+  .directive('mapaDetalle', function ($rootScope, mapaEstablecimientoFactory, $timeout) {
     return {
       restrict: 'E',
       replace: false,
@@ -16,6 +16,7 @@ angular.module('yvyUiApp')
       templateUrl: 'views/templates/template_detalle.html',
       link: function postLink(scope, element, attrs) {
         var detailOpen = false;
+        var panelslider, detalleHolder;
         var crearPopup = function (){
           
           function onOpen(){
@@ -25,7 +26,8 @@ angular.module('yvyUiApp')
           function onClose(){
             $('#left-panel').css('margin-left', '-70px');
           }
-          $('#right-panel').panelslider({
+
+          panelslider = $('#right-panel').panelslider({
                                 side: 'right',
                                 duration: 1,
                                 clickClose: false,
@@ -48,28 +50,27 @@ angular.module('yvyUiApp')
                                 } 
                               });
         };
-      
+                  
+        crearPopup();
         scope.$watch('detalle', function(detalle){
 
-          if(typeof detalle !== 'undefined' && detalle !== ''){
+          if(detalle){
+            detalleHolder = detalle;
             mapaEstablecimientoFactory.getInstitucionesPorEstablecimiento(detalle)
               .then(function(data){
                 scope.instituciones = data;
+                if(!detailOpen){
+                  $timeout(function(){
+                    $('#right-panel').click();
+                    scope.$apply(function(){
+                      scope.detalle = detalleHolder;
+                    });
+                  });
+                }
               });
-
-            console.log(scope.instituciones);
-            crearPopup();
-
-            if(!detailOpen){
-              $('#right-panel').click();
-            }
-            //scope.detalle=''; //ponemos a vacio para poder seleccionar el mismo marker nuevamente
-
-          }else{
-            //nothing to do
           }
 
-        }, true);
+        });
 
         scope.unset = function(){
           scope.detalle = null;
