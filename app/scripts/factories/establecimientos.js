@@ -8,13 +8,13 @@
  * Controller of the yvyUiApp
  */
 angular.module('yvyUiApp')
-  .factory('mapaEstablecimientoFactory', function($http) {
+  .factory('mapaEstablecimientoFactory', function($http, $q) {
   	var paramToKey = {
   		'01': 'cluster_departamento',
   		'02': 'cluster_distrito',
   		'03': 'cluster_barrio_localidad',
   		'11': 'establecimientos'
-  	}
+  	};
 
   	var clusterIndexes = {};
   	var establecimientos = [];
@@ -28,9 +28,24 @@ angular.module('yvyUiApp')
   		return key;
   	};
 
+  	var keyStorage = function(key, jsonData, expirationMin){ //El parámetro de expiración esta en Minutos
+	    var expirationMS = expirationMin * 60 * 1000;
+	    var record = {value: jsonData, timestamp: new Date().getTime() + expirationMS};
+	    try{
+	      return localforage.setItem(key, record);
+	    }catch(e){
+	      alert("Por favor actualice su navegador");
+	    }
+	    return ;
+	};
+
     return {
 
 			getDatosCluster: function(parametro){
+				
+				var defered = $q.defer();
+				var promise = defered.promise;
+
 				var self = this;
 				var req = {
 					method: 'GET',
@@ -42,18 +57,28 @@ angular.module('yvyUiApp')
 				    }
 				};
 
+				var key = paramToKey[parametro.tipo_consulta];
 
-				return $http(req).then(function(data){
-					//localStorage[paramToKey[parametro.tipo_consulta]] = JSON.stringify(data.data);
-					var objeto = _.keys(data.data.objects);
-					var key = paramToKey[parametro.tipo_consulta];
-					console.log(data);
-					localStorage[key] = JSON.stringify(topojson.feature(data.data, data.data.objects[objeto]));
-					clusterIndexes[key] = self.getClusterIndex(key);
+				return localforage.getItem(key).then(function(data){
+					if( data && (new Date().getTime() < data.timestamp) ){
+						clusterIndexes[key] = _.indexBy(data.value.features, function(c){ return getKeyFromFeature(c); });
+						return promise;
+					}else{
+						return $http(req)
+								.success(function(data){
+									var objeto = _.keys(data.objects);
+									var cluster = topojson.feature(data, data.objects[objeto]);
+									clusterIndexes[key] = _.indexBy(cluster.features, function(c){ return getKeyFromFeature(c); });
+									keyStorage(key, cluster, 14);
+								});
+
+					}
 				});
+
 			},
 
 			getClusterIndex: function(key){
+
 				if(clusterIndexes[key]){
 					return  (key === 'instituciones') 
 						? clusterIndexes[key] 
@@ -62,26 +87,16 @@ angular.module('yvyUiApp')
 							return c;
 						});
 				}else{
-					console.time('cluster parse ' + key);
-					var cluster = (key === 'establecimientos') ? establecimientos : JSON.parse(localStorage[key]);
-					console.timeEnd('cluster parse ' + key);
-					var clusterIndex;
-					//build a cluster index
-					if(cluster){
-				  	clusterIndex = _.indexBy(cluster.features, function(c){ return getKeyFromFeature(c); });
-					}else{
-						console.log('Invalid cluster key');
-					}
-					return clusterIndex;
+					console.log('Invalid cluster key');
 				}
 				
 			},
 
-			getClusterElementChild: function(e){
+			getClusterElementChild: function(e, periodo){
 				var key = getKeyFromFeature(e);
 				var children;
 				if(e.properties['nombre_barrio_localidad']){
-					children = establecimientos.features;
+					children = establecimientos[periodo].features;
 				}else if(e.properties['nombre_distrito']){
 					children = _.values(clusterIndexes['cluster_barrio_localidad']);
 				}else if(e.properties['nombre_departamento']){
@@ -101,29 +116,42 @@ angular.module('yvyUiApp')
 
 			getDatosEstablecimientos: function(parametro){
 
+				var defered = $q.defer();
+				var promise = defered.promise;
 				var req = {
 					method: 'GET',
 					dataType: "json",
 				    url: 'http://localhost:3000/app/mapa_establecimientos/datos',
-				    params: parametro,
+				    params: { 'tipo_consulta': '11', 'periodo': parametro.periodo },
 				    headers: {
 				        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
 				    }
 				};
+				var nombre_establecimiento = paramToKey['11'] + parametro.periodo;
+				if(establecimientos[parametro.periodo]){
+					defered.resolve(establecimientos[parametro.periodo]);
+					return promise;
+				}else{
+					return localforage.getItem(nombre_establecimiento).then(function(data){
+						if( data && (new Date().getTime() < data.timestamp) ){
+							establecimientos[parametro.periodo] = data.value;
+							defered.resolve(data);
+							return promise;
+						}else{
+							return $http(req)
+								.success(function(data){
+									var objeto = _.keys(data.objects);
+									establecimientos[parametro.periodo] = topojson.feature(data, data.objects[objeto]);
+									keyStorage(nombre_establecimiento, establecimientos[parametro.periodo], 14);
+								})
+								.error(function(err){
+									//defered.reject(err);
+								});
+						}
 
-				return $http(req).then(function(data){
-					//localStorage[paramToKey[parametro.tipo_consulta]] = JSON.stringify(data.data);
-					var result = JSON.stringify(data);
-					localStorage[paramToKey[parametro.tipo_consulta]] = result;
-				});
-			},
+					});	
+				}
 
-			getEstablecimientos: function(){
-				var data = JSON.parse(localStorage['establecimientos']);
-				var objeto = _.keys(data.data.objects);
-				establecimientos = topojson.feature(data.data, data.data.objects[objeto]);
-				
-				return establecimientos;
 			},
 
 			getDatosInstituciones: function(parametro){

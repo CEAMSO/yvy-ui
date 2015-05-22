@@ -14,12 +14,13 @@ angular.module('yvyUiApp')
         data:'=',
         filtro:'=',
         local:'=',
-        ready: '='
+        periodo: '='
       },
       templateUrl: 'views/templates/template_filtro.html',
       link: function postLink(scope, element, attrs) {
+
         //Botones, el primer parametro es el ID del filtro, el segundo parametro representa la lista de valores posibles
-        var filtrosBotones = {periodo: ['2014', '2012'], nombre_zona:['RURAL', 'URBANA'], proyecto111:['SI', 'NO'], proyecto822:['SI', 'NO']};
+        var filtrosBotones = {nombre_zona:['RURAL', 'URBANA'], proyecto111:['SI', 'NO'], proyecto822:['SI', 'NO']};
 
         //Definicion de un array, donde cada indice representa el filtro (Ej: departamento, distrito), donde cada indice esta asociado a un array con los valores posibles para el mismo
         var filtrosSelect = {nombre_departamento:[], nombre_distrito:[], nombre_barrio_localidad:[]};
@@ -29,8 +30,7 @@ angular.module('yvyUiApp')
         se actualiza la variable de scope "filtro" (sobre la cual, la directiva "mapa_establecimientos.js" esta realizando un watch
         que permite la aplicacion de los filtros sobre el mapa)
         */
-        scope.updateFiltro = function(primeraVez){
-          if (primeraVez == true) { scope.local={periodo:'2014'}; }
+        scope.updateFiltro = function(){
           
           var localFiltro = scope.local;
           var filtroBase = [];
@@ -76,57 +76,42 @@ angular.module('yvyUiApp')
             return _(establecimientos.features).map(function(e){ return e.properties[key]; }).uniq().value().sort();
           }).value();
 
-          //Append a las listas desplegables
-          console.time('loop cargar');
-          $.each(filtrosSelect, function(attr, array){ //ciclo por cada filtro existente
-            var options = _.reduce(array, function(memo, a){ return memo + '<option value="'+a+'">'+a+'</option>'; }, '');
-            document.getElementById('filtro_'+ attr).innerHTML = options;
-            $('#filtro_'+attr).select2();
-          });
-          console.timeEnd('loop cargar');
+          if (primeraVez === true) {
 
-          //Cargamos los valores de filtros para los botones
-          var boton = '';
-          $.each(filtrosBotones, function(attr, array){
-            boton = '#filtro_'+attr;
-            setup_checkbox_values(boton, array);
-          });
-
-          // Convertimos el grupo de checboxes de periodo en algo similar a un grupo de radio buttons
-          $('#filtro_periodo label.btn, #filtro_nombre_zona label.btn, #filtro_proyecto111 label.btn, #filtro_proyecto822 label.btn')
-          .click(function(){
-            var self = $(this);
-            $(this).children('input:checkbox').each(function(){
-              if(!this.checked){
-                self.siblings('label.btn').each(function(){
-                  $(this).children('input:checkbox').each(function(){
-                    $(this).attr('checked', false);
-                    $(this).parent().removeClass('active');
-                  });
-                });
-              }else{
-                //VER COMO MANTENER SELECCIONADO AL MENOS
-                //this.parentNode.classList.add('active');
-                //this.checked=true;
-              }
+            //Append a las listas desplegables
+            console.time('loop cargar');
+            $.each(filtrosSelect, function(attr, array){ //ciclo por cada filtro existente
+              var options = _.reduce(array, function(memo, a){ return memo + '<option value="'+a+'">'+a+'</option>'; }, '');
+              document.getElementById('filtro_'+ attr).innerHTML = options;
+              $('#filtro_'+attr).select2();
             });
-          });
+            console.timeEnd('loop cargar');
 
-          //Dejamos seleccionado 2014 como valor por defecto del PERIODO
-          _.each($('#filtro_periodo label'), function(l){
-            if(l.innerText==='2014'){
-              l.classList.add('active');
-              l.children[0].checked=true;
-            }
-          });
-
-
-          //Definimos un onChange sobre cada boton, de modo a que los cambios hechos sobre el filtro se reflejen en el mapa
-          $('#filtro_nombre_zona label input, #filtro_proyecto111 label input, #filtro_proyecto822 label input').change(function(){
-            scope.$apply(function() {
-              scope.updateFiltro();
+            //Cargamos los valores de filtros para los botones
+            var boton = '';
+            $.each(filtrosBotones, function(attr, array){
+              boton = '#filtro_'+attr;
+              setup_checkbox_values(boton, array);
             });
-          });
+
+            //Definimos un onChange sobre cada boton, de modo a que los cambios hechos sobre el filtro se reflejen en el mapa
+            $('#filtro_nombre_zona label input, #filtro_proyecto111 label input, #filtro_proyecto822 label input').change(function(){
+              scope.$apply(function() {
+                scope.updateFiltro();
+              });
+            });
+
+            primeraVez = false;
+          
+          }else{
+            
+            $.each(filtrosSelect, function(attr, array){ //ciclo por cada filtro existente
+              $('#filtro_'+attr).find('option').remove().end();
+              var options = _.reduce(array, function(memo, a){ return memo + '<option value="'+a+'">'+a+'</option>'; }, '');
+              document.getElementById('filtro_'+ attr).innerHTML = options;
+            });
+
+          }
 
         };
 
@@ -159,15 +144,18 @@ angular.module('yvyUiApp')
         /*********************** INICIO ***********************************/
 
         var establecimientos = '';
+        var primeraVez = true;
 
-        var unwatch =  scope.$watch('ready', function(ready) {
-          if(ready){
-            unwatch(); //Remove the watch
-            establecimientos = mapaEstablecimientoFactory.getEstablecimientos();
-            scope.updateFiltro(true);
-            console.time('cargar establecimientos');
-            cargar(establecimientos);
-            console.timeEnd('cargar establecimientos');
+        scope.$watch('periodo', function(periodo) {
+          if(periodo){
+            mapaEstablecimientoFactory.getDatosEstablecimientos({ 'periodo': periodo }).then(function(value){
+              establecimientos = value;
+              (scope.local) ? scope.local['periodo']=periodo : scope.local = { periodo:periodo };
+              scope.updateFiltro();
+              console.time('cargar establecimientos');
+              cargar(establecimientos);
+              console.timeEnd('cargar establecimientos');
+            });
           }
         });
 

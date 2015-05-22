@@ -14,7 +14,7 @@ angular.module('yvyUiApp')
         data:'=',
         filtro:'=',
         detalle:'=',
-        ready: '='
+        periodo: '='
       },
       templateUrl: 'views/templates/template_mapa.html',
       link: function postLink(scope, element, attrs) {
@@ -544,8 +544,7 @@ angular.module('yvyUiApp')
         /* Handler para el click de un marker */
         function onMarkerClick(t){
           target = t.layer;
-          scope.distancia = 0;
-          var feature = (target.feature.properties.cantidad === 1) ? mapaEstablecimientoFactory.getClusterElementChild(target.feature) : target.feature;
+          var feature = (target.feature.properties.cantidad === 1) ? mapaEstablecimientoFactory.getClusterElementChild(target.feature, scope.periodo) : target.feature;
           //var feature = target.feature;
           //map.panTo(target.layer.getLatLng()); //funcion que centra el mapa sobre el marker
 
@@ -589,7 +588,7 @@ angular.module('yvyUiApp')
             removePolygons();
             //targetChild = target.layer.feature.properties.targetChild; //Se toma el primero, se podria tomar random tambien
             targetZoom = _.find(_.values(MECONF.nivelesZoom), function(z){ return z > levelZoom; });
-            targetChild = mapaEstablecimientoFactory.getClusterElementChild(target.feature);
+            targetChild = mapaEstablecimientoFactory.getClusterElementChild(target.feature, scope.periodo);
             latLon = [targetChild.geometry.coordinates[1], targetChild.geometry.coordinates[0]];
             map.setView(latLon, targetZoom); //funcion que centra el mapa sobre el marker
           }
@@ -727,18 +726,17 @@ angular.module('yvyUiApp')
 
         var establecimientos;
         var map = init_map();
+        console.time('draw Markers');
+        draw_markers();
+        console.timeEnd('draw Markers');        
 
-        var unwatch = scope.$watch('ready', function(ready) {
-          //console.log(ready);
-          //console.timeEnd('scope notified');
-          if(ready){
-            unwatch(); //Remove the watch
-            console.time('draw Markers');
-            draw_markers();
-            console.timeEnd('draw Markers');
-            establecimientos = mapaEstablecimientoFactory.getEstablecimientos();
-            console.timeEnd('servicio');
-            finishedLoading();
+        scope.$watch('periodo', function(periodo) {
+          if(periodo){
+            mapaEstablecimientoFactory.getDatosEstablecimientos({ 'periodo': periodo }).then(function(value){
+              establecimientos = value;
+              console.timeEnd('servicio');
+              finishedLoading();
+            });
           }
         });
 
