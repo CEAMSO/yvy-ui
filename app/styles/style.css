@@ -245,11 +245,24 @@ h6{
   box-shadow: none;
 }
 
-.bootstrap-switch, .bootstrap-switch-handle-on, .bootstrap-switch-handle-off{
-  border-radius: 0px;
-  border-bottom-left-radius: 0px !important;
-  border-top-left-radius: 0px !important;
+.toggle-group{
+  height: 100%;
 }
+
+.toggle{
+  width: 100% !important;
+  height: 100% !important;
+  border-left-width: 0px;
+  border-top-width: 0px;
+  border-bottom-left-radius: 0px;
+  border-top-left-radius: 0px;
+}
+
+.toggle-on, .toggle-off{
+  border-left-width: 0px;
+  border-top-width: 0px;
+}
+
 
 pre.ui-distance {
   position:absolute;
@@ -261,4 +274,8 @@ pre.ui-distance {
   font-size:16px;
   line-height:18px;
   border-radius:3px;
+}
+
+.hidden{
+  visibility: hidden;
 }

@@ -42,13 +42,13 @@ angular.module('yvyUiApp')
             this.debouncedChange = _.debounce(this.onChange, 300);
             this.debouncedDblClick = _.debounce(this.onDblClick, 300)
             L.DomEvent.addListener(this.input, 'change', this.debouncedChange, this);
-            L.DomEvent.addListener(this.input, 'dblclick', this.debouncedDblClick, this);
+            L.DomEvent.addListener(this.form, 'dblclick', this.debouncedDblClick, this);
             this.userChangeFlag = false;
             return container;
           },
           onRemove: function (map) {
             L.DomEvent.removeListener(this.input, 'change', this.debouncedChange);
-            L.DomEvent.removeListener(this.input, 'dblclick', this.debouncedDblClick);
+            L.DomEvent.removeListener(this.form, 'dblclick', this.debouncedDblClick);
           },
           onChange: function(e) {
             this.userChangeFlag = true;
@@ -92,22 +92,25 @@ angular.module('yvyUiApp')
             var prefix = L.DomUtil.create('span', 'input-group-addon', group);
             prefix.textContent = 'Cálculo Distancia:'
             this.input = L.DomUtil.create('input', 'form-control input-sm', group);
-            $(this.input).bootstrapSwitch({
-              onText: 'Activo',
-              offText: 'Inactivo'
+
+            $(this.input).bootstrapToggle({
+              on: 'Activo',
+              off: 'Inactivo'
             });
             this.input.type = 'checkbox';
             this.input.checked = this.options.checked;
             this.value = this.options.checked;
-            this.proxiedOnChange = function(e, state){ self.onChange.call(self, e, state); }
-            $(this.input).on('switchChange.bootstrapSwitch', this.proxiedOnChange);
+            this.proxiedOnChange = function(e){ self.onChange.call(self, e); }
+            $(this.input).on('change', this.proxiedOnChange);
+            L.DomEvent.addListener(this.form, 'dblclick', this.onDblClick, this);
             return container;
           },
           onRemove: function (map) {
-            $(this.input).off('switchChange.bootstrapSwitch', this.proxiedOnChange);
+            $(this.input).off('change', this.proxiedOnChange);
+            L.DomEvent.removeListener(this.form, 'dblclick', this.onDblClick);
           },
-          onChange: function(e, state) {
-            this.value = state;
+          onChange: function(e) {
+            this.value = e.target.checked;
           },
           onDblClick: function(e) {
             map.doubleClickZoom.enable();
@@ -272,7 +275,7 @@ angular.module('yvyUiApp')
           
           //si el doble click ocurre en un control
           map.on('dblclick', function(e){
-            if($(e.originalEvent.target).is('input')){
+            if(e.originalEvent.target.id !== 'map'){
               map.doubleClickZoom.disable();
             }
           });
@@ -551,7 +554,7 @@ angular.module('yvyUiApp')
           var icon, color, lineGeoJSON, latLonA, latLonB;
           if(feature.properties['periodo']){ //Verificamos que se trata de un establecimiento
             //Si ya hay un establecimiento seleccionado y esta habilitado el control de distancia
-            if(MECONF.controlDistancia.getValue()){
+            if(MECONF.controlDistancia.getValue() && rightPanelOpen){
               scope.$apply(function(){
                 removePolygons(L.Polyline);
                 latLonA = MECONF.fixedMarker.getLatLng();
