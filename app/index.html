@@ -6,16 +6,18 @@
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width">
     <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
+    <link href='https://api.tiles.mapbox.com/mapbox.js/v2.1.9/mapbox.css' rel='stylesheet' />
     <!-- build:css(.) styles/vendor.css -->
     <!-- bower:css -->
-    <link rel="stylesheet" href="bower_components/mapbox.js/mapbox.css" />
     <link rel="stylesheet" href="bower_components/select2/select2.css" />
     <link rel="stylesheet" href="bower_components/bootstrap-toggle/css/bootstrap-toggle.min.css" />
     <!-- endbower -->
     <link rel="stylesheet" href="bower_components/bootswatch/paper/bootstrap.css" />
     <!-- endbuild -->
-    <!-- build:css({app, .tmp}) styles/main.css -->
+    <!-- build:css(.tmp) styles/main.css -->
     <link rel="stylesheet" href="styles/main.css" />
+    <!-- endbuild -->
+    <!-- build:css({app, .tmp}) styles/custom.css -->
     <link rel="stylesheet" href="styles/style.css" />
     <link rel="stylesheet" href="styles/leaflet.awesome-markers.css" />
     <!-- endbuild -->
@@ -70,7 +72,6 @@
     <script src="bower_components/lodash/lodash.js"></script>
     <script src="bower_components/spin-js/spin.js"></script>
     <script src="bower_components/sprintf/src/sprintf.js"></script>
-    <script src="bower_components/mapbox.js/mapbox.js"></script>
     <script src="bower_components/jquery-panelslider/jquery.panelslider.js"></script>
     <script src="bower_components/select2/select2.js"></script>
     <script src="bower_components/bootstrap-toggle/js/bootstrap-toggle.min.js"></script>
@@ -80,9 +81,10 @@
 
     <script src="http://d3js.org/topojson.v1.min.js"></script>
     <script src="http://maps.google.com/maps/api/js?sensor=true"></script>
+    <script src='https://api.tiles.mapbox.com/mapbox.js/v2.1.9/mapbox.js'></script>
+    <script src='https://rawgit.com/shramov/leaflet-plugins/master/layer/tile/Google.js'></script>
 
-    <!-- build:js(.) scripts/libs.js -->
-    <script src="scripts/mapa/Google.js"></script>
+    <!-- build:js({app, .tmp}) scripts/libs.js -->
     <script src="scripts/mapa/leaflet.awesome-markers.js"></script>
     <!-- endbuild -->
 
