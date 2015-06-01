@@ -9,6 +9,9 @@
  */
 angular.module('yvyUiApp')
   .factory('mapaEstablecimientoFactory', function($http, $q) {
+  	var urlBase = 'http://localhost:3000';
+  	//var urlBase = 'http://datos.mec.gov.py';
+
   	var paramToKey = {
   		'01': 'cluster_departamento',
   		'02': 'cluster_distrito',
@@ -50,7 +53,7 @@ angular.module('yvyUiApp')
 				var req = {
 					method: 'GET',
 					dataType: "json",
-				    url: 'http://localhost:3000/app/mapa_establecimientos/datos',
+				    url: urlBase + '/app/mapa_establecimientos/datos',
 				    params: parametro,
 				    headers: {
 				        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
@@ -121,7 +124,7 @@ angular.module('yvyUiApp')
 				var req = {
 					method: 'GET',
 					dataType: "json",
-				    url: 'http://localhost:3000/app/mapa_establecimientos/datos',
+				    url: urlBase + '/app/mapa_establecimientos/datos',
 				    params: { 'tipo_consulta': '11', 'periodo': parametro.periodo },
 				    headers: {
 				        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
@@ -159,7 +162,7 @@ angular.module('yvyUiApp')
 				var req = {
 					method: 'GET',
 					dataType: "json",
-				    url: 'http://localhost:3000/app/mapa_establecimientos/datos',
+				    url: urlBase + '/app/mapa_establecimientos/datos',
 				    params: parametro,
 				    headers: {
 				        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
@@ -175,14 +178,14 @@ angular.module('yvyUiApp')
 				var req = {
 					method: 'POST',
 					dataType: "json",
-				    url: 'http://localhost:3000/app/mapa_establecimientos/datos',
+				    url: urlBase + '/app/mapa_establecimientos/datos',
 				    params: parametro,
 				    headers: {
 				        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
 				    }
 				};
 
-				$.post( "http://localhost:3000/app/mapa_establecimientos/datos", parametro, function(returnServerData){
+				$.post( urlBase + '/app/mapa_establecimientos/datos', parametro, function(returnServerData){
 					console.log("Instituciones");
 					console.log(returnServerData);
 				});
@@ -194,7 +197,7 @@ angular.module('yvyUiApp')
 				var req = {
 					method: 'GET',
 					dataType: "json",
-				    url: 'http://localhost:3000/app/mapa_establecimientos/datos',
+				    url: urlBase + '/app/mapa_establecimientos/datos',
 				    params: {tipo_consulta: '13', establecimiento: establecimiento.codigo_establecimiento},
 				    headers: {
 				        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
