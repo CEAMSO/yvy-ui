@@ -130,10 +130,12 @@ angular.module('yvyUiApp')
         function get_selected_checkbox(selector){
           var labels = $(selector);
           var enabled = [];
+          var text = '';
           _.each(labels, function(l){ //Verificamos cada label/boton que compone el filtro
-            if(l.innerText){ //Texto del label
-              if (l.children[0].checked){ //Si esta chequeado, lo agregamos
-                enabled.push(l.innerText);
+            text = l.innerText || l.textContent;
+            if(text){ //Texto del label
+              if(l.children[0].checked){ //Si esta chequeado, lo agregamos
+                enabled.push(text);
               }
             }
           });
