@@ -96,9 +96,13 @@ angular.module('yvyUiApp')
 			},
 
 			getClusterElementChild: function(e, periodo){
-				var key = getKeyFromFeature(e);
+				console.log('GETCLUSTERELEMENTCHILD');
+				console.log(e);
+				console.log(periodo);
+
+				//var key = getKeyFromFeature(e);
 				var children;
-				if(e.properties['nombre_barrio_localidad']){
+				if(e.properties['nombre_barrio_localidad'] || e.properties.cantidad === 1){
 					children = establecimientos[periodo].features;
 				}else if(e.properties['nombre_distrito']){
 					children = _.values(clusterIndexes['cluster_barrio_localidad']);
