@@ -6,7 +6,7 @@
  * # mapaLeaflet
  */
 angular.module('yvyUiApp')
-  .directive('mapaFiltro', function (mapaEstablecimientoFactory) {
+  .directive('mapaFiltro', function (mapaEstablecimientoFactory, $rootScope) {
     return {
       restrict: 'E',
       replace: false,
@@ -142,6 +142,20 @@ angular.module('yvyUiApp')
           return enabled;
         }
 
+        function initControl(){
+          var panelSlider = L.control.sidebar('left-panel-link', {
+            position: 'left'
+          });
+          panelSlider.on('hidden', function(){
+            $('#filtroDepartamento').select2('close');
+            $('#filtroDistrito').select2('close');
+            $('#filtroBarrioLocalidad').select2('close');
+            $('#filtroCodigoEstablecimiento').select2('close');
+          });
+          
+          $rootScope.$broadcast('filter-ready', panelSlider);
+        }
+
 
         /*********************** INICIO ***********************************/
 
@@ -157,6 +171,7 @@ angular.module('yvyUiApp')
               console.time('cargar establecimientos');
               cargar(establecimientos);
               console.timeEnd('cargar establecimientos');
+              initControl();
             });
           }
         });

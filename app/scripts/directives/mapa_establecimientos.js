@@ -18,7 +18,7 @@ angular.module('yvyUiApp')
       },
       templateUrl: 'views/templates/template_mapa.html',
       link: function postLink(scope, element, attrs) {
-        var target, result, rightPanelOpen, filterFlag = false;
+        var target, result, detailSidebar, filterSidebar, rightPanelOpen, filterFlag = false;
         scope.distancia = 0;
         L.Control.Cobertura = L.Control.extend({
           options: {
@@ -129,31 +129,6 @@ angular.module('yvyUiApp')
 
         $('#map').data('right-sidebar-visible', false);
 
-        $('#left-panel').panelslider({
-                                  side: 'left',
-                                  duration: 200,
-                                  clickClose: false,
-                                  container: $('[ng-view]'),
-                                  onStartOpen: function(){
-                                    //invalidateSize(true);
-                                  },
-                                  onOpen: function(){
-                                    invalidateSize(true);
-                                  },
-                                  onClose: function(){
-                                    var width = rightPanelOpen ? 'calc(100% - 350px)' : '100%'
-                			              $('#filtroDepartamento').select2('close');
-                          			    $('#filtroDistrito').select2('close');
-                          			    $('#filtroBarrioLocalidad').select2('close');
-                				            $('#filtroCodigoEstablecimiento').select2('close');
-                                    $('#map').css('width', width);
-                                    invalidateSize(true);
-                                  },
-                                  onStartClose: function(){
-                                    $('#map').css('width', 'calc(100% + 240px)');
-                                    invalidateSize(false);
-                                  }
-                                });        
         
         /* El watch nos permitira filtrar los establecimientos (y por consiguiente, los respectivos Markers) */
         scope.$watch('filtro', function(filtro){
@@ -190,40 +165,41 @@ angular.module('yvyUiApp')
           map.on('move', updateMap);
         }
 
-        scope.$on('detail-open', function(){
+        scope.$on('detail-ready', function(e, sidebar){
+          map.addControl(sidebar);
+          detailSidebar = sidebar;
           rightPanelOpen = true;
-          $('#map').css('width', 'calc(100% - 450px)');
-          invalidateSize(true);
-          draw_map();
-          //map.setZoom(16);
-          //map.panTo(target.layer.getLatLng());
-        });
-
-        scope.$on('detail-start-open', function(){
-          map.off('move', updateMap);
-          map.on('moveend', addUpdateHandlers);
-          //map.setZoom(17, {animate: true});
-          map.panTo(target.getLatLng());
-        });
-
-        scope.$on('detail-close', function(){
-          scope.$apply(function(){
-            scope.distancia = 0;
+          detailSidebar.on('hidden', function(){
+            scope.$apply(function(){
+              scope.distancia = 0;
+            });
+            rightPanelOpen = false;
+            MECONF.infoBox.update(MECONF.establecimientosVisibles.features);
+            removePolygons();
+            draw_map();
           });
-          rightPanelOpen = false;
-          invalidateSize(true);
-          MECONF.infoBox.update(MECONF.establecimientosVisibles.features);
-          removePolygons();
-          draw_map();
+          detailSidebar.on('show', function(){
+            map.panTo(target.getLatLng());
+          });
+
+          detailSidebar.on('shown', function(){
+            rightPanelOpen = true;
+            draw_map();
+          });
         });
 
-        scope.$on('detail-start-close', function(){
-/*          map.off('zoomend', updateMap);
-          map.off('move', updateMap);
-          map.on('moveend', addUpdateHandlers);
-*/        $('#map').css('width', '100%');
-          //invalidateSize(true);
+        scope.$on('filter-ready', function(e, sidebar){
+          map.addControl(sidebar);
+          filterSidebar = sidebar;
+          $(sidebar.getContainer()).removeClass('hidden');
+          filterSidebar.on('shown', function(){
+            $('#left-panel').hide();
+          });
+          filterSidebar.on('hidden', function(){
+            $('#left-panel').show();
+          });
         });
+
 
         /* Funcion que reduce la lista de establecimientos acorde al filtro seleccionado */
         var filtrar_establecimientos = function(establecimientos, filtro){
@@ -355,7 +331,7 @@ angular.module('yvyUiApp')
 
           //map.on('zoomend', updateMap);
           map.on('move', updateMap);
-
+ 
         }
 
         var updateMap = _.throttle(function(){ draw_map(); }, 200);
@@ -741,6 +717,10 @@ angular.module('yvyUiApp')
             });
           }
         });
+
+        scope.showFilter = function(){
+          filterSidebar.show();
+        }
 
       }//link: function postLink(scope, element, attrs) {
     };
