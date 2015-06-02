@@ -18,14 +18,6 @@ angular.module('yvyUiApp')
         var detailOpen = false;
         var panelslider, detalleHolder;
         var crearPopup = function (){
-          
-          function onOpen(){
-            $('#left-panel').css('margin-left', '280px');
-          }
-
-          function onClose(){
-            $('#left-panel').css('margin-left', '-70px');
-          }
 
           panelslider = $('#right-panel').panelslider({
                                 side: 'right',
@@ -35,6 +27,7 @@ angular.module('yvyUiApp')
                                 onStartOpen: function(){
                                   $rootScope.$broadcast('detail-start-open');
                                   $('#left-panel').css('margin-left', '410px');
+                                  $('.leaflet-control-zoom').css('margin-left', '460px');
                                 },
                                 onOpen: function(){
                                   $rootScope.$broadcast('detail-open');
@@ -42,6 +35,7 @@ angular.module('yvyUiApp')
                                 },
                                 onStartClose: function(){
                                   $('#left-panel').css('margin-left', '-40px');
+                                  $('.leaflet-control-zoom').css('margin-left', '10px');
                                   $rootScope.$broadcast('detail-start-close');
                                 },
                                 onClose: function(){

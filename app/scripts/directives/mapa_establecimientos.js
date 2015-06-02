@@ -207,6 +207,9 @@ angular.module('yvyUiApp')
         });
 
         scope.$on('detail-close', function(){
+          scope.$apply(function(){
+            scope.distancia = 0;
+          });
           rightPanelOpen = false;
           invalidateSize(true);
           MECONF.infoBox.update(MECONF.establecimientosVisibles.features);
@@ -560,7 +563,6 @@ angular.module('yvyUiApp')
                 latLonB = target.getLatLng();
                 var polyline = L.polyline([latLonA, latLonB]).addTo(map);
                 scope.distancia = Math.round(latLonA.distanceTo(latLonB));
-                console.log(scope.distancia);
               });
             }else{
               removePolygons();
