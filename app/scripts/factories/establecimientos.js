@@ -96,11 +96,7 @@ angular.module('yvyUiApp')
 			},
 
 			getClusterElementChild: function(e, periodo){
-				console.log('GETCLUSTERELEMENTCHILD');
-				console.log(e);
-				console.log(periodo);
 
-				//var key = getKeyFromFeature(e);
 				var children;
 				if(e.properties['nombre_barrio_localidad'] || e.properties.cantidad === 1){
 					children = establecimientos[periodo].features;
