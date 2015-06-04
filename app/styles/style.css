@@ -7,6 +7,7 @@
     padding: 0 10px 0 10px;
     font-family: 'open_sansregular', Helvetica, Arial, sans-serif;
     font-size: 16px;
+    z-index: -2;
 }
 
 /* Propiedades del loader*/
@@ -46,37 +47,49 @@
 
 /* Propiedades del panel de filtros */
 .left-panel {
-  height: 95% !important;
-  display: none;
+  width: 60% !important;
   width: 240px;
-  background-color: #eee;
+  background-color: #eee !important;
   text-align: center;
 /*  color: #000000;
 */  overflow: auto;
 }
 
+.leaflet-sidebar.left.visible ~ .leaflet-left {
+  left: 276px;
+}
+
+.left-panel + .close {
+  right: 190px !important;
+  background: none;
+}
+
 /* Propiedades de los filtros */
-.filtro-ancho{
+.filtro-ancho {
   margin: 0px !important;
   width: 180px !important;
 }
 
 /* Propiedades del panel Popup */
-.right-panel{
-  display: none;
+.right-panel {
   text-align: center;
   width: 450px;
-  background-color: #eee;
+  background-color: #eee !important;
   color: #000000;
-  height: 95% !important;
   overflow: auto;
 }
 
-.right-panel h3{
-    color: #000000;
+.right-panel h4 .label {
+  font-size: 100% !important;
 }
+
+.right-panel + .close {
+  right: 0px !important;
+  left: 20px;
+  background: none;
+}
+
 .right-panel table{
-  width: 80%;
   margin: 0 auto;
 }
 .attr-title {
@@ -223,9 +236,14 @@ h6{
   clear: none;
 }
 
-.leaflet-control-cobertura .input-group, .leaflet-control-distancia .input-group{
-  width: 240px;
+.leaflet-control-cobertura .input-group{
+  width: 75px;
   height: 34px;
+}
+
+.leaflet-control-distancia .input-group{
+  width: 125px;
+  height: 34px; 
 }
 
 .leaflet-control-cobertura .input-group-addon, .leaflet-control-distancia .input-group-addon{
@@ -267,7 +285,7 @@ h6{
 pre.ui-distance {
   position:absolute;
   bottom:10px;
-  right:10px;
+  right:475px;
   padding:5px 10px;
   background:rgba(0,0,0,0.5);
   color:#fff;
@@ -278,4 +296,26 @@ pre.ui-distance {
 
 .hidden{
   visibility: hidden;
+}
+
+#mapa-filtro h6 {
+  margin-top: 10px;
+}
+
+.distance-icon {
+    background-image: url(/images/distance.png);
+    background-size: 25px 25px;
+    background-position: center;
+    background-repeat: no-repeat; 
+}
+
+.coverage-icon {
+    background-image: url(/images/coverage.png);
+    background-size: 25px 25px;
+    background-position: center;
+    background-repeat: no-repeat; 
+}
+
+.tooltip {
+  position: fixed;
 }

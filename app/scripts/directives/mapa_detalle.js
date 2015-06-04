@@ -18,42 +18,17 @@ angular.module('yvyUiApp')
         var detailOpen = false;
         var panelslider, detalleHolder;
         var crearPopup = function (){
-          
-          function onOpen(){
-            $('#left-panel').css('margin-left', '280px');
-          }
+          panelslider = L.control.sidebar('right-panel-link', {
+            position: 'right'
+          });
 
-          function onClose(){
-            $('#left-panel').css('margin-left', '-70px');
-          }
+          $rootScope.$broadcast('detail-ready', panelslider);
 
-          panelslider = $('#right-panel').panelslider({
-                                side: 'right',
-                                duration: 1,
-                                clickClose: false,
-                                container: $('[ng-view]'),
-                                onStartOpen: function(){
-                                  $rootScope.$broadcast('detail-start-open');
-                                  $('#left-panel').css('margin-left', '410px');
-                                },
-                                onOpen: function(){
-                                  $rootScope.$broadcast('detail-open');
-                                  detailOpen = true;
-                                },
-                                onStartClose: function(){
-                                  $('#left-panel').css('margin-left', '-40px');
-                                  $rootScope.$broadcast('detail-start-close');
-                                },
-                                onClose: function(){
-                                  $rootScope.$broadcast('detail-close');
-                                  detailOpen = false;
-                                } 
-                              });
         };
                   
         crearPopup();
         scope.$watch('detalle', function(detalle){
-
+          console.log('watch detalle!');
           if(detalle){
             detalleHolder = detalle;
             mapaEstablecimientoFactory.getInstitucionesPorEstablecimiento(detalle)
@@ -61,7 +36,9 @@ angular.module('yvyUiApp')
                 scope.instituciones = data;
                 if(!detailOpen){
                   $timeout(function(){
-                    $('#right-panel').click();
+                    //$('#right-panel').click();
+                    console.log('abriendo detalle!');
+                    panelslider.show();
                     scope.$apply(function(){
                       scope.detalle = detalleHolder;
                     });
@@ -72,9 +49,11 @@ angular.module('yvyUiApp')
 
         });
 
-        scope.unset = function(){
-          scope.detalle = null;
-        }
+        panelslider.on('hidden', function () {
+          scope.$apply(function(){
+            scope.detalle = null;
+          })
+        });
 
         /*********************** INICIO ***********************************/
 

@@ -1,10 +1,11 @@
-<div id="left-panel-link" class="left-panel panel panel-default" role="navigation">
+<div id="left-panel-link" class="left-panel panel panel-default hidden" role="navigation">
   <div id="mapa-filtro">
     <h6>Periodo</h6>
     <div class="btn-group">
         <input type="radio" ng-model="local.periodo" value="2014" ng-change="$parent.updateEstablecimientos(local.periodo)" checked="checked">2014</input>
         <input type="radio" ng-model="local.periodo" value="2012" ng-change="$parent.updateEstablecimientos(local.periodo)">2012</input>
     </div>
+    <br>
     <h6>Departamento</h6>
     <select multiple id="filtro_nombre_departamento" name="filtro_nombre_departamento" class="filtro-ancho" ng-model="local.nombre_departamento" ng-change="updateFiltro()"></select><br/>
     <h6>Distrito</h6>
