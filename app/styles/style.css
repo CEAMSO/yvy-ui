@@ -47,7 +47,7 @@
 
 /* Propiedades del panel de filtros */
 .left-panel {
-  height: 90% !important;
+  height: 100% !important;
   width: 60% !important;
   width: 240px;
   background-color: #eee !important;
@@ -169,7 +169,7 @@ h6{
   font-size: 11px;
   font-family: Arial, sans-serif;
   font-weight: bold;
-  background-image: url(/images/m4.png);
+  background-image: url(../images/m4.png);
   background-position: 0px 0px;
 }
 
@@ -186,7 +186,7 @@ h6{
   font-size: 11px;
   font-family: Arial, sans-serif;
   font-weight: bold;
-  background-image: url(/images/m3.png);
+  background-image: url(../images/m3.png);
   background-position: 0px 0px;
 }
 
@@ -203,7 +203,7 @@ h6{
   font-size: 11px;
   font-family: Arial, sans-serif;
   font-weight: bold;
-  background-image: url(/images/m2.png);
+  background-image: url(../images/m2.png);
   background-position: 0px 0px;
 }
 
@@ -220,7 +220,7 @@ h6{
   font-size: 11px;
   font-family: Arial, sans-serif;
   font-weight: bold;
-  background-image: url(/images/m1.png);
+  background-image: url(../images/m1.png);
   background-position: 0px 0px;
 }
 
@@ -300,14 +300,14 @@ pre.ui-distance {
 }
 
 .distance-icon {
-    background-image: url(/images/distance.png);
+    background-image: url(../images/distance.png);
     background-size: 25px 25px;
     background-position: center;
     background-repeat: no-repeat; 
 }
 
 .coverage-icon {
-    background-image: url(/images/coverage.png);
+    background-image: url(../images/coverage.png);
     background-size: 25px 25px;
     background-position: center;
     background-repeat: no-repeat; 
@@ -316,3 +316,13 @@ pre.ui-distance {
 .tooltip {
   position: fixed;
 }
+
+.leaflet-control-layers-toggle {
+  background-image: url(../images/layers.png);
+  width: 36px;
+  height: 36px;
+  }
+.leaflet-retina .leaflet-control-layers-toggle {
+  background-image: url(../images/layers-2x.png);
+  background-size: 26px 26px;
+  }
