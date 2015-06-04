@@ -304,8 +304,7 @@ angular.module('yvyUiApp')
                 markerColor: color,
                 prefix: 'glyphicon'
               });
-            }else{
-              color = 'blue';
+            }else if(feature.properties.cantidad > 1){
               content = sprintf('<div>%s</div>', feature.properties.cantidad);
               icon = L.divIcon({
                 className: getMarkerClass(feature),
@@ -384,6 +383,7 @@ angular.module('yvyUiApp')
           //console.log('levelZoom: ' + levelZoom);
           console.time('filtrado');
           console.log('zoom: ' + levelZoom);
+
           if(redrawClusters){
             e = getClusterByZoom(levelZoom);
           }else{
@@ -393,11 +393,6 @@ angular.module('yvyUiApp')
           console.timeEnd('filtrado');
           console.time('bounds');
 
-          if( levelZoom < MECONF.nivelesZoom['barrio_localidad'] && filtros ){
-            var codigos_establecimientos = _.pluck(MECONF.establecimientosVisibles.features, 'properties');
-            codigos_establecimientos =  _.pluck(codigos_establecimientos, 'codigo_establecimiento');
-            //scope.$parent.getInstituciones(codigos_establecimientos); //El controller se encarga de cargar la Lista de Detalles
-          }
           var afterFit = function(){ drawVisibleMarkers(e)};
           console.timeEnd('bounds');
           //console.log(e
@@ -451,17 +446,17 @@ angular.module('yvyUiApp')
         var getClusterByZoom = function(levelZoom){
           var e;
           if(levelZoom < MECONF.nivelesZoom['pais']){
-            e = filtrar_cluster('pais');
+            e = mapaEstablecimientoFactory.getCantidadEstablecimientos('pais');
           } else if (levelZoom < MECONF.nivelesZoom['departamento']) { //cluster por departamento (por defecto)
-            e = filtrar_cluster('departamento');
+            e = mapaEstablecimientoFactory.getCantidadEstablecimientos('departamento', MECONF.establecimientosVisibles);
             console.log('cluster by departamento');
           } else if ((levelZoom >= MECONF.nivelesZoom['departamento'] && levelZoom < MECONF.nivelesZoom['distrito'])) { //cluster por distrito
-            e = filtrar_cluster('distrito');
+            e = mapaEstablecimientoFactory.getCantidadEstablecimientos('distrito', MECONF.establecimientosVisibles);
             console.log('cluster by distrito');
 
           } else if ((levelZoom >= MECONF.nivelesZoom['distrito'] && levelZoom < MECONF.nivelesZoom['barrio_localidad'])) { //cluster por barrio/localidad
             console.log('cluster by localidad');
-            e = filtrar_cluster('barrio_localidad');
+            e = mapaEstablecimientoFactory.getCantidadEstablecimientos('barrio_localidad', MECONF.establecimientosVisibles);
           }else{
             console.log('no cluster');
             e = _.clone(MECONF.establecimientosVisibles);
@@ -469,70 +464,6 @@ angular.module('yvyUiApp')
           MECONF.allFeatures = e.features;
           return e;
         }
-
-        /* Funcion que filtra el cluster a mostrar, ya sea por Departamentos/Distritos/BarrioLocalidad */
-        var filtrar_cluster = function(tipo){
-          var clusterPais;
-          if(tipo === 'pais'){
-            clusterPais = mapaEstablecimientoFactory.getCentroPais();
-            clusterPais.features[0].properties.cantidad = MECONF.establecimientosVisibles.features.length;
-            return clusterPais;
-          }
-
-          var tipo_cluster = 'cluster_'+tipo;
-          //Reemplazar por llamada al service
-          console.time('cluster index');
-          //build a cluster index
-          var clusterIndex = mapaEstablecimientoFactory.getClusterIndex(tipo_cluster);
-          var coordinatesIndex = {};
-          console.timeEnd('cluster index');
-
-          var e =  
-          { 'type' : 'FeatureCollection',
-            'features' : []
-          };
-
-          var keyAccesor;
-          switch(tipo){
-            case 'departamento':
-              keyAccesor = function(f){ return _.deburr(f.properties['nombre_departamento']); };
-              break;
-            case 'distrito':
-              keyAccesor = function(f){ return _.deburr(f.properties['nombre_departamento']) + _.deburr(f.properties['nombre_distrito']); };
-              break;
-            case 'barrio_localidad':
-              keyAccesor = function(f){ return _.deburr(f.properties['nombre_departamento']) + _.deburr(f.properties['nombre_distrito']) + _.deburr(f.properties['nombre_barrio_localidad']); };
-              break;
-          }
-
-          console.time('cluster features');
-          _.each(MECONF.establecimientosVisibles.features, function(f){
-            var key = keyAccesor(f);
-            if(clusterIndex[key]){
-              clusterIndex[key].properties.cantidad++;
-              coordinatesIndex[key] = f.geometry.coordinates;
-              //clusterIndex[key].properties.targetChild = f;
-            }
-          });
-
-          /* Si el cluster es de un elemento, se desplaza su centro:
-             Del centroide del poligono al punto del unico establecimiento del cluster
-          */
-          _.forOwn(clusterIndex, function(c, k){
-            if(c.properties.cantidad === 1){
-              c.geometry.coordinates = coordinatesIndex[k];    
-            } 
-          });
-
-          console.timeEnd('cluster features');
-
-          console.time('cluster filter');
-          e.features = _(clusterIndex).values().filter(function(f){ return f.properties.cantidad; }).value();
-          console.timeEnd('cluster filter');
-          console.log(e);
-          return e;
-
-        };
 
         function removePolygons(clazz){
           clazz =  clazz || L.Path;
@@ -544,9 +475,8 @@ angular.module('yvyUiApp')
         /* Handler para el click de un marker */
         function onMarkerClick(t){
           target = t.layer;
-          var feature = (target.feature.properties.cantidad === 1) ? mapaEstablecimientoFactory.getClusterElementChild(target.feature, scope.periodo) : target.feature;
-          //var feature = target.feature;
-          //map.panTo(target.layer.getLatLng()); //funcion que centra el mapa sobre el marker
+
+          var feature = (target.feature.properties.cantidad === 1) ? mapaEstablecimientoFactory.getClusterElementChild(target.feature, MECONF.establecimientosVisibles) : target.feature;
 
           var levelZoom = map.getZoom();
           var latLon, targetChild, targetZoom;
@@ -586,9 +516,8 @@ angular.module('yvyUiApp')
             }
           }else{
             removePolygons();
-            //targetChild = target.layer.feature.properties.targetChild; //Se toma el primero, se podria tomar random tambien
             targetZoom = _.find(_.values(MECONF.nivelesZoom), function(z){ return z > levelZoom; });
-            targetChild = mapaEstablecimientoFactory.getClusterElementChild(target.feature, scope.periodo);
+            targetChild = mapaEstablecimientoFactory.getClusterElementChild(target.feature, MECONF.establecimientosVisibles);
             latLon = [targetChild.geometry.coordinates[1], targetChild.geometry.coordinates[0]];
             map.setView(latLon, targetZoom); //funcion que centra el mapa sobre el marker
           }
