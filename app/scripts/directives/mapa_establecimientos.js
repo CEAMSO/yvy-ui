@@ -33,6 +33,7 @@ angular.module('yvyUiApp')
             var self = this;
             var container = L.DomUtil.create('div', 'leaflet-control-cobertura');
             this.form = L.DomUtil.create('form', 'form-inline', container);
+            this.form.setAttribute('onsubmit', 'return false');
             var group = L.DomUtil.create('div', 'input-group', this.form);
             var prefix = L.DomUtil.create('span', 'input-group-addon coverage-icon', group);
             prefix.setAttribute('data-toggle', 'tooltip');
@@ -40,6 +41,7 @@ angular.module('yvyUiApp')
             prefix.setAttribute('title', 'Con este control puedes visualizar la cobertura del establecimiento educativo seleccionado o la de todos los establecimientos visibles');
             //prefix.textContent = 'Cobertura:'
             this.input = L.DomUtil.create('input', 'form-control input-sm', group);
+            this.input.setAttribute('min', '0');
             this.input.type = 'number';
             this.input.setAttribute('ng-model', 'data');
             var group2 = L.DomUtil.create('div', 'input-group', this.form);
@@ -112,6 +114,7 @@ angular.module('yvyUiApp')
             var self = this;
             var container = L.DomUtil.create('div', 'leaflet-control-distancia');
             this.form = L.DomUtil.create('form', 'form', container);
+            this.form.setAttribute('onsubmit', 'return false');
             var group = L.DomUtil.create('div', 'input-group', this.form);
             var prefix = L.DomUtil.create('span', 'input-group-addon distance-icon', group);
             prefix.setAttribute('data-toggle', 'tooltip');
@@ -284,7 +287,7 @@ angular.module('yvyUiApp')
           $('[data-toggle="tooltip"]').tooltip();
           //si el doble click ocurre en un control
           map.on('dblclick', function(e){
-            if(e.originalEvent.target.id !== 'map'){
+            if(e.originalEvent.target.id !== 'map' && e.originalEvent.target.tagName !== 'svg'){
               map.doubleClickZoom.disable();
             }
           });
@@ -415,6 +418,7 @@ angular.module('yvyUiApp')
           var outerBounds;
 
           if(redrawClusters){
+            removePolygons(L.Polyline);
             MECONF.infoBox.update(MECONF.establecimientosVisibles.features);
             if(filtros){
               MECONF.geoJsonLayer.setGeoJSON(e);
@@ -685,7 +689,7 @@ angular.module('yvyUiApp')
               top: '92%',
               left: '98%'
           }).spin();
-          $("#map").removeClass().append(spinner.el);
+          $("#map").append(spinner.el);
         };
 
 
