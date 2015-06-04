@@ -23,22 +23,40 @@ angular.module('yvyUiApp')
         L.Control.Cobertura = L.Control.extend({
           options: {
             // topright, topleft, bottomleft, bottomright
-            position: 'topright'
+            position: 'topright',
+            checked: false
           },
           initialize: function (options) {
             L.Util.setOptions(this, options);
           },
           onAdd: function (map) {
+            var self = this;
             var container = L.DomUtil.create('div', 'leaflet-control-cobertura');
-            this.form = L.DomUtil.create('form', 'form', container);
+            this.form = L.DomUtil.create('form', 'form-inline', container);
             var group = L.DomUtil.create('div', 'input-group', this.form);
-            var prefix = L.DomUtil.create('span', 'input-group-addon', group);
-            prefix.textContent = 'Cobertura:'
+            var prefix = L.DomUtil.create('span', 'input-group-addon coverage-icon', group);
+            prefix.setAttribute('data-toggle', 'tooltip');
+            prefix.setAttribute('data-placement', 'bottom');
+            prefix.setAttribute('title', 'Con este control puedes visualizar la cobertura del establecimiento educativo seleccionado o la de todos los establecimientos visibles');
+            //prefix.textContent = 'Cobertura:'
             this.input = L.DomUtil.create('input', 'form-control input-sm', group);
             this.input.type = 'number';
             this.input.setAttribute('ng-model', 'data');
-            var postfix = L.DomUtil.create('span', 'input-group-addon', group);
-            postfix.textContent = 'metros'
+            var group2 = L.DomUtil.create('div', 'input-group', this.form);
+            this.toggle = L.DomUtil.create('input', 'form-control input-sm', group2);
+
+            $(this.toggle).bootstrapToggle({
+              on: 'Uno',
+              off: 'Todos'
+            });
+            this.toggle.type = 'checkbox';
+            this.toggle.checked = this.options.checked;
+            this.checked = this.options.checked;
+            this.proxiedToggleChange = function(e){ self.toggleChange.call(self, e); }
+            $(this.toggle).on('change', this.proxiedToggleChange);
+
+            //var postfix = L.DomUtil.create('span', 'input-group-addon', group);
+            //postfix.textContent = 'metros'
             this.debouncedChange = _.debounce(this.onChange, 300);
             this.debouncedDblClick = _.debounce(this.onDblClick, 300)
             L.DomEvent.addListener(this.input, 'change', this.debouncedChange, this);
@@ -56,6 +74,9 @@ angular.module('yvyUiApp')
               if(layer instanceof L.Circle) layer.setRadius(e.target.value);
             });
           },
+          toggleChange: function(e) {
+            this.checked = e.target.checked;
+          },
           onDblClick: function(e) {
             map.doubleClickZoom.enable();
           },
@@ -68,6 +89,9 @@ angular.module('yvyUiApp')
           },
           lastChangeByUser: function() {
             return this.userChangeFlag;
+          },
+          isCoverageGeneral: function() {
+            return this.checked;
           }
         });
          
@@ -89,8 +113,11 @@ angular.module('yvyUiApp')
             var container = L.DomUtil.create('div', 'leaflet-control-distancia');
             this.form = L.DomUtil.create('form', 'form', container);
             var group = L.DomUtil.create('div', 'input-group', this.form);
-            var prefix = L.DomUtil.create('span', 'input-group-addon', group);
-            prefix.textContent = 'Cálculo Distancia:'
+            var prefix = L.DomUtil.create('span', 'input-group-addon distance-icon', group);
+            prefix.setAttribute('data-toggle', 'tooltip');
+            prefix.setAttribute('data-placement', 'bottom');
+            prefix.setAttribute('title', 'Activando este control, puedes calcular la distancia entre dos establecimientos educativos');
+            //prefix.textContent = 'Cálculo Distancia:'
             this.input = L.DomUtil.create('input', 'form-control input-sm', group);
 
             $(this.input).bootstrapToggle({
@@ -169,13 +196,16 @@ angular.module('yvyUiApp')
           map.addControl(sidebar);
           detailSidebar = sidebar;
           rightPanelOpen = true;
-          detailSidebar.on('hidden', function(){
+          detailSidebar.on('hide', function(){
             scope.$apply(function(){
               scope.distancia = 0;
             });
+            removePolygons();
+          });
+
+          detailSidebar.on('hidden', function(){
             rightPanelOpen = false;
             MECONF.infoBox.update(MECONF.establecimientosVisibles.features);
-            removePolygons();
             draw_map();
           });
           detailSidebar.on('show', function(){
@@ -251,7 +281,7 @@ angular.module('yvyUiApp')
           map.addControl(MECONF.controlCobertura);
           MECONF.controlDistancia = L.control.distancia('control-distancia');
           map.addControl(MECONF.controlDistancia);
-          
+          $('[data-toggle="tooltip"]').tooltip();
           //si el doble click ocurre en un control
           map.on('dblclick', function(e){
             if(e.originalEvent.target.id !== 'map'){

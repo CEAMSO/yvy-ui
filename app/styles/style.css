@@ -7,6 +7,7 @@
     padding: 0 10px 0 10px;
     font-family: 'open_sansregular', Helvetica, Arial, sans-serif;
     font-size: 16px;
+    z-index: -2;
 }
 
 /* Propiedades del loader*/
@@ -232,9 +233,14 @@ h6{
   clear: none;
 }
 
-.leaflet-control-cobertura .input-group, .leaflet-control-distancia .input-group{
-  width: 240px;
+.leaflet-control-cobertura .input-group{
+  width: 75px;
   height: 34px;
+}
+
+.leaflet-control-distancia .input-group{
+  width: 125px;
+  height: 34px; 
 }
 
 .leaflet-control-cobertura .input-group-addon, .leaflet-control-distancia .input-group-addon{
@@ -276,7 +282,7 @@ h6{
 pre.ui-distance {
   position:absolute;
   bottom:10px;
-  right:10px;
+  right:475px;
   padding:5px 10px;
   background:rgba(0,0,0,0.5);
   color:#fff;
@@ -291,4 +297,22 @@ pre.ui-distance {
 
 #mapa-filtro h6 {
   margin-top: 10px;
+}
+
+.distance-icon {
+    background-image: url(/images/distance.png);
+    background-size: 25px 25px;
+    background-position: center;
+    background-repeat: no-repeat; 
+}
+
+.coverage-icon {
+    background-image: url(/images/coverage.png);
+    background-size: 25px 25px;
+    background-position: center;
+    background-repeat: no-repeat; 
+}
+
+.tooltip {
+  position: fixed;
 }
