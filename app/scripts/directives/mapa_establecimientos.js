@@ -48,8 +48,8 @@ angular.module('yvyUiApp')
             this.toggle = L.DomUtil.create('input', 'form-control input-sm', group2);
 
             $(this.toggle).bootstrapToggle({
-              on: 'Uno',
-              off: 'Todos'
+              on: 'Todos',
+              off: 'Uno'
             });
             this.toggle.type = 'checkbox';
             this.toggle.checked = this.options.checked;
@@ -78,6 +78,7 @@ angular.module('yvyUiApp')
           },
           toggleChange: function(e) {
             this.checked = e.target.checked;
+            draw_map();
           },
           onDblClick: function(e) {
             map.doubleClickZoom.enable();
@@ -92,7 +93,7 @@ angular.module('yvyUiApp')
           lastChangeByUser: function() {
             return this.userChangeFlag;
           },
-          isCoverageGeneral: function() {
+          generalCoverageEnabled: function() {
             return this.checked;
           }
         });
@@ -203,6 +204,7 @@ angular.module('yvyUiApp')
             scope.$apply(function(){
               scope.distancia = 0;
             });
+            MECONF.fixedMarker = null;
             removePolygons();
           });
 
@@ -445,6 +447,7 @@ angular.module('yvyUiApp')
         };
 
         var drawVisibleMarkers = function(e){
+          removePolygons();
           console.time('visible');
           var bounds = map.getBounds();
           e.features = _.filter(MECONF.allFeatures, function(punto){
@@ -456,6 +459,20 @@ angular.module('yvyUiApp')
           console.time('geojson');
 
           MECONF.geoJsonLayer.setGeoJSON(e);
+          if(MECONF.controlCobertura.generalCoverageEnabled()){
+            _.each(e.features, function(f) {
+              if(f.properties.cantidad === 1 || f.properties.codigo_establecimiento){
+                var latLon = [f.geometry.coordinates[1], f.geometry.coordinates[0]];
+                L.circle(latLon, MECONF.controlCobertura.getValue(), {
+                    color: 'blue',
+                    fillOpacity: 0.5
+                }).addTo(map);
+              }
+            });
+          }else{
+            drawDetailCoverage();
+          }
+
           console.timeEnd('geojson');
 
           //MECONF.currentZoom = levelZoom;
@@ -547,15 +564,26 @@ angular.module('yvyUiApp')
 
         };
 
-        function removePolygons(clazz){
+        function removePolygons(clazz) {
           clazz =  clazz || L.Path;
-          map.eachLayer(function(layer){
+          map.eachLayer(function(layer) {
             if(layer instanceof clazz) map.removeLayer(layer);
           });
         }
 
+        function drawDetailCoverage() {
+          var latLon;
+          if(MECONF.fixedMarker){
+            console.log(MECONF.fixedMarker);
+            L.circle(MECONF.fixedMarker.getLatLng(), MECONF.controlCobertura.getValue(), {
+              color: 'blue',
+              fillOpacity: 0.5
+            }).addTo(map);
+          }
+        }
+
         /* Handler para el click de un marker */
-        function onMarkerClick(t){
+        function onMarkerClick(t) {
           target = t.layer;
           var feature = (target.feature.properties.cantidad === 1) ? mapaEstablecimientoFactory.getClusterElementChild(target.feature, scope.periodo) : target.feature;
           //var feature = target.feature;
@@ -581,11 +609,7 @@ angular.module('yvyUiApp')
               if(!MECONF.controlCobertura.lastChangeByUser()){
                 MECONF.controlCobertura.setValue(Math.pow(19 - levelZoom, 2) * 10);
               }
-
-              L.circle(target.getLatLng(), MECONF.controlCobertura.getValue(), {
-                  color: 'blue',
-                  fillOpacity: 0.5
-                }).addTo(map);
+              drawDetailCoverage();
               $timeout(function(){
                 scope.$apply(function(){
                   scope.detalle = feature.properties;
