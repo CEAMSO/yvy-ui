@@ -48,8 +48,8 @@ angular.module('yvyUiApp')
             this.toggle = L.DomUtil.create('input', 'form-control input-sm', group2);
 
             $(this.toggle).bootstrapToggle({
-              on: 'Uno',
-              off: 'Todos'
+              on: 'Todos',
+              off: 'Uno'
             });
             this.toggle.type = 'checkbox';
             this.toggle.checked = this.options.checked;
@@ -78,6 +78,7 @@ angular.module('yvyUiApp')
           },
           toggleChange: function(e) {
             this.checked = e.target.checked;
+            draw_map();
           },
           onDblClick: function(e) {
             map.doubleClickZoom.enable();
@@ -92,7 +93,7 @@ angular.module('yvyUiApp')
           lastChangeByUser: function() {
             return this.userChangeFlag;
           },
-          isCoverageGeneral: function() {
+          generalCoverageEnabled: function() {
             return this.checked;
           }
         });
@@ -203,6 +204,7 @@ angular.module('yvyUiApp')
             scope.$apply(function(){
               scope.distancia = 0;
             });
+            MECONF.fixedMarker = null;
             removePolygons();
           });
 
@@ -440,6 +442,7 @@ angular.module('yvyUiApp')
         };
 
         var drawVisibleMarkers = function(e){
+          removePolygons();
           console.time('visible');
           var bounds = map.getBounds();
           e.features = _.filter(MECONF.allFeatures, function(punto){
@@ -451,6 +454,20 @@ angular.module('yvyUiApp')
           console.time('geojson');
 
           MECONF.geoJsonLayer.setGeoJSON(e);
+          if(MECONF.controlCobertura.generalCoverageEnabled()){
+            _.each(e.features, function(f) {
+              if(f.properties.cantidad === 1 || f.properties.codigo_establecimiento){
+                var latLon = [f.geometry.coordinates[1], f.geometry.coordinates[0]];
+                L.circle(latLon, MECONF.controlCobertura.getValue(), {
+                    color: 'blue',
+                    fillOpacity: 0.5
+                }).addTo(map);
+              }
+            });
+          }else{
+            drawDetailCoverage();
+          }
+
           console.timeEnd('geojson');
 
           //MECONF.currentZoom = levelZoom;
@@ -478,15 +495,90 @@ angular.module('yvyUiApp')
           return e;
         }
 
+        /* Funcion que filtra el cluster a mostrar, ya sea por Departamentos/Distritos/BarrioLocalidad */
+        var filtrar_cluster = function(tipo){
+          var clusterPais;
+          if(tipo === 'pais'){
+            clusterPais = mapaEstablecimientoFactory.getCentroPais();
+            clusterPais.features[0].properties.cantidad = MECONF.establecimientosVisibles.features.length;
+            return clusterPais;
+          }
+
+          var tipo_cluster = 'cluster_'+tipo;
+          //Reemplazar por llamada al service
+          console.time('cluster index');
+          //build a cluster index
+          var clusterIndex = mapaEstablecimientoFactory.getClusterIndex(tipo_cluster);
+          var coordinatesIndex = {};
+          console.timeEnd('cluster index');
+
+          var e =  
+          { 'type' : 'FeatureCollection',
+            'features' : []
+          };
+
+          var keyAccesor;
+          switch(tipo){
+            case 'departamento':
+              keyAccesor = function(f){ return _.deburr(f.properties['nombre_departamento']); };
+              break;
+            case 'distrito':
+              keyAccesor = function(f){ return _.deburr(f.properties['nombre_departamento']) + _.deburr(f.properties['nombre_distrito']); };
+              break;
+            case 'barrio_localidad':
+              keyAccesor = function(f){ return _.deburr(f.properties['nombre_departamento']) + _.deburr(f.properties['nombre_distrito']) + _.deburr(f.properties['nombre_barrio_localidad']); };
+              break;
+          }
+
+          console.time('cluster features');
+          _.each(MECONF.establecimientosVisibles.features, function(f){
+            var key = keyAccesor(f);
+            if(clusterIndex[key]){
+              clusterIndex[key].properties.cantidad++;
+              coordinatesIndex[key] = f.geometry.coordinates;
+              //clusterIndex[key].properties.targetChild = f;
+            }
+          });
+
+          /* Si el cluster es de un elemento, se desplaza su centro:
+             Del centroide del poligono al punto del unico establecimiento del cluster
+          */
+          _.forOwn(clusterIndex, function(c, k){
+            if(c.properties.cantidad === 1){
+              c.geometry.coordinates = coordinatesIndex[k];    
+            } 
+          });
+
+          console.timeEnd('cluster features');
+
+          console.time('cluster filter');
+          e.features = _(clusterIndex).values().filter(function(f){ return f.properties.cantidad; }).value();
+          console.timeEnd('cluster filter');
+          console.log(e);
+          return e;
+
+        };
+
         function removePolygons(clazz){
           clazz =  clazz || L.Path;
-          map.eachLayer(function(layer){
+          map.eachLayer(function(layer) {
             if(layer instanceof clazz) map.removeLayer(layer);
           });
         }
 
+        function drawDetailCoverage() {
+          var latLon;
+          if(MECONF.fixedMarker){
+            console.log(MECONF.fixedMarker);
+            L.circle(MECONF.fixedMarker.getLatLng(), MECONF.controlCobertura.getValue(), {
+              color: 'blue',
+              fillOpacity: 0.5
+            }).addTo(map);
+          }
+        }
+
         /* Handler para el click de un marker */
-        function onMarkerClick(t){
+        function onMarkerClick(t) {
           target = t.layer;
 
           var feature = (target.feature.properties.cantidad === 1) ? mapaEstablecimientoFactory.getClusterElementChild(target.feature, MECONF.establecimientosVisibles) : target.feature;
@@ -511,11 +603,7 @@ angular.module('yvyUiApp')
               if(!MECONF.controlCobertura.lastChangeByUser()){
                 MECONF.controlCobertura.setValue(Math.pow(19 - levelZoom, 2) * 10);
               }
-
-              L.circle(target.getLatLng(), MECONF.controlCobertura.getValue(), {
-                  color: 'blue',
-                  fillOpacity: 0.5
-                }).addTo(map);
+              drawDetailCoverage();
               $timeout(function(){
                 scope.$apply(function(){
                   scope.detalle = feature.properties;
