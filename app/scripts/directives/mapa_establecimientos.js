@@ -318,8 +318,7 @@ angular.module('yvyUiApp')
                 markerColor: color,
                 prefix: 'glyphicon'
               });
-            }else{
-              color = 'blue';
+            }else if(feature.properties.cantidad > 1){
               content = sprintf('<div>%s</div>', feature.properties.cantidad);
               icon = L.divIcon({
                 className: getMarkerClass(feature),
@@ -398,6 +397,7 @@ angular.module('yvyUiApp')
           //console.log('levelZoom: ' + levelZoom);
           console.time('filtrado');
           console.log('zoom: ' + levelZoom);
+
           if(redrawClusters){
             e = getClusterByZoom(levelZoom);
           }else{
@@ -407,11 +407,6 @@ angular.module('yvyUiApp')
           console.timeEnd('filtrado');
           console.time('bounds');
 
-          if( levelZoom < MECONF.nivelesZoom['barrio_localidad'] && filtros ){
-            var codigos_establecimientos = _.pluck(MECONF.establecimientosVisibles.features, 'properties');
-            codigos_establecimientos =  _.pluck(codigos_establecimientos, 'codigo_establecimiento');
-            //scope.$parent.getInstituciones(codigos_establecimientos); //El controller se encarga de cargar la Lista de Detalles
-          }
           var afterFit = function(){ drawVisibleMarkers(e)};
           console.timeEnd('bounds');
           //console.log(e
@@ -481,17 +476,17 @@ angular.module('yvyUiApp')
         var getClusterByZoom = function(levelZoom){
           var e;
           if(levelZoom < MECONF.nivelesZoom['pais']){
-            e = filtrar_cluster('pais');
+            e = mapaEstablecimientoFactory.getCantidadEstablecimientos('pais', MECONF.establecimientosVisibles);
           } else if (levelZoom < MECONF.nivelesZoom['departamento']) { //cluster por departamento (por defecto)
-            e = filtrar_cluster('departamento');
+            e = mapaEstablecimientoFactory.getCantidadEstablecimientos('departamento', MECONF.establecimientosVisibles);
             console.log('cluster by departamento');
           } else if ((levelZoom >= MECONF.nivelesZoom['departamento'] && levelZoom < MECONF.nivelesZoom['distrito'])) { //cluster por distrito
-            e = filtrar_cluster('distrito');
+            e = mapaEstablecimientoFactory.getCantidadEstablecimientos('distrito', MECONF.establecimientosVisibles);
             console.log('cluster by distrito');
 
           } else if ((levelZoom >= MECONF.nivelesZoom['distrito'] && levelZoom < MECONF.nivelesZoom['barrio_localidad'])) { //cluster por barrio/localidad
             console.log('cluster by localidad');
-            e = filtrar_cluster('barrio_localidad');
+            e = mapaEstablecimientoFactory.getCantidadEstablecimientos('barrio_localidad', MECONF.establecimientosVisibles);
           }else{
             console.log('no cluster');
             e = _.clone(MECONF.establecimientosVisibles);
@@ -564,7 +559,7 @@ angular.module('yvyUiApp')
 
         };
 
-        function removePolygons(clazz) {
+        function removePolygons(clazz){
           clazz =  clazz || L.Path;
           map.eachLayer(function(layer) {
             if(layer instanceof clazz) map.removeLayer(layer);
@@ -585,9 +580,8 @@ angular.module('yvyUiApp')
         /* Handler para el click de un marker */
         function onMarkerClick(t) {
           target = t.layer;
-          var feature = (target.feature.properties.cantidad === 1) ? mapaEstablecimientoFactory.getClusterElementChild(target.feature, scope.periodo) : target.feature;
-          //var feature = target.feature;
-          //map.panTo(target.layer.getLatLng()); //funcion que centra el mapa sobre el marker
+
+          var feature = (target.feature.properties.cantidad === 1) ? mapaEstablecimientoFactory.getClusterElementChild(target.feature, MECONF.establecimientosVisibles) : target.feature;
 
           var levelZoom = map.getZoom();
           var latLon, targetChild, targetZoom;
@@ -622,9 +616,8 @@ angular.module('yvyUiApp')
             }
           }else{
             removePolygons();
-            //targetChild = target.layer.feature.properties.targetChild; //Se toma el primero, se podria tomar random tambien
             targetZoom = _.find(_.values(MECONF.nivelesZoom), function(z){ return z > levelZoom; });
-            targetChild = mapaEstablecimientoFactory.getClusterElementChild(target.feature, scope.periodo);
+            targetChild = mapaEstablecimientoFactory.getClusterElementChild(target.feature, MECONF.establecimientosVisibles);
             latLon = [targetChild.geometry.coordinates[1], targetChild.geometry.coordinates[0]];
             map.setView(latLon, targetZoom); //funcion que centra el mapa sobre el marker
           }
