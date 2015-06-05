@@ -459,7 +459,7 @@ angular.module('yvyUiApp')
         var getClusterByZoom = function(levelZoom){
           var e;
           if(levelZoom < MECONF.nivelesZoom['pais']){
-            e = mapaEstablecimientoFactory.getCantidadEstablecimientos('pais');
+            e = mapaEstablecimientoFactory.getCantidadEstablecimientos('pais', MECONF.establecimientosVisibles);
           } else if (levelZoom < MECONF.nivelesZoom['departamento']) { //cluster por departamento (por defecto)
             e = mapaEstablecimientoFactory.getCantidadEstablecimientos('departamento', MECONF.establecimientosVisibles);
             console.log('cluster by departamento');
