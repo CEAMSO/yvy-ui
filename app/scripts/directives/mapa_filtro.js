@@ -166,12 +166,16 @@ angular.module('yvyUiApp')
           if(periodo){
             mapaEstablecimientoFactory.getDatosEstablecimientos({ 'periodo': periodo }).then(function(value){
               establecimientos = value;
-              (scope.local) ? scope.local['periodo']=periodo : scope.local = { periodo:periodo };
+              if(scope.local){
+                scope.local['periodo']=periodo
+              }else{
+                scope.local = { periodo:periodo };
+                initControl();
+              }
               scope.updateFiltro();
               console.time('cargar establecimientos');
               cargar(establecimientos);
               console.timeEnd('cargar establecimientos');
-              initControl();
             });
           }
         });
