@@ -18,8 +18,7 @@ angular.module('yvyUiApp')
       },
       templateUrl: 'views/templates/template_mapa.html',
       link: function postLink(scope, element, attrs) {
-        var target, result, detailSidebar, filterSidebar, rightPanelOpen, filterFlag = false;
-        scope.distancia = 0;
+        var detailSidebar, filterSidebar, rightPanelOpen, filterFlag = false;
         L.Control.Cobertura = L.Control.extend({
           options: {
             // topright, topleft, bottomleft, bottomright
@@ -172,7 +171,7 @@ angular.module('yvyUiApp')
             });
             MECONF.establecimientosVisibles = establecimientos_visibles;
             console.timeEnd('filtrando');
-            result = draw_map(filtro);
+            draw_map(filtro);
           }
           console.log(filtro);
         });
@@ -182,28 +181,33 @@ angular.module('yvyUiApp')
             if(filterFlag){
               map.off('move', updateMap);
               map.once('moveend', function(){ addUpdateHandlers(callback); });
-              map.fitBounds(MECONF.geoJsonLayer.getBounds(), {maxZoom: result.maxZoom});
+              map.fitBounds(MECONF.geoJsonLayer.getBounds(), {maxZoom: zoom});
             }
             filterFlag = true;
           }else{
             map.setView([-24, -57.189], 7, {animate: true});
           }
-        }
+        };
         
         var addUpdateHandlers = function(callback){
           //map.on('zoomend', updateMap);
           if(_.isFunction(callback)) callback();
           map.on('move', updateMap);
-        }
+        };
+
+        var setDistancia = function(){
+          scope.$apply(function(){ 
+            scope.distancia = 0;
+          });
+        };
 
         scope.$on('detail-ready', function(e, sidebar){
           map.addControl(sidebar);
           detailSidebar = sidebar;
           rightPanelOpen = true;
+          
           detailSidebar.on('hide', function(){
-            scope.$apply(function(){
-              scope.distancia = 0;
-            });
+            if(scope.distancia > 0) { setDistancia(); }
             MECONF.fixedMarker = null;
             removePolygons();
           });
@@ -213,8 +217,9 @@ angular.module('yvyUiApp')
             MECONF.infoBox.update(MECONF.establecimientosVisibles.features);
             draw_map();
           });
+
           detailSidebar.on('show', function(){
-            map.panTo(target.getLatLng());
+            map.panTo(MECONF.fixedMarker.getLatLng());
           });
 
           detailSidebar.on('shown', function(){
@@ -227,11 +232,21 @@ angular.module('yvyUiApp')
           map.addControl(sidebar);
           filterSidebar = sidebar;
           $(sidebar.getContainer()).removeClass('hidden');
-          filterSidebar.on('shown', function(){
-            $('#left-panel').hide();
+
+          filterSidebar.on('hidde', function(){
+            if(MECONF.fixedMarker){ map.panTo(MECONF.fixedMarker.getLatLng()); }
           });
+
           filterSidebar.on('hidden', function(){
             $('#left-panel').show();
+          });
+
+          filterSidebar.on('show', function(){
+            if(MECONF.fixedMarker){ map.panTo(MECONF.fixedMarker.getLatLng()); }
+          });
+
+          filterSidebar.on('shown', function(){
+            $('#left-panel').hide();
           });
         });
 
@@ -377,7 +392,6 @@ angular.module('yvyUiApp')
           var maxZoom, e, filterByDepartamento, filterByDistrito, filterByLocalidad, levelZoom = map.getZoom();
           MECONF.currentZoom = MECONF.currentZoom || levelZoom;
           var redrawClusters = filtros || levelZoom !== MECONF.currentZoom;
-          var testLayer = L.mapbox.featureLayer();
 
           if(filtros){
             filterByLocalidad = _.filter(filtros, function(f){ return f.atributo === 'nombre_barrio_localidad' && f.valor.length; }).length > 0;
@@ -409,27 +423,28 @@ angular.module('yvyUiApp')
 
           var afterFit = function(){ drawVisibleMarkers(e)};
           console.timeEnd('bounds');
-          //console.log(e
 
           console.time('ultimo');
           var outerBounds;
 
           if(redrawClusters){
-            removePolygons(L.Polyline);
             MECONF.infoBox.update(MECONF.establecimientosVisibles.features);
             if(filtros){
               MECONF.geoJsonLayer.setGeoJSON(e);
               outerBounds = MECONF.geoJsonLayer.getBounds();
               console.log(levelZoom);
-              fitMap(map, outerBounds, levelZoom, afterFit);
+              fitMap(map, outerBounds, maxZoom, afterFit);
               levelZoom = map.getZoom();
-              //e = getClusterByZoom(levelZoom);
-
             }else{
               drawVisibleMarkers(e);
             }
-            //console.time('esta');
-            //console.timeEnd('esta');
+
+            $timeout(function(){
+              if(scope.distancia > 0){
+                setDistancia(); 
+                removePolygons(L.Polyline);
+              }
+            });
 
           }else{
             drawVisibleMarkers(e);
@@ -438,11 +453,11 @@ angular.module('yvyUiApp')
           MECONF.currentZoom = levelZoom;
           console.timeEnd('ultimo');              
           console.timeEnd('draw_map');
-          return {map: map, maxZoom: maxZoom };
+          return {map: map};
         };
 
         var drawVisibleMarkers = function(e){
-          removePolygons();
+          removePolygons(L.Circle);
           console.time('visible');
           var bounds = map.getBounds();
           e.features = _.filter(MECONF.allFeatures, function(punto){
@@ -579,16 +594,17 @@ angular.module('yvyUiApp')
 
         /* Handler para el click de un marker */
         function onMarkerClick(t) {
-          target = t.layer;
+          var target = t.layer;
 
           var feature = (target.feature.properties.cantidad === 1) ? mapaEstablecimientoFactory.getClusterElementChild(target.feature, MECONF.establecimientosVisibles) : target.feature;
 
           var levelZoom = map.getZoom();
           var latLon, targetChild, targetZoom;
           var icon, color, lineGeoJSON, latLonA, latLonB;
+          var existeDistancia = MECONF.controlDistancia.getValue() && rightPanelOpen;
           if(feature.properties['periodo']){ //Verificamos que se trata de un establecimiento
             //Si ya hay un establecimiento seleccionado y esta habilitado el control de distancia
-            if(MECONF.controlDistancia.getValue() && rightPanelOpen){
+            if(MECONF.fixedMarker && existeDistancia){
               scope.$apply(function(){
                 removePolygons(L.Polyline);
                 latLonA = MECONF.fixedMarker.getLatLng();
@@ -597,6 +613,7 @@ angular.module('yvyUiApp')
                 scope.distancia = Math.round(latLonA.distanceTo(latLonB));
               });
             }else{
+              if(scope.distancia > 0) { setDistancia(); }
               removePolygons();
               MECONF.fixedMarker = target;
               //Cambiamos el radio respecto al zoom hasta que el usuario haga un cambio sobre el control
@@ -609,9 +626,7 @@ angular.module('yvyUiApp')
                   scope.detalle = feature.properties;
                 });
                 MECONF.infoBox.update(feature);
-                  if(rightPanelOpen){
-                  map.setView(target.getLatLng());
-                }
+                if(rightPanelOpen){ map.panTo(MECONF.fixedMarker.getLatLng()); }
               });
             }
           }else{
