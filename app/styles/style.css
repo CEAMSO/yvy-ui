@@ -91,7 +91,10 @@
 
 .right-panel table{
   margin: 0 auto;
+  width:94%;
+  float:right;
 }
+
 .attr-title {
   font-weight: bold;
   text-align: center;

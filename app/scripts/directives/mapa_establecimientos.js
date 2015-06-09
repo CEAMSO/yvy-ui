@@ -18,7 +18,7 @@ angular.module('yvyUiApp')
       },
       templateUrl: 'views/templates/template_mapa.html',
       link: function postLink(scope, element, attrs) {
-        var detailSidebar, filterSidebar, rightPanelOpen, filterFlag = false;
+        var detailSidebar, filterSidebar, filterFlag = false;
         L.Control.Cobertura = L.Control.extend({
           options: {
             // topright, topleft, bottomleft, bottomright
@@ -203,7 +203,13 @@ angular.module('yvyUiApp')
 
         var addVarianza = function(){
           var latLon = MECONF.fixedMarker.getLatLng();
-          latLon.lat = latLon.lat+0.00005;
+          var detailVisible = detailSidebar.isVisible();
+          var filterVisible = filterSidebar.isVisible();
+          if( (detailVisible && filterVisible) || (!detailVisible && !filterVisible) ){
+            latLon.lat = latLon.lat-0.00007;
+          }else{
+            latLon.lat = latLon.lat+0.00007;
+          }
           return latLon;
         };
 
@@ -219,7 +225,6 @@ angular.module('yvyUiApp')
           });
 
           detailSidebar.on('hidden', function(){
-            rightPanelOpen = false;
             MECONF.infoBox.update(MECONF.establecimientosVisibles.features);
             draw_map();
           });
@@ -229,7 +234,6 @@ angular.module('yvyUiApp')
           });
 
           detailSidebar.on('shown', function(){
-            rightPanelOpen = true;
             draw_map();
           });
         });
@@ -607,10 +611,9 @@ angular.module('yvyUiApp')
           var levelZoom = map.getZoom();
           var latLon, targetChild, targetZoom;
           var icon, color, lineGeoJSON, latLonA, latLonB;
-          var existeDistancia = MECONF.controlDistancia.getValue() && rightPanelOpen;
           if(feature.properties['periodo']){ //Verificamos que se trata de un establecimiento
             //Si ya hay un establecimiento seleccionado y esta habilitado el control de distancia
-            if(MECONF.fixedMarker && existeDistancia){
+            if(MECONF.fixedMarker && MECONF.controlDistancia.getValue() && detailSidebar.isVisible()){
               scope.$apply(function(){
                 removePolygons(L.Polyline);
                 latLonA = MECONF.fixedMarker.getLatLng();
@@ -626,7 +629,7 @@ angular.module('yvyUiApp')
               if(!MECONF.controlCobertura.lastChangeByUser()){
                 MECONF.controlCobertura.setValue(Math.pow(19 - levelZoom, 2) * 10);
               }
-              if(rightPanelOpen){
+              if(detailSidebar.isVisible()){
                 map.panTo(MECONF.fixedMarker.getLatLng());
               }
               drawDetailCoverage();
