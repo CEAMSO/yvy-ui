@@ -201,13 +201,19 @@ angular.module('yvyUiApp')
           });
         };
 
+        var addVarianza = function(){
+          var latLon = MECONF.fixedMarker.getLatLng();
+          latLon.lat = latLon.lat+0.00005;
+          return latLon;
+        };
+
         scope.$on('detail-ready', function(e, sidebar){
           map.addControl(sidebar);
           detailSidebar = sidebar;
-          rightPanelOpen = true;
           
           detailSidebar.on('hide', function(){
             if(scope.distancia > 0) { setDistancia(); }
+            map.panTo(addVarianza());
             MECONF.fixedMarker = null;
             removePolygons();
           });
@@ -219,7 +225,7 @@ angular.module('yvyUiApp')
           });
 
           detailSidebar.on('show', function(){
-            map.panTo(MECONF.fixedMarker.getLatLng());
+            map.panTo(addVarianza());
           });
 
           detailSidebar.on('shown', function(){
@@ -233,8 +239,8 @@ angular.module('yvyUiApp')
           filterSidebar = sidebar;
           $(sidebar.getContainer()).removeClass('hidden');
 
-          filterSidebar.on('hidde', function(){
-            if(MECONF.fixedMarker){ map.panTo(MECONF.fixedMarker.getLatLng()); }
+          filterSidebar.on('hide', function(){
+            if(MECONF.fixedMarker){ map.panTo(addVarianza()); }
           });
 
           filterSidebar.on('hidden', function(){
@@ -242,7 +248,7 @@ angular.module('yvyUiApp')
           });
 
           filterSidebar.on('show', function(){
-            if(MECONF.fixedMarker){ map.panTo(MECONF.fixedMarker.getLatLng()); }
+            if(MECONF.fixedMarker){ map.panTo(addVarianza()); }
           });
 
           filterSidebar.on('shown', function(){
@@ -620,13 +626,15 @@ angular.module('yvyUiApp')
               if(!MECONF.controlCobertura.lastChangeByUser()){
                 MECONF.controlCobertura.setValue(Math.pow(19 - levelZoom, 2) * 10);
               }
+              if(rightPanelOpen){
+                map.panTo(MECONF.fixedMarker.getLatLng());
+              }
               drawDetailCoverage();
               $timeout(function(){
                 scope.$apply(function(){
                   scope.detalle = feature.properties;
                 });
                 MECONF.infoBox.update(feature);
-                if(rightPanelOpen){ map.panTo(MECONF.fixedMarker.getLatLng()); }
               });
             }
           }else{
