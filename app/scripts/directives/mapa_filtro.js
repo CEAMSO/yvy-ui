@@ -96,6 +96,9 @@ angular.module('yvyUiApp')
 
             //Definimos un onChange sobre cada boton, de modo a que los cambios hechos sobre el filtro se reflejen en el mapa
             $('#filtro_nombre_zona label input, #filtro_proyecto111 label input, #filtro_proyecto822 label input').change(function(){
+              var self = $(this);
+              var item = self.parent();
+              (item.hasClass('active')) ? item.removeClass('active focus'):item.addClass('active');
               scope.$apply(function() {
                 scope.updateFiltro();
               });
