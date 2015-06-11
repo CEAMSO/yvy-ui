@@ -201,25 +201,12 @@ angular.module('yvyUiApp')
           });
         };
 
-        var addVarianza = function(){
-          var latLon = MECONF.fixedMarker.getLatLng();
-          var detailVisible = detailSidebar.isVisible();
-          var filterVisible = filterSidebar.isVisible();
-          if( (detailVisible && filterVisible) || (!detailVisible && !filterVisible) ){
-            latLon.lat = latLon.lat-0.00007;
-          }else{
-            latLon.lat = latLon.lat+0.00007;
-          }
-          return latLon;
-        };
-
         scope.$on('detail-ready', function(e, sidebar){
           map.addControl(sidebar);
           detailSidebar = sidebar;
           
           detailSidebar.on('hide', function(){
             if(scope.distancia > 0) { setDistancia(); }
-            map.panTo(addVarianza());
             MECONF.fixedMarker = null;
             removePolygons();
           });
@@ -230,7 +217,7 @@ angular.module('yvyUiApp')
           });
 
           detailSidebar.on('show', function(){
-            map.panTo(addVarianza());
+            map.panTo(MECONF.fixedMarker.getLatLng());
           });
 
           detailSidebar.on('shown', function(){
@@ -243,16 +230,8 @@ angular.module('yvyUiApp')
           filterSidebar = sidebar;
           $(sidebar.getContainer()).removeClass('hidden');
 
-          filterSidebar.on('hide', function(){
-            if(MECONF.fixedMarker){ map.panTo(addVarianza()); }
-          });
-
           filterSidebar.on('hidden', function(){
             $('#left-panel').show();
-          });
-
-          filterSidebar.on('show', function(){
-            if(MECONF.fixedMarker){ map.panTo(addVarianza()); }
           });
 
           filterSidebar.on('shown', function(){

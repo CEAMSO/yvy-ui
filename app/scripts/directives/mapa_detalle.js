@@ -19,7 +19,8 @@ angular.module('yvyUiApp')
         var panelslider, detalleHolder;
         var crearPopup = function (){
           panelslider = L.control.sidebar('right-panel-link', {
-            position: 'right'
+            position: 'right',
+            autoPan: false
           });
 
           $rootScope.$broadcast('detail-ready', panelslider);

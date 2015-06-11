@@ -147,13 +147,8 @@ angular.module('yvyUiApp')
 
         function initControl(){
           var panelSlider = L.control.sidebar('left-panel-link', {
-            position: 'left'
-          });
-          panelSlider.on('hidden', function(){
-            $('#filtroDepartamento').select2('close');
-            $('#filtroDistrito').select2('close');
-            $('#filtroBarrioLocalidad').select2('close');
-            $('#filtroCodigoEstablecimiento').select2('close');
+            position: 'left',
+            autoPan: false
           });
           
           $rootScope.$broadcast('filter-ready', panelSlider);
