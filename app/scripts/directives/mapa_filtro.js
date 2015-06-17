@@ -96,6 +96,9 @@ angular.module('yvyUiApp')
 
             //Definimos un onChange sobre cada boton, de modo a que los cambios hechos sobre el filtro se reflejen en el mapa
             $('#filtro_nombre_zona label input, #filtro_proyecto111 label input, #filtro_proyecto822 label input').change(function(){
+              var self = $(this);
+              var item = self.parent();
+              (item.hasClass('active')) ? item.removeClass('active focus'):item.addClass('active');
               scope.$apply(function() {
                 scope.updateFiltro();
               });
@@ -144,13 +147,8 @@ angular.module('yvyUiApp')
 
         function initControl(){
           var panelSlider = L.control.sidebar('left-panel-link', {
-            position: 'left'
-          });
-          panelSlider.on('hidden', function(){
-            $('#filtroDepartamento').select2('close');
-            $('#filtroDistrito').select2('close');
-            $('#filtroBarrioLocalidad').select2('close');
-            $('#filtroCodigoEstablecimiento').select2('close');
+            position: 'left',
+            autoPan: false
           });
           
           $rootScope.$broadcast('filter-ready', panelSlider);
@@ -166,12 +164,16 @@ angular.module('yvyUiApp')
           if(periodo){
             mapaEstablecimientoFactory.getDatosEstablecimientos({ 'periodo': periodo }).then(function(value){
               establecimientos = value;
-              (scope.local) ? scope.local['periodo']=periodo : scope.local = { periodo:periodo };
+              if(scope.local){
+                scope.local['periodo']=periodo
+              }else{
+                scope.local = { periodo:periodo };
+                initControl();
+              }
               scope.updateFiltro();
               console.time('cargar establecimientos');
               cargar(establecimientos);
               console.timeEnd('cargar establecimientos');
-              initControl();
             });
           }
         });

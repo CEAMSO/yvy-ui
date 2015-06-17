@@ -47,20 +47,22 @@
 
 /* Propiedades del panel de filtros */
 .left-panel {
-  width: 60% !important;
   width: 240px;
   background-color: #eee !important;
   text-align: center;
-/*  color: #000000;
-*/  overflow: auto;
+  overflow: auto;
+  background: none;
+}
+
+.leaflet-sidebar.left.visible{
+  width: 300px;
 }
 
 .leaflet-sidebar.left.visible ~ .leaflet-left {
-  left: 276px;
+  left: 300px;
 }
 
 .left-panel + .close {
-  right: 190px !important;
   background: none;
 }
 
@@ -91,7 +93,10 @@
 
 .right-panel table{
   margin: 0 auto;
+  width:94%;
+  float:right;
 }
+
 .attr-title {
   font-weight: bold;
   text-align: center;
