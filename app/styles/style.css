@@ -24,6 +24,7 @@
     -webkit-transition:background 1s ease-out;
     z-index: 10000;
 }
+
 #loader.done {
     background:rgba(255, 255, 255, 0);
 }
@@ -95,6 +96,7 @@
   margin: 0 auto;
   width:94%;
   float:right;
+  margin-bottom: 23px;
 }
 
 .attr-title {
