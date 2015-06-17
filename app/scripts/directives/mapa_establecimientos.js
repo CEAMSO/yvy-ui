@@ -33,6 +33,7 @@ angular.module('yvyUiApp')
             var self = this;
             var container = L.DomUtil.create('div', 'leaflet-control-cobertura');
             this.form = L.DomUtil.create('form', 'form-inline', container);
+            this.form.setAttribute('onsubmit', 'return false');
             var group = L.DomUtil.create('div', 'input-group', this.form);
             var prefix = L.DomUtil.create('span', 'input-group-addon coverage-icon', group);
             prefix.setAttribute('data-toggle', 'tooltip');
@@ -40,14 +41,15 @@ angular.module('yvyUiApp')
             prefix.setAttribute('title', 'Con este control puedes visualizar la cobertura del establecimiento educativo seleccionado o la de todos los establecimientos visibles');
             //prefix.textContent = 'Cobertura:'
             this.input = L.DomUtil.create('input', 'form-control input-sm', group);
+            this.input.setAttribute('min', '0');
             this.input.type = 'number';
             this.input.setAttribute('ng-model', 'data');
             var group2 = L.DomUtil.create('div', 'input-group', this.form);
             this.toggle = L.DomUtil.create('input', 'form-control input-sm', group2);
 
             $(this.toggle).bootstrapToggle({
-              on: 'Uno',
-              off: 'Todos'
+              on: 'Todos',
+              off: 'Uno'
             });
             this.toggle.type = 'checkbox';
             this.toggle.checked = this.options.checked;
@@ -76,6 +78,7 @@ angular.module('yvyUiApp')
           },
           toggleChange: function(e) {
             this.checked = e.target.checked;
+            draw_map();
           },
           onDblClick: function(e) {
             map.doubleClickZoom.enable();
@@ -90,7 +93,7 @@ angular.module('yvyUiApp')
           lastChangeByUser: function() {
             return this.userChangeFlag;
           },
-          isCoverageGeneral: function() {
+          generalCoverageEnabled: function() {
             return this.checked;
           }
         });
@@ -112,6 +115,7 @@ angular.module('yvyUiApp')
             var self = this;
             var container = L.DomUtil.create('div', 'leaflet-control-distancia');
             this.form = L.DomUtil.create('form', 'form', container);
+            this.form.setAttribute('onsubmit', 'return false');
             var group = L.DomUtil.create('div', 'input-group', this.form);
             var prefix = L.DomUtil.create('span', 'input-group-addon distance-icon', group);
             prefix.setAttribute('data-toggle', 'tooltip');
@@ -200,6 +204,7 @@ angular.module('yvyUiApp')
             scope.$apply(function(){
               scope.distancia = 0;
             });
+            MECONF.fixedMarker = null;
             removePolygons();
           });
 
@@ -284,7 +289,7 @@ angular.module('yvyUiApp')
           $('[data-toggle="tooltip"]').tooltip();
           //si el doble click ocurre en un control
           map.on('dblclick', function(e){
-            if(e.originalEvent.target.id !== 'map'){
+            if(e.originalEvent.target.id !== 'map' && e.originalEvent.target.tagName !== 'svg'){
               map.doubleClickZoom.disable();
             }
           });
@@ -313,8 +318,7 @@ angular.module('yvyUiApp')
                 markerColor: color,
                 prefix: 'glyphicon'
               });
-            }else{
-              color = 'blue';
+            }else if(feature.properties.cantidad > 1){
               content = sprintf('<div>%s</div>', feature.properties.cantidad);
               icon = L.divIcon({
                 className: getMarkerClass(feature),
@@ -393,6 +397,7 @@ angular.module('yvyUiApp')
           //console.log('levelZoom: ' + levelZoom);
           console.time('filtrado');
           console.log('zoom: ' + levelZoom);
+
           if(redrawClusters){
             e = getClusterByZoom(levelZoom);
           }else{
@@ -402,11 +407,6 @@ angular.module('yvyUiApp')
           console.timeEnd('filtrado');
           console.time('bounds');
 
-          if( levelZoom < MECONF.nivelesZoom['barrio_localidad'] && filtros ){
-            var codigos_establecimientos = _.pluck(MECONF.establecimientosVisibles.features, 'properties');
-            codigos_establecimientos =  _.pluck(codigos_establecimientos, 'codigo_establecimiento');
-            //scope.$parent.getInstituciones(codigos_establecimientos); //El controller se encarga de cargar la Lista de Detalles
-          }
           var afterFit = function(){ drawVisibleMarkers(e)};
           console.timeEnd('bounds');
           //console.log(e
@@ -415,6 +415,7 @@ angular.module('yvyUiApp')
           var outerBounds;
 
           if(redrawClusters){
+            removePolygons(L.Polyline);
             MECONF.infoBox.update(MECONF.establecimientosVisibles.features);
             if(filtros){
               MECONF.geoJsonLayer.setGeoJSON(e);
@@ -441,6 +442,7 @@ angular.module('yvyUiApp')
         };
 
         var drawVisibleMarkers = function(e){
+          removePolygons();
           console.time('visible');
           var bounds = map.getBounds();
           e.features = _.filter(MECONF.allFeatures, function(punto){
@@ -452,6 +454,20 @@ angular.module('yvyUiApp')
           console.time('geojson');
 
           MECONF.geoJsonLayer.setGeoJSON(e);
+          if(MECONF.controlCobertura.generalCoverageEnabled()){
+            _.each(e.features, function(f) {
+              if(f.properties.cantidad === 1 || f.properties.codigo_establecimiento){
+                var latLon = [f.geometry.coordinates[1], f.geometry.coordinates[0]];
+                L.circle(latLon, MECONF.controlCobertura.getValue(), {
+                    color: 'blue',
+                    fillOpacity: 0.5
+                }).addTo(map);
+              }
+            });
+          }else{
+            drawDetailCoverage();
+          }
+
           console.timeEnd('geojson');
 
           //MECONF.currentZoom = levelZoom;
@@ -460,17 +476,17 @@ angular.module('yvyUiApp')
         var getClusterByZoom = function(levelZoom){
           var e;
           if(levelZoom < MECONF.nivelesZoom['pais']){
-            e = filtrar_cluster('pais');
+            e = mapaEstablecimientoFactory.getCantidadEstablecimientos('pais', MECONF.establecimientosVisibles);
           } else if (levelZoom < MECONF.nivelesZoom['departamento']) { //cluster por departamento (por defecto)
-            e = filtrar_cluster('departamento');
+            e = mapaEstablecimientoFactory.getCantidadEstablecimientos('departamento', MECONF.establecimientosVisibles);
             console.log('cluster by departamento');
           } else if ((levelZoom >= MECONF.nivelesZoom['departamento'] && levelZoom < MECONF.nivelesZoom['distrito'])) { //cluster por distrito
-            e = filtrar_cluster('distrito');
+            e = mapaEstablecimientoFactory.getCantidadEstablecimientos('distrito', MECONF.establecimientosVisibles);
             console.log('cluster by distrito');
 
           } else if ((levelZoom >= MECONF.nivelesZoom['distrito'] && levelZoom < MECONF.nivelesZoom['barrio_localidad'])) { //cluster por barrio/localidad
             console.log('cluster by localidad');
-            e = filtrar_cluster('barrio_localidad');
+            e = mapaEstablecimientoFactory.getCantidadEstablecimientos('barrio_localidad', MECONF.establecimientosVisibles);
           }else{
             console.log('no cluster');
             e = _.clone(MECONF.establecimientosVisibles);
@@ -545,17 +561,27 @@ angular.module('yvyUiApp')
 
         function removePolygons(clazz){
           clazz =  clazz || L.Path;
-          map.eachLayer(function(layer){
+          map.eachLayer(function(layer) {
             if(layer instanceof clazz) map.removeLayer(layer);
           });
         }
 
+        function drawDetailCoverage() {
+          var latLon;
+          if(MECONF.fixedMarker){
+            console.log(MECONF.fixedMarker);
+            L.circle(MECONF.fixedMarker.getLatLng(), MECONF.controlCobertura.getValue(), {
+              color: 'blue',
+              fillOpacity: 0.5
+            }).addTo(map);
+          }
+        }
+
         /* Handler para el click de un marker */
-        function onMarkerClick(t){
+        function onMarkerClick(t) {
           target = t.layer;
-          var feature = (target.feature.properties.cantidad === 1) ? mapaEstablecimientoFactory.getClusterElementChild(target.feature, scope.periodo) : target.feature;
-          //var feature = target.feature;
-          //map.panTo(target.layer.getLatLng()); //funcion que centra el mapa sobre el marker
+
+          var feature = (target.feature.properties.cantidad === 1) ? mapaEstablecimientoFactory.getClusterElementChild(target.feature, MECONF.establecimientosVisibles) : target.feature;
 
           var levelZoom = map.getZoom();
           var latLon, targetChild, targetZoom;
@@ -577,11 +603,7 @@ angular.module('yvyUiApp')
               if(!MECONF.controlCobertura.lastChangeByUser()){
                 MECONF.controlCobertura.setValue(Math.pow(19 - levelZoom, 2) * 10);
               }
-
-              L.circle(target.getLatLng(), MECONF.controlCobertura.getValue(), {
-                  color: 'blue',
-                  fillOpacity: 0.5
-                }).addTo(map);
+              drawDetailCoverage();
               $timeout(function(){
                 scope.$apply(function(){
                   scope.detalle = feature.properties;
@@ -594,9 +616,8 @@ angular.module('yvyUiApp')
             }
           }else{
             removePolygons();
-            //targetChild = target.layer.feature.properties.targetChild; //Se toma el primero, se podria tomar random tambien
             targetZoom = _.find(_.values(MECONF.nivelesZoom), function(z){ return z > levelZoom; });
-            targetChild = mapaEstablecimientoFactory.getClusterElementChild(target.feature, scope.periodo);
+            targetChild = mapaEstablecimientoFactory.getClusterElementChild(target.feature, MECONF.establecimientosVisibles);
             latLon = [targetChild.geometry.coordinates[1], targetChild.geometry.coordinates[0]];
             map.setView(latLon, targetZoom); //funcion que centra el mapa sobre el marker
           }
@@ -685,7 +706,7 @@ angular.module('yvyUiApp')
               top: '92%',
               left: '98%'
           }).spin();
-          $("#map").removeClass().append(spinner.el);
+          $("#map").append(spinner.el);
         };
 
 

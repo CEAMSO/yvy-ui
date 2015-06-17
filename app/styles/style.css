@@ -47,13 +47,16 @@
 
 /* Propiedades del panel de filtros */
 .left-panel {
-  height: 100% !important;
   width: 60% !important;
   width: 240px;
   background-color: #eee !important;
   text-align: center;
 /*  color: #000000;
 */  overflow: auto;
+}
+
+.leaflet-sidebar.left.visible ~ .leaflet-left {
+  left: 276px;
 }
 
 .left-panel + .close {
@@ -234,7 +237,7 @@ h6{
 }
 
 .leaflet-control-cobertura .input-group{
-  width: 75px;
+  width: 85px;
   height: 34px;
 }
 

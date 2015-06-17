@@ -95,24 +95,86 @@ angular.module('yvyUiApp')
 				
 			},
 
-			getClusterElementChild: function(e, periodo){
-				console.log('GETCLUSTERELEMENTCHILD');
-				console.log(e);
-				console.log(periodo);
+			getCantidadEstablecimientos: function(tipo, establecimientosVisibles){
 
-				//var key = getKeyFromFeature(e);
+	          var clusterPais;
+	          if(tipo === 'pais'){
+	            clusterPais = this.getCentroPais();
+	            clusterPais.features[0].properties.cantidad = establecimientosVisibles.features.length;
+	            return clusterPais;
+	          }
+
+	          var tipo_cluster = 'cluster_'+tipo;
+	          //Reemplazar por llamada al service
+	          console.time('cluster index');
+	          //build a cluster index
+	          var clusterIndex = this.getClusterIndex(tipo_cluster);
+	          var coordinatesIndex = {};
+	          console.timeEnd('cluster index');
+
+	          var e =  
+	          { 'type' : 'FeatureCollection',
+	            'features' : []
+	          };
+
+	          var keyAccesor;
+	          switch(tipo){
+	            case 'departamento':
+	              keyAccesor = function(f){ return _.deburr(f.properties['nombre_departamento']); };
+	              break;
+	            case 'distrito':
+	              keyAccesor = function(f){ return _.deburr(f.properties['nombre_departamento']) + _.deburr(f.properties['nombre_distrito']); };
+	              break;
+	            case 'barrio_localidad':
+	              keyAccesor = function(f){ return _.deburr(f.properties['nombre_departamento']) + _.deburr(f.properties['nombre_distrito']) + _.deburr(f.properties['nombre_barrio_localidad']); };
+	              break;
+	          }
+
+	          console.time('cluster features');
+	          _.each(establecimientosVisibles.features, function(f){
+	            var key = keyAccesor(f);
+	            if(clusterIndex[key]){
+	              clusterIndex[key].properties.cantidad++;
+	              coordinatesIndex[key] = f.geometry.coordinates;
+	              //clusterIndex[key].properties.targetChild = f;
+	            }
+	          });
+
+	          /* Si el cluster es de un elemento, se desplaza su centro:
+	             Del centroide del poligono al punto del unico establecimiento del cluster
+	          */
+	          _.forOwn(clusterIndex, function(c, k){
+	            if(c.properties.cantidad === 1){
+	              c.geometry.coordinates = coordinatesIndex[k];
+	            }
+	          });
+
+	          console.timeEnd('cluster features');
+
+	          console.time('cluster filter');
+	          e.features = _(clusterIndex).values().filter(function(f){ return f.properties.cantidad }).value();
+	          console.timeEnd('cluster filter');
+	          console.log(e);
+	          return e;
+
+			},
+
+			getClusterElementChild: function(e, establecimientosVisibles){
+
 				var children;
+				var cluster;
 				if(e.properties['nombre_barrio_localidad'] || e.properties.cantidad === 1){
-					children = establecimientos[periodo].features;
+					children = establecimientosVisibles.features;
 				}else if(e.properties['nombre_distrito']){
-					children = _.values(clusterIndexes['cluster_barrio_localidad']);
+					cluster = this.getCantidadEstablecimientos('barrio_localidad', establecimientosVisibles);
+					children = _.values(cluster.features);
 				}else if(e.properties['nombre_departamento']){
-					children = _.values(clusterIndexes['cluster_distrito']);
+					cluster = this.getCantidadEstablecimientos('distrito', establecimientosVisibles);
+					children = _.values(cluster.features);
 				}else{
 					return this.getCentroPais().features[0];
 				}
 				
-
 				return _.find(children, function(c){
 					var result = c.properties['nombre_departamento'] === e.properties['nombre_departamento'];
 					if(e.properties['nombre_distrito']) result = result && c.properties['nombre_distrito'] === e.properties['nombre_distrito'];
