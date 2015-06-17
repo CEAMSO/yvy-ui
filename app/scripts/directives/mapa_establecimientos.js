@@ -279,7 +279,7 @@ angular.module('yvyUiApp')
               'Satélite': gglHybrid,
               'Calles Google Maps': gglRoadmap
           };
-
+          L.polyline([[0, 0], ]).addTo(map);
           map.addLayer(gglRoadmap);
 
           
@@ -367,12 +367,11 @@ angular.module('yvyUiApp')
           
           MECONF.geoJsonLayer.addTo(map);
 
-          //map.on('zoomend', updateMap);
           map.on('move', updateMap);
  
         }
 
-        var updateMap = _.throttle(function(){ draw_map(); }, 200);
+        var updateMap = _.throttle(function(){ console.log('drawwww'); draw_map(); }, 200);
 
         /* Funcion que dibuja el mapa de acuerdo a los establecimientos filtrados y al zoom actual */
         var draw_map = function(filtros){
