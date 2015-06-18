@@ -106,11 +106,9 @@ angular.module('yvyUiApp')
 
 	          var tipo_cluster = 'cluster_'+tipo;
 	          //Reemplazar por llamada al service
-	          console.time('cluster index');
 	          //build a cluster index
 	          var clusterIndex = this.getClusterIndex(tipo_cluster);
 	          var coordinatesIndex = {};
-	          console.timeEnd('cluster index');
 
 	          var e =  
 	          { 'type' : 'FeatureCollection',
@@ -130,7 +128,6 @@ angular.module('yvyUiApp')
 	              break;
 	          }
 
-	          console.time('cluster features');
 	          _.each(establecimientosVisibles.features, function(f){
 	            var key = keyAccesor(f);
 	            if(clusterIndex[key]){
@@ -149,12 +146,7 @@ angular.module('yvyUiApp')
 	            }
 	          });
 
-	          console.timeEnd('cluster features');
-
-	          console.time('cluster filter');
 	          e.features = _(clusterIndex).values().filter(function(f){ return f.properties.cantidad }).value();
-	          console.timeEnd('cluster filter');
-	          console.log(e);
 	          return e;
 
 			},
