@@ -29,7 +29,6 @@ angular.module('yvyUiApp')
                   
         crearPopup();
         scope.$watch('detalle', function(detalle){
-          console.log('watch detalle!');
           if(detalle){
             detalleHolder = detalle;
             mapaEstablecimientoFactory.getInstitucionesPorEstablecimiento(detalle)
@@ -38,7 +37,6 @@ angular.module('yvyUiApp')
                 if(!detailOpen){
                   $timeout(function(){
                     //$('#right-panel').click();
-                    console.log('abriendo detalle!');
                     panelslider.show();
                     scope.$apply(function(){
                       scope.detalle = detalleHolder;
