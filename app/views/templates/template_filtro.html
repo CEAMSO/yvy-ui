@@ -1,22 +1,29 @@
 <div id="left-panel-link" class="left-panel panel panel-default hidden" role="navigation">
   <div id="mapa-filtro">
-    <h6>Periodo</h6>
+    
+    <h6 class="tooltip-bottom" data-toggle="tooltip" title='Se refiere al año de captura de los datos'>Periodo</h6>
     <div class="btn-group">
         <input type="radio" ng-model="local.periodo" value="2014" ng-change="$parent.updateEstablecimientos(local.periodo)" checked="checked">2014</input>
         <input type="radio" ng-model="local.periodo" value="2012" ng-change="$parent.updateEstablecimientos(local.periodo)">2012</input>
     </div>
     <br>
-    <h6>Departamento</h6>
+    
+    <h6 class="tooltip-bottom" data-toggle="tooltip" title='Corresponde al departamento geográfico donde esta localizado el establecimiento escolar'>Departamento</h6>
     <select multiple id="filtro_nombre_departamento" name="filtro_nombre_departamento" class="filtro-ancho" ng-model="local.nombre_departamento" ng-change="updateFiltro()"></select><br/>
-    <h6>Distrito</h6>
+    
+    <h6 class="tooltip-bottom" data-toggle="tooltip" title='Corresponde al distrito del departamento geográfico donde esta localizado el establecimiento escolar'>Distrito</h6>
     <select multiple id="filtro_nombre_distrito" name="filtro_nombre_distrito" class="filtro-ancho" ng-model="local.nombre_distrito" ng-change="updateFiltro()"></select><br/>
-    <h6>Barrio/Localidad</h6>
+    
+    <h6 class="tooltip-bottom" data-toggle="tooltip" title='Corresponde a la localidad o barrio del distrito donde esta localizado el establecimiento escolar'>Barrio/Localidad</h6>
     <select multiple id="filtro_nombre_barrio_localidad" name="filtro_nombre_barrio_localidad" class="filtro-ancho" ng-model="local.nombre_barrio_localidad" ng-change="updateFiltro()"></select><br/>
-    <h6>Zona</h6>
+    
+    <h6 data-toggle="tooltip" title='Corresponde a la ubicación del establecimiento escolar, sea en la zona urbana o rural'>Zona</h6>
     <div id="filtro_nombre_zona" class="btn-group-vertical" data-toggle="buttons"></div>
-    <h6>Proyecto 111</h6>
+    
+    <h6 class="tooltip-top" data-toggle="tooltip" title='Contiene la datos del proyecto de "Ampliación y reposición de espacios escolares en 111 Establecimientos Educativos del MEC, en Asunción y 10 departamentos geográficos del país"'>Proyecto 111</h6>
     <div id="filtro_proyecto111" class="btn-group-vertical" data-toggle="buttons"></div>
-    <h6>Proyecto 822</h6>
+    
+    <h6 class="tooltip-top" data-toggle="tooltip" title='Contiene datos del proyecto de "Ampliación y reposición de espacios escolares en 822 Establecimientos Educativos del MEC, en Asunción y los 17 departamentos geográficos del país"'>Proyecto 822</h6>
     <div id="filtro_proyecto822" class="btn-group-vertical" data-toggle="buttons"></div>
   </div>
   <br/>

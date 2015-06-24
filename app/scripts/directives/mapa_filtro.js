@@ -19,6 +19,9 @@ angular.module('yvyUiApp')
       templateUrl: 'views/templates/template_filtro.html',
       link: function postLink(scope, element, attrs) {
 
+        $('.tooltip-top').tooltip({placement:'top'});
+        $('.tooltip-bottom').tooltip({placement:'bottom'});
+
         //Botones, el primer parametro es el ID del filtro, el segundo parametro representa la lista de valores posibles
         var filtrosBotones = {nombre_zona:['RURAL', 'URBANA'], proyecto111:['SI', 'NO'], proyecto822:['SI', 'NO']};
 
